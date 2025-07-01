@@ -34,13 +34,13 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Pencil, Trash2, PlusCircle, LogIn } from 'lucide-react';
-
-const ADMIN_PASSWORD = 'admin';
+import { verifyPassword } from '@/actions/auth';
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [isMounted, setIsMounted] = useState(false);
 
@@ -57,14 +57,24 @@ export default function AdminPage() {
     setIsMounted(true);
   }, []);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === ADMIN_PASSWORD) {
-      setIsAuthenticated(true);
-      sessionStorage.setItem('isAdminAuthenticated', 'true');
-      setError('');
-    } else {
-      setError('Contraseña incorrecta.');
+    setIsLoggingIn(true);
+    setError('');
+
+    try {
+      const isValid = await verifyPassword(password);
+      if (isValid) {
+        setIsAuthenticated(true);
+        sessionStorage.setItem('isAdminAuthenticated', 'true');
+        setError('');
+      } else {
+        setError('Contraseña incorrecta.');
+      }
+    } catch (err) {
+      setError('Ocurrió un error al verificar la contraseña.');
+    } finally {
+      setIsLoggingIn(false);
     }
   };
 
@@ -120,9 +130,13 @@ export default function AdminPage() {
                 </div>
                 {error && <p className="text-sm text-destructive">{error}</p>}
               </div>
-              <Button type="submit" className="w-full mt-6">
-                <LogIn className="mr-2 h-4 w-4" />
-                Ingresar
+              <Button type="submit" className="w-full mt-6" disabled={isLoggingIn}>
+                {isLoggingIn ? 'Verificando...' : (
+                  <>
+                    <LogIn className="mr-2 h-4 w-4" />
+                    Ingresar
+                  </>
+                )}
               </Button>
             </form>
           </div>
