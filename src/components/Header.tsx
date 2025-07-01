@@ -4,6 +4,7 @@
 import Link from 'next/link';
 import { Logo } from './Logo';
 import { ShoppingCart, User, Mail, Lock } from 'lucide-react';
+import { SidebarTrigger } from '@/components/ui/sidebar';
 
 export function Header() {
   const navLinks = [
@@ -15,10 +16,13 @@ export function Header() {
   return (
     <header className="bg-background/80 backdrop-blur-md sticky top-0 z-50 border-b border-border">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
-          <Logo className="h-8 w-8 text-primary" />
-          <span className="font-bold text-lg">aquifrenos.cl</span>
-        </Link>
+        <div className="flex items-center gap-2">
+            <SidebarTrigger className="md:hidden" />
+            <Link href="/" className="flex items-center gap-2">
+            <Logo className="h-8 w-8 text-primary" />
+            <span className="font-bold text-lg">aquifrenos.cl</span>
+            </Link>
+        </div>
         
         <nav className="hidden md:flex items-center gap-6">
           {navLinks.map(link => (
