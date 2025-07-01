@@ -172,7 +172,24 @@ const Sidebar = React.forwardRef<
     },
     ref
   ) => {
-    const { isMobile, state, openMobile, setOpenMobile } = useSidebar()!
+    const sidebar = useSidebar()
+
+    if (!sidebar) {
+        return (
+             <div
+                className={cn(
+                    "flex h-full w-[--sidebar-width] flex-col bg-sidebar text-sidebar-foreground",
+                    className
+                )}
+                ref={ref}
+                {...props}
+            >
+                {children}
+            </div>
+        )
+    }
+
+    const { isMobile, state, openMobile, setOpenMobile } = sidebar;
 
     if (collapsible === "none") {
       return (
@@ -557,7 +574,20 @@ const SidebarMenuButton = React.forwardRef<
     ref
   ) => {
     const Comp = asChild ? Slot : "button"
-    const { isMobile, state } = useSidebar()!
+    const sidebar = useSidebar()
+    
+    if (!sidebar) return (
+        <Comp
+        ref={ref}
+        data-sidebar="menu-button"
+        data-size={size}
+        data-active={isActive}
+        className={cn(sidebarMenuButtonVariants({ variant, size }), className)}
+        {...props}
+      />
+    )
+
+    const { isMobile, state } = sidebar;
 
     const button = (
       <Comp
