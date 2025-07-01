@@ -1,10 +1,1 @@
-
-"use client";
-
-import { WorkshopInfoForm } from '@/components/workshop-info-form';
-
-export default function EditWorkshopInfoPage() {
-  return (
-    <WorkshopInfoForm />
-  );
-}
+// This file has been removed.
