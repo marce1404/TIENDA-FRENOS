@@ -15,10 +15,10 @@ export const Logo = ({ className, ...props }: React.SVGProps<SVGSVGElement>) => 
       className={cn(className)}
       {...props}
     >
-      <title>aquifrenos.cl Logo</title>
-      <circle cx="12" cy="12" r="10" />
-      <path d="M12 18a6 6 0 0 0 0-12v12Z" fill="currentColor" />
-      <path d="M12 18a6 6 0 0 1 0-12" />
+      <title>aquifrenos.cl Logo Personalizado</title>
+      <path d="M7 15l5-10 5 10" />
+      <path d="M3.5 15h17" />
+      <path d="M12 21a9 9 0 000-18 9 9 0 000 18z" />
     </svg>
   );
 };
