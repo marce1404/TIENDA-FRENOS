@@ -34,15 +34,15 @@ export default function HomePage() {
       <Header />
       <main className="flex-1">
         
-        <section className="container mx-auto px-4 py-16 md:py-24 text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6">La Potencia de Frenado que Necesitas</h1>
+        <section className="container mx-auto px-4 py-12 md:py-20 text-center">
+          <h1 className="text-4xl md:text-5xl font-bold mb-6">La Potencia de Frenado que Necesitas</h1>
           <div className="max-w-xl mx-auto mb-8">
             <Image
               src="https://placehold.co/600x400.png"
               alt="Mecánico instalando frenos de alto rendimiento"
               width={600}
               height={400}
-              className="rounded-lg shadow-2xl mx-auto"
+              className="rounded-lg shadow-xl mx-auto"
               data-ai-hint="brake repair"
               priority
             />
