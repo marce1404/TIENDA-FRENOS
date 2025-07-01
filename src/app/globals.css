@@ -3,100 +3,37 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
-}
-
 @layer base {
   :root {
-    --background: 210 20% 98%; /* Very light cool gray */
-    --foreground: 210 10% 23%; /* Dark cool gray */
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
 
-    --card: 210 20% 98%;
-    --card-foreground: 210 10% 23%;
+    --card: 222 47% 15%;
+    --card-foreground: 210 40% 98%;
 
-    --popover: 210 20% 98%;
-    --popover-foreground: 210 10% 23%;
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
 
-    --primary: 36 100% 50%; /* Orange #FF9800 */
-    --primary-foreground: 0 0% 100%; /* White for contrast on Orange */
+    --primary: 347 77% 61%;
+    --primary-foreground: 210 40% 98%;
 
-    --secondary: 200 18% 46%; /* Gray #607D8B */
-    --secondary-foreground: 0 0% 100%; /* White for contrast on Gray */
-
-    --muted: 210 20% 90%; /* Lighter cool gray for muted backgrounds */
-    --muted-foreground: 210 10% 45%; /* Mid cool gray for muted text */
-
-    --accent: 36 100% 55%; /* Slightly lighter/brighter Orange for accent */
-    --accent-foreground: 0 0% 100%; /* White for contrast on Accent Orange */
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 200 18% 75%; /* Gray-derived border */
-    --input: 200 18% 85%; /* Gray-derived input background */
-    --ring: 36 100% 50%; /* Orange for focus rings */
-
-    --chart-1: 36 100% 50%; /* Orange */
-    --chart-2: 200 18% 46%; /* Gray */
-    --chart-3: 36 80% 60%; /* Lighter Orange */
-    --chart-4: 200 15% 55%; /* Lighter Gray */
-    --chart-5: 30 90% 50%; /* Another shade of Orange/Yellow */
-    --radius: 0.5rem;
-
-    --sidebar-background: 210 20% 96%; /* Light gray for sidebar */
-    --sidebar-foreground: 210 10% 30%; /* Dark gray for sidebar text */
-    --sidebar-primary: 36 100% 50%; /* Orange for sidebar primary elements */
-    --sidebar-primary-foreground: 0 0% 100%; /* White */
-    --sidebar-accent: 36 100% 85%; /* Very light orange for sidebar accent */
-    --sidebar-accent-foreground: 36 100% 30%; /* Darker orange for text on light orange accent */
-    --sidebar-border: 200 18% 80%; /* Gray border for sidebar */
-    --sidebar-ring: 36 100% 50%; /* Orange ring */
-  }
-
-  .dark {
-    --background: 210 10% 15%; /* Dark cool gray */
-    --foreground: 210 20% 95%; /* Light cool gray */
-
-    --card: 210 10% 15%;
-    --card-foreground: 210 20% 95%;
-
-    --popover: 210 10% 15%;
-    --popover-foreground: 210 20% 95%;
-
-    --primary: 36 100% 50%; /* Orange */
-    --primary-foreground: 36 100% 95%; /* Very light, almost white, for contrast on Orange in dark */
-
-    --secondary: 200 18% 30%; /* Darker Gray */
-    --secondary-foreground: 210 20% 95%; /* Light text on Darker Gray */
-
-    --muted: 210 10% 25%;
-    --muted-foreground: 210 20% 70%;
-
-    --accent: 36 100% 55%; /* Slightly lighter/brighter Orange */
-    --accent-foreground: 36 100% 95%; /* Very light for contrast on Accent Orange in dark */
+    --secondary: 217 33% 25%;
+    --secondary-foreground: 210 40% 98%;
     
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
+    --muted: 217 33% 25%;
+    --muted-foreground: 210 40% 70%;
 
-    --border: 200 18% 25%;
-    --input: 200 18% 20%;
-    --ring: 36 100% 50%;
+    --accent: 217 33% 25%;
+    --accent-foreground: 210 40% 98%;
 
-    --chart-1: 36 100% 50%;
-    --chart-2: 200 18% 50%;
-    --chart-3: 36 80% 65%;
-    --chart-4: 200 15% 60%;
-    --chart-5: 30 90% 55%;
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
 
-    --sidebar-background: 210 10% 12%; /* Dark gray for sidebar */
-    --sidebar-foreground: 210 20% 85%; /* Light gray for sidebar text */
-    --sidebar-primary: 36 100% 50%; /* Orange */
-    --sidebar-primary-foreground: 36 100% 95%;
-    --sidebar-accent: 36 100% 20%; /* Dark orange for sidebar accent */
-    --sidebar-accent-foreground: 36 100% 80%; /* Lighter orange text on dark orange accent */
-    --sidebar-border: 200 18% 20%; /* Dark gray border for sidebar */
-    --sidebar-ring: 36 100% 50%;
+    --border: 217 33% 25%;
+    --input: 217 33% 20%;
+    --ring: 347 77% 61%;
+
+    --radius: 0.5rem;
   }
 }
 

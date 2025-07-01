@@ -1,22 +1,15 @@
 
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Inter } from 'next/font/google';
 import './globals.css';
-import { AppLayoutClientBoundary } from '@/components/app-layout-client-boundary';
+import { Header } from '@/components/Header';
+import { Toaster } from '@/components/ui/toaster';
 
-const geistSans = Geist({ 
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-});
-
-const geistMono = Geist_Mono({ 
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
-});
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'SerAPP - Tienda de Frenos y Mantenimiento',
-  description: 'Gestión de clientes y servicios para tu tienda de frenos y mantenimiento vehicular.',
+  title: 'aquifrenos.cl - Repuestos de Freno',
+  description: 'Catálogo completo de discos, pastillas y kits de freno.',
 };
 
 export default function RootLayout({
@@ -26,11 +19,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      {/* La etiqueta <head> es manejada por Next.js a través de 'metadata' y 'generateMetadata' */}
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <AppLayoutClientBoundary>
-          {children}
-        </AppLayoutClientBoundary>
+      <body className={`${inter.className} antialiased`}>
+        <Header />
+        <main className="container mx-auto px-4 py-8">{children}</main>
+        <Toaster />
       </body>
     </html>
   );
