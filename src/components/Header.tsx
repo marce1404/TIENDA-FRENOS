@@ -8,7 +8,7 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 
 export function Header() {
   const navLinks = [
-    { href: '/', label: 'Productos' },
+    { href: '/productos', label: 'Productos' },
     { href: '/contacto', label: 'Contacto' },
     { href: '/admin', label: 'Admin', icon: Lock },
   ];
