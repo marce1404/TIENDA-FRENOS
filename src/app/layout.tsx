@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'SerAPP - Mantenimiento Vehicular',
-  description: 'Registra y administra el mantenimiento de tus vehículos.',
+  title: 'SerAPP - Tienda de Frenos y Mantenimiento',
+  description: 'Gestión de clientes y servicios para tu tienda de frenos y mantenimiento vehicular.',
 };
 
 export default function RootLayout({

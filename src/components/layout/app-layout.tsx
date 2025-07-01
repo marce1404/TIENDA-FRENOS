@@ -2,7 +2,7 @@
 "use client";
 
 import Link from 'next/link';
-import { Factory, Cog } from 'lucide-react'; // Changed Fuel to Factory
+import { Disc3, Cog } from 'lucide-react';
 import { Toaster } from '@/components/ui/toaster';
 import { Button } from '@/components/ui/button';
 
@@ -16,7 +16,7 @@ export function AppLayout({ children }: AppLayoutProps) {
       <header className="bg-primary text-primary-foreground shadow-md">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 text-xl font-bold">
-            <Factory className="h-7 w-7" /> {/* Changed Fuel to Factory */}
+            <Disc3 className="h-7 w-7" />
             <span>SerAPP</span>
           </Link>
           <Button variant="ghost" size="icon" asChild>
@@ -34,7 +34,7 @@ export function AppLayout({ children }: AppLayoutProps) {
       </main>
       <footer className="bg-muted text-muted-foreground py-4 text-center text-sm">
         <div className="container mx-auto px-4">
-          © {new Date().getFullYear()} SerAPP. ¡Mantén tus viajes suaves!
+          © {new Date().getFullYear()} SerAPP. Tu especialista en frenos.
         </div>
       </footer>
       <Toaster />

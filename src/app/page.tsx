@@ -143,14 +143,14 @@ export default function HomePage() {
         <div className="text-center py-12 border-2 border-dashed border-muted-foreground/30 rounded-lg bg-card shadow-sm">
           <Image 
             src="https://placehold.co/600x400.png" 
-            alt="Taller artístico" 
+            alt="Taller de frenos" 
             width={600} 
             height={400}
             className="w-full max-w-md mx-auto rounded-lg shadow-md mb-6"
-            data-ai-hint="workshop art"
+            data-ai-hint="brake workshop"
           />
-          <h2 className="text-xl font-semibold text-muted-foreground mb-2">Bienvenido a SerAPP</h2>
-          <p className="text-muted-foreground mb-6">Parece que aún no has agregado ningún vehículo. ¡Comienza ahora!</p>
+          <h2 className="text-xl font-semibold text-muted-foreground mb-2">Bienvenido a tu Gestor de Servicios</h2>
+          <p className="text-muted-foreground mb-6">Administra los vehículos y servicios de tus clientes. ¡Comienza agregando el primer vehículo!</p>
           <Button asChild>
             <Link href="/vehicles/new">
               <span>
