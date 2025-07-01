@@ -2,9 +2,10 @@
 "use client";
 
 import Link from 'next/link';
-import { Disc3, Cog } from 'lucide-react';
+import { Cog } from 'lucide-react';
 import { Toaster } from '@/components/ui/toaster';
 import { Button } from '@/components/ui/button';
+import { Logo } from '@/components/logo';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -16,7 +17,7 @@ export function AppLayout({ children }: AppLayoutProps) {
       <header className="bg-primary text-primary-foreground shadow-md">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 text-xl font-bold">
-            <Disc3 className="h-7 w-7" />
+            <Logo className="h-7 w-7" />
             <span>SerAPP</span>
           </Link>
           <Button variant="ghost" size="icon" asChild>
