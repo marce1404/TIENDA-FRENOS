@@ -6,6 +6,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { WhatsappButton } from '@/components/WhatsappButton';
+import { CartProvider } from '@/hooks/use-cart';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -22,13 +23,15 @@ export default function RootLayout({
   return (
     <html lang="es" className="dark">
       <body className={`${inter.className} antialiased`}>
-        <div className="relative flex min-h-screen flex-col bg-background">
-          <Header />
-          <main className="flex-1">{children}</main>
-          <Footer />
-        </div>
-        <WhatsappButton />
-        <Toaster />
+        <CartProvider>
+          <div className="relative flex min-h-screen flex-col bg-background">
+            <Header />
+            <main className="flex-1">{children}</main>
+            <Footer />
+          </div>
+          <WhatsappButton />
+          <Toaster />
+        </CartProvider>
       </body>
     </html>
   );

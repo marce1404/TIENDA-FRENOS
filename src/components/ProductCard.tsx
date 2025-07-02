@@ -1,14 +1,19 @@
 
+'use client';
+
 import Image from 'next/image';
 import type { Product } from '@/lib/types';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
+import { useCart } from '@/hooks/use-cart';
 
 interface ProductCardProps {
   product: Product;
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+  const { addToCart } = useCart();
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('es-CL', {
       style: 'currency',
@@ -44,7 +49,7 @@ export function ProductCard({ product }: ProductCardProps) {
       </CardContent>
       <CardFooter className="p-4 pt-0 flex items-center justify-between">
          <p className="text-lg font-semibold text-foreground">{formatPrice(product.price)}</p>
-         <Button size="sm">Añadir</Button>
+         <Button size="sm" onClick={() => addToCart(product)}>Añadir</Button>
       </CardFooter>
     </Card>
   );

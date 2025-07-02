@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { Logo } from './Logo';
-import { ShoppingCart } from 'lucide-react';
+import { CartSheet } from './CartSheet';
 
 export function Header() {
   
@@ -32,10 +32,7 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-4">
-           <button className="text-muted-foreground hover:text-foreground transition-colors">
-            <ShoppingCart className="h-6 w-6" />
-            <span className="sr-only">Carrito de compras</span>
-           </button>
+           <CartSheet />
         </div>
       </div>
     </header>

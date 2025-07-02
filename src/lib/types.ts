@@ -10,3 +10,7 @@ export interface Product {
   imageUrl: string;
   isFeatured: boolean;
 }
+
+export interface CartItem extends Product {
+  quantity: number;
+}
