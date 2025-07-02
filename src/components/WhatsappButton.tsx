@@ -9,9 +9,22 @@ export function WhatsappButton() {
   const [whatsappNumber, setWhatsappNumber] = useState('56912345678');
 
   useEffect(() => {
-    const savedNumber = localStorage.getItem('whatsappNumber');
-    if (savedNumber) {
-      setWhatsappNumber(savedNumber);
+    const savedInfo = localStorage.getItem('whatsappInfo');
+    if (savedInfo) {
+      try {
+        const { number } = JSON.parse(savedInfo);
+        if (number) {
+          setWhatsappNumber(number);
+        }
+      } catch (e) {
+        // Ignore error, use default
+      }
+    } else {
+      // Fallback for old key
+      const savedNumber = localStorage.getItem('whatsappNumber');
+      if (savedNumber) {
+        setWhatsappNumber(savedNumber);
+      }
     }
   }, []);
 

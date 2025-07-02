@@ -35,10 +35,12 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Pencil, Trash2, PlusCircle, LogIn, LogOut, Star, Phone } from 'lucide-react';
+import { Pencil, Trash2, PlusCircle, LogIn, LogOut, Star, Phone, Settings } from 'lucide-react';
 import { verifyPassword } from '@/actions/auth';
 import { cn } from '@/lib/utils';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -48,6 +50,7 @@ export default function AdminPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [isMounted, setIsMounted] = useState(false);
   const [whatsappNumber, setWhatsappNumber] = useState('');
+  const [contactName, setContactName] = useState('');
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -59,8 +62,21 @@ export default function AdminPage() {
     if (authStatus === 'true') {
         setIsAuthenticated(true);
     }
-    const savedNumber = localStorage.getItem('whatsappNumber') || '56912345678';
-    setWhatsappNumber(savedNumber);
+    const savedInfo = localStorage.getItem('whatsappInfo');
+    if (savedInfo) {
+        try {
+            const { name, number } = JSON.parse(savedInfo);
+            setContactName(name || 'Ventas');
+            setWhatsappNumber(number || '56912345678');
+        } catch (e) {
+            setContactName('Ventas');
+            setWhatsappNumber('56912345678');
+        }
+    } else {
+        const savedNumber = localStorage.getItem('whatsappNumber') || '56912345678';
+        setContactName('Ventas');
+        setWhatsappNumber(savedNumber);
+    }
     setIsMounted(true);
   }, []);
 
@@ -93,8 +109,13 @@ export default function AdminPage() {
 
   const handleSaveWhatsapp = (e: React.FormEvent) => {
     e.preventDefault();
-    localStorage.setItem('whatsappNumber', whatsappNumber);
-    alert('Número de WhatsApp actualizado.');
+    const whatsappInfo = {
+        name: contactName,
+        number: whatsappNumber,
+    };
+    localStorage.setItem('whatsappInfo', JSON.stringify(whatsappInfo));
+    localStorage.removeItem('whatsappNumber'); 
+    alert('Configuración de contacto actualizada.');
   };
 
   const formatPrice = (price: number) => {
@@ -184,35 +205,64 @@ export default function AdminPage() {
             </Button>
         </div>
 
-        <Card className="mb-8">
-          <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                  <Phone className="h-5 w-5" />
-                  <span>Administrar WhatsApp</span>
-              </CardTitle>
-              <CardDescription>
-                  Actualiza el número de teléfono para el botón de contacto por WhatsApp.
-              </CardDescription>
-          </CardHeader>
-          <form onSubmit={handleSaveWhatsapp}>
-              <CardContent>
-                  <Label htmlFor="whatsapp-number">Número de Teléfono</Label>
-                  <Input
-                      id="whatsapp-number"
-                      value={whatsappNumber}
-                      onChange={(e) => setWhatsappNumber(e.target.value)}
-                      placeholder="Ej: 56912345678"
-                      className="mt-2"
-                  />
-                  <p className="text-xs text-muted-foreground mt-2">
-                      Ingresa el número completo, incluyendo el código de país, sin espacios ni el símbolo '+'.
-                  </p>
-              </CardContent>
-              <CardFooter>
-                  <Button type="submit">Guardar Número</Button>
-              </CardFooter>
-          </form>
-        </Card>
+        <Accordion type="single" collapsible className="w-full mb-8">
+          <AccordionItem value="item-1">
+            <AccordionTrigger>
+              <div className="flex items-center gap-3">
+                <Settings className="h-6 w-6" />
+                <h2 className="text-2xl font-bold">Configuración General</h2>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent>
+              <Card className="border-t pt-4 mt-2">
+                <CardHeader className="p-0 pb-4">
+                    <CardTitle className="flex items-center gap-2 text-xl">
+                        <Phone className="h-5 w-5" />
+                        <span>Contacto de WhatsApp</span>
+                    </CardTitle>
+                    <CardDescription>
+                        Define el nombre y número que se usará para el botón de contacto de WhatsApp.
+                    </CardDescription>
+                </CardHeader>
+                <form onSubmit={handleSaveWhatsapp}>
+                    <CardContent className="p-0">
+                        <div className="space-y-4">
+                            <div>
+                                <Label htmlFor="contact-name">Nombre del Contacto</Label>
+                                <Input
+                                    id="contact-name"
+                                    value={contactName}
+                                    onChange={(e) => setContactName(e.target.value)}
+                                    placeholder="Ej: Ventas"
+                                    className="mt-2"
+                                />
+                                 <p className="text-xs text-muted-foreground mt-2">
+                                    Un nombre para tu referencia en el panel. No es visible para los clientes.
+                                </p>
+                            </div>
+                            <div>
+                                <Label htmlFor="whatsapp-number">Número de Teléfono</Label>
+                                <Input
+                                    id="whatsapp-number"
+                                    value={whatsappNumber}
+                                    onChange={(e) => setWhatsappNumber(e.target.value)}
+                                    placeholder="Ej: 56912345678"
+                                    className="mt-2"
+                                />
+                                <p className="text-xs text-muted-foreground mt-2">
+                                    Incluye código de país, sin el símbolo '+' ni espacios.
+                                </p>
+                            </div>
+                        </div>
+                    </CardContent>
+                    <CardFooter className="p-0 pt-6">
+                        <Button type="submit">Guardar Configuración</Button>
+                    </CardFooter>
+                </form>
+              </Card>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
 
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold">Gestión de Productos</h2>
