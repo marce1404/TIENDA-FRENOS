@@ -404,25 +404,50 @@ export default function AdminPage() {
                   <CardHeader>
                     <CardTitle>Configuración de Correo (SMTP)</CardTitle>
                     <CardDescription>
-                        Para enviar correos desde el formulario de contacto, es necesario configurar las credenciales SMTP.
-                        Por seguridad, estas credenciales deben ser añadidas como variables de entorno en el archivo <code className="font-mono bg-muted px-1 py-0.5 rounded">.env</code> de tu proyecto.
+                        Añade las siguientes credenciales como variables de entorno en el archivo <code className="font-mono bg-muted px-1 py-0.5 rounded">.env</code> de tu proyecto.
                     </CardDescription>
                   </CardHeader>
-                  <CardContent>
-                    <p className="mb-4">
-                        A continuación se muestran las variables que necesitas añadir. Reemplaza los valores de ejemplo con tus datos reales.
+                  <CardContent className="space-y-6 pt-6">
+                    <p className="text-sm text-muted-foreground -mt-4">
+                        Por razones de seguridad, las credenciales no se guardan desde este panel. Utiliza los siguientes campos como guía para rellenar tu archivo.
                     </p>
-                    <div className="bg-muted p-4 rounded-md text-sm text-muted-foreground font-mono overflow-x-auto">
-                        <p>ADMIN_PASSWORD=tu_contraseña_de_admin</p>
-                        <p className="mt-4"># Credenciales de correo</p>
-                        <p>SMTP_HOST=smtp.example.com</p>
-                        <p>SMTP_PORT=587</p>
-                        <p>SMTP_USER=user@example.com</p>
-                        <p>SMTP_PASS=your_smtp_password</p>
-                        <p>SMTP_TO_EMAIL=correo_receptor@example.com</p>
+                    
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                          <Label htmlFor="admin-password">Contraseña de Administrador (ADMIN_PASSWORD)</Label>
+                          <Input id="admin-password" type="password" placeholder="••••••••" readOnly />
+                          <p className="text-xs text-muted-foreground">
+                             La contraseña para acceder a este panel de administración.
+                          </p>
+                      </div>
+
+                      <div className="space-y-2">
+                          <Label htmlFor="smtp-host">Host del Servidor (SMTP_HOST)</Label>
+                          <Input id="smtp-host" placeholder="smtp.example.com" readOnly />
+                      </div>
+                      <div className="space-y-2">
+                          <Label htmlFor="smtp-port">Puerto (SMTP_PORT)</Label>
+                          <Input id="smtp-port" placeholder="587" readOnly />
+                      </div>
+                      <div className="space-y-2">
+                          <Label htmlFor="smtp-user">Usuario (SMTP_USER)</Label>
+                          <Input id="smtp-user" placeholder="user@example.com" readOnly />
+                      </div>
+                      <div className="space-y-2">
+                          <Label htmlFor="smtp-pass">Contraseña (SMTP_PASS)</Label>
+                          <Input id="smtp-pass" type="password" placeholder="••••••••" readOnly />
+                      </div>
+                       <div className="space-y-2">
+                          <Label htmlFor="smtp-to">Correo de Destino (SMTP_TO_EMAIL)</Label>
+                          <Input id="smtp-to" placeholder="correo_receptor@example.com" readOnly />
+                           <p className="text-xs text-muted-foreground">
+                              El correo que recibirá los mensajes del formulario de contacto.
+                          </p>
+                      </div>
                     </div>
-                     <p className="mt-4 text-xs text-muted-foreground">
-                        <span className="font-bold">Importante:</span> Después de modificar el archivo <code className="font-mono bg-muted px-1 py-0.5 rounded">.env</code>, necesitarás reiniciar el servidor de desarrollo para que los cambios tomen efecto.
+                    
+                     <p className="mt-4 text-sm text-destructive">
+                        <span className="font-bold">Importante:</span> Después de añadir o modificar el archivo <code className="font-mono bg-muted text-destructive px-1 py-0.5 rounded">.env</code>, debes reiniciar el servidor para que los cambios tomen efecto.
                     </p>
                   </CardContent>
                 </Card>
