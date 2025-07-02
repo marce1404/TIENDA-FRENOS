@@ -269,234 +269,239 @@ export default function AdminPage() {
           </Button>
       </div>
       
-      <h2 className="text-2xl font-bold flex items-center gap-3 mb-4">
-        <Settings className="h-6 w-6" />
-        <span>Configuración General</span>
-      </h2>
-
-      <Tabs defaultValue="contact" className="w-full mb-8">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="contact"><Phone className="mr-2 h-4 w-4" />Contacto</TabsTrigger>
-          <TabsTrigger value="appearance"><ImageIcon className="mr-2 h-4 w-4" />Apariencia</TabsTrigger>
-          <TabsTrigger value="email"><Mail className="mr-2 h-4 w-4" />Correo</TabsTrigger>
+      <Tabs defaultValue="products" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="settings"><Settings className="mr-2 h-4 w-4" />Configuración General</TabsTrigger>
+          <TabsTrigger value="products"><Package className="mr-2 h-4 w-4" />Gestión de Productos</TabsTrigger>
         </TabsList>
-        <TabsContent value="contact">
-          <Card className="mt-6">
-            <CardHeader>
-              <CardTitle>Contacto de WhatsApp</CardTitle>
-              <CardDescription>
-                  Define el nombre y número que se usará para el botón de contacto de WhatsApp.
-              </CardDescription>
-            </CardHeader>
-            <form onSubmit={handleSaveWhatsapp}>
-              <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="contact-name">Nombre del Contacto</Label>
+
+        <TabsContent value="settings" className="mt-6">
+          <Tabs defaultValue="contact" className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="contact"><Phone className="mr-2 h-4 w-4" />Contacto</TabsTrigger>
+              <TabsTrigger value="appearance"><ImageIcon className="mr-2 h-4 w-4" />Apariencia</TabsTrigger>
+              <TabsTrigger value="email"><Mail className="mr-2 h-4 w-4" />Correo</TabsTrigger>
+            </TabsList>
+            <TabsContent value="contact">
+              <Card className="mt-6">
+                <CardHeader>
+                  <CardTitle>Contacto de WhatsApp</CardTitle>
+                  <CardDescription>
+                      Define el nombre y número que se usará para el botón de contacto de WhatsApp.
+                  </CardDescription>
+                </CardHeader>
+                <form onSubmit={handleSaveWhatsapp}>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="contact-name">Nombre del Contacto</Label>
+                        <Input
+                          id="contact-name"
+                          value={contactName}
+                          onChange={(e) => setContactName(e.target.value)}
+                          placeholder="Ej: Ventas"
+                          className="mt-2"
+                        />
+                        <p className="text-xs text-muted-foreground mt-2">
+                          Un nombre para tu referencia en el panel. No es visible para los clientes.
+                        </p>
+                      </div>
+                      <div>
+                        <Label htmlFor="whatsapp-number">Número de Teléfono</Label>
+                        <Input
+                          id="whatsapp-number"
+                          value={whatsappNumber}
+                          onChange={(e) => setWhatsappNumber(e.target.value)}
+                          placeholder="Ej: 56912345678"
+                          className="mt-2"
+                        />
+                        <p className="text-xs text-muted-foreground mt-2">
+                          Incluye código de país, sin el símbolo '+' ni espacios.
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                  <CardFooter>
+                    <Button type="submit">Guardar Contacto</Button>
+                  </CardFooter>
+                </form>
+              </Card>
+            </TabsContent>
+            <TabsContent value="appearance">
+              <Card className="mt-6">
+                <CardHeader>
+                  <CardTitle>Imagen de Portada (Home)</CardTitle>
+                  <CardDescription>
+                    Cambia la imagen principal que se muestra en la página de inicio.
+                  </CardDescription>
+                </CardHeader>
+                <form onSubmit={handleSaveHomeImage}>
+                  <CardContent className="space-y-2">
+                    <Label htmlFor="home-image-file">Seleccionar Imagen</Label>
                     <Input
-                      id="contact-name"
-                      value={contactName}
-                      onChange={(e) => setContactName(e.target.value)}
-                      placeholder="Ej: Ventas"
-                      className="mt-2"
-                    />
-                    <p className="text-xs text-muted-foreground mt-2">
-                      Un nombre para tu referencia en el panel. No es visible para los clientes.
-                    </p>
-                  </div>
-                  <div>
-                    <Label htmlFor="whatsapp-number">Número de Teléfono</Label>
-                    <Input
-                      id="whatsapp-number"
-                      value={whatsappNumber}
-                      onChange={(e) => setWhatsappNumber(e.target.value)}
-                      placeholder="Ej: 56912345678"
-                      className="mt-2"
-                    />
-                    <p className="text-xs text-muted-foreground mt-2">
-                      Incluye código de país, sin el símbolo '+' ni espacios.
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button type="submit">Guardar Contacto</Button>
-              </CardFooter>
-            </form>
-          </Card>
-        </TabsContent>
-        <TabsContent value="appearance">
-          <Card className="mt-6">
-            <CardHeader>
-              <CardTitle>Imagen de Portada (Home)</CardTitle>
-              <CardDescription>
-                Cambia la imagen principal que se muestra en la página de inicio.
-              </CardDescription>
-            </CardHeader>
-            <form onSubmit={handleSaveHomeImage}>
-              <CardContent className="space-y-2">
-                <Label htmlFor="home-image-file">Seleccionar Imagen</Label>
-                <Input
-                  id="home-image-file"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleHomeImageChange}
-                />
-                {homeImageUrl && (
-                  <div className="mt-4">
-                    <p className="text-xs text-muted-foreground mb-2">Vista previa actual:</p>
-                    <Image
-                      src={homeImageUrl}
-                      alt="Vista previa de imagen de portada"
-                      width={200}
-                      height={120}
-                      className="rounded-md object-cover"
-                    />
-                  </div>
-                )}
-              </CardContent>
-              <CardFooter>
-                <Button type="submit">Guardar Imagen de Portada</Button>
-              </CardFooter>
-            </form>
-          </Card>
-          <Card className="mt-8">
-            <CardHeader>
-              <CardTitle>Imágenes de Categoría por Defecto</CardTitle>
-              <CardDescription>
-                Asigna una imagen predeterminada a cada categoría. Se usará si un producto no tiene su propia imagen.
-              </CardDescription>
-            </CardHeader>
-            <form onSubmit={handleSaveCategoryImages}>
-              <CardContent className="space-y-4">
-                {allCategories.map(category => (
-                  <div key={category} className="space-y-2">
-                    <Label htmlFor={`category-image-${category}`}>{category}</Label>
-                    <Input
-                      id={`category-image-${category}`}
+                      id="home-image-file"
                       type="file"
                       accept="image/*"
-                      onChange={(e) => handleCategoryImagesChange(category, e)}
-                      className="mt-1"
+                      onChange={handleHomeImageChange}
                     />
-                    {categoryImages[category] && (
-                      <Image
-                        src={categoryImages[category]}
-                        alt={`Vista previa de ${category}`}
-                        width={100}
-                        height={100}
-                        className="mt-2 rounded-md object-cover"
-                      />
+                    {homeImageUrl && (
+                      <div className="mt-4">
+                        <p className="text-xs text-muted-foreground mb-2">Vista previa actual:</p>
+                        <Image
+                          src={homeImageUrl}
+                          alt="Vista previa de imagen de portada"
+                          width={200}
+                          height={120}
+                          className="rounded-md object-cover"
+                        />
+                      </div>
                     )}
-                  </div>
-                ))}
-              </CardContent>
-              <CardFooter>
-                <Button type="submit">Guardar Imágenes de Categoría</Button>
-              </CardFooter>
-            </form>
-          </Card>
+                  </CardContent>
+                  <CardFooter>
+                    <Button type="submit">Guardar Imagen de Portada</Button>
+                  </CardFooter>
+                </form>
+              </Card>
+              <Card className="mt-8">
+                <CardHeader>
+                  <CardTitle>Imágenes de Categoría por Defecto</CardTitle>
+                  <CardDescription>
+                    Asigna una imagen predeterminada a cada categoría. Se usará si un producto no tiene su propia imagen.
+                  </CardDescription>
+                </CardHeader>
+                <form onSubmit={handleSaveCategoryImages}>
+                  <CardContent className="space-y-4">
+                    {allCategories.map(category => (
+                      <div key={category} className="space-y-2">
+                        <Label htmlFor={`category-image-${category}`}>{category}</Label>
+                        <Input
+                          id={`category-image-${category}`}
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleCategoryImagesChange(category, e)}
+                          className="mt-1"
+                        />
+                        {categoryImages[category] && (
+                          <Image
+                            src={categoryImages[category]}
+                            alt={`Vista previa de ${category}`}
+                            width={100}
+                            height={100}
+                            className="mt-2 rounded-md object-cover"
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </CardContent>
+                  <CardFooter>
+                    <Button type="submit">Guardar Imágenes de Categoría</Button>
+                  </CardFooter>
+                </form>
+              </Card>
+            </TabsContent>
+            <TabsContent value="email">
+                <Card className="mt-6">
+                  <CardHeader>
+                    <CardTitle>Configuración de Correo (SMTP)</CardTitle>
+                    <CardDescription>
+                        Para enviar correos desde el formulario de contacto, es necesario configurar las credenciales SMTP.
+                        Por seguridad, estas credenciales deben ser añadidas como variables de entorno en el archivo <code className="font-mono bg-muted px-1 py-0.5 rounded">.env</code> de tu proyecto.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="mb-4">
+                        A continuación se muestran las variables que necesitas añadir. Reemplaza los valores de ejemplo con tus datos reales.
+                    </p>
+                    <div className="bg-muted p-4 rounded-md text-sm text-muted-foreground font-mono overflow-x-auto">
+                        <p>ADMIN_PASSWORD=tu_contraseña_de_admin</p>
+                        <p className="mt-4"># Credenciales de correo</p>
+                        <p>SMTP_HOST=smtp.example.com</p>
+                        <p>SMTP_PORT=587</p>
+                        <p>SMTP_USER=user@example.com</p>
+                        <p>SMTP_PASS=your_smtp_password</p>
+                        <p>SMTP_TO_EMAIL=correo_receptor@example.com</p>
+                    </div>
+                     <p className="mt-4 text-xs text-muted-foreground">
+                        <span className="font-bold">Importante:</span> Después de modificar el archivo <code className="font-mono bg-muted px-1 py-0.5 rounded">.env</code>, necesitarás reiniciar el servidor de desarrollo para que los cambios tomen efecto.
+                    </p>
+                  </CardContent>
+                </Card>
+            </TabsContent>
+          </Tabs>
         </TabsContent>
-        <TabsContent value="email">
-            <Card className="mt-6">
-              <CardHeader>
-                <CardTitle>Configuración de Correo (SMTP)</CardTitle>
-                <CardDescription>
-                    Para enviar correos desde el formulario de contacto, es necesario configurar las credenciales SMTP.
-                    Por seguridad, estas credenciales deben ser añadidas como variables de entorno en el archivo <code className="font-mono bg-muted px-1 py-0.5 rounded">.env</code> de tu proyecto.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="mb-4">
-                    A continuación se muestran las variables que necesitas añadir. Reemplaza los valores de ejemplo con tus datos reales.
-                </p>
-                <div className="bg-muted p-4 rounded-md text-sm text-muted-foreground font-mono overflow-x-auto">
-                    <p>ADMIN_PASSWORD=tu_contraseña_de_admin</p>
-                    <p className="mt-4"># Credenciales de correo</p>
-                    <p>SMTP_HOST=smtp.example.com</p>
-                    <p>SMTP_PORT=587</p>
-                    <p>SMTP_USER=user@example.com</p>
-                    <p>SMTP_PASS=your_smtp_password</p>
-                    <p>SMTP_TO_EMAIL=correo_receptor@example.com</p>
-                </div>
-                 <p className="mt-4 text-xs text-muted-foreground">
-                    <span className="font-bold">Importante:</span> Después de modificar el archivo <code className="font-mono bg-muted px-1 py-0.5 rounded">.env</code>, necesitarás reiniciar el servidor de desarrollo para que los cambios tomen efecto.
-                </p>
-              </CardContent>
-            </Card>
+
+        <TabsContent value="products" className="mt-6">
+            <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold">Lista de Productos</h2>
+                <Button onClick={() => setIsAddDialogOpen(true)}>
+                <PlusCircle className="mr-2" />
+                Añadir Producto
+                </Button>
+            </div>
+            
+            <div className="rounded-lg border">
+                <Table>
+                <TableHeader>
+                    <TableRow>
+                    <TableHead className="w-[80px]">ID</TableHead>
+                    <TableHead>Nombre</TableHead>
+                    <TableHead>Marca</TableHead>
+                    <TableHead>Modelo</TableHead>
+                    <TableHead>Compatibilidad</TableHead>
+                    <TableHead className="text-right">Precio</TableHead>
+                    <TableHead className="text-center">Destacado</TableHead>
+                    <TableHead className="w-[120px] text-center">Acciones</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {products.map((product) => (
+                    <TableRow key={product.id}>
+                        <TableCell className="font-medium">{product.id}</TableCell>
+                        <TableCell>{product.name}</TableCell>
+                        <TableCell>{product.brand}</TableCell>
+                        <TableCell>{product.model}</TableCell>
+                        <TableCell>{product.compatibility}</TableCell>
+                        <TableCell className="text-right">{formatPrice(product.price)}</TableCell>
+                        <TableCell className="text-center">
+                        <Button variant="ghost" size="icon" onClick={() => handleToggleFeatured(product.id)}>
+                            <Star className={cn("h-5 w-5", product.isFeatured ? "fill-primary text-primary" : "text-muted-foreground")} />
+                            <span className="sr-only">Toggle Destacado</span>
+                        </Button>
+                        </TableCell>
+                        <TableCell className="flex justify-center gap-2">
+                        <Button variant="outline" size="icon" onClick={() => { setProductToEdit(product); setIsEditDialogOpen(true); }}>
+                            <Pencil className="h-4 w-4" />
+                            <span className="sr-only">Editar</span>
+                        </Button>
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                            <Button variant="destructive" size="icon">
+                                <Trash2 className="h-4 w-4" />
+                                <span className="sr-only">Eliminar</span>
+                            </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                Esta acción no se puede deshacer. Esto eliminará permanentemente el producto.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleDeleteProduct(product.id)}>Eliminar</AlertDialogAction>
+                            </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                        </TableCell>
+                    </TableRow>
+                    ))}
+                </TableBody>
+                </Table>
+            </div>
         </TabsContent>
       </Tabs>
 
-
-      <div className="flex justify-between items-center mb-6 mt-12">
-        <h2 className="text-2xl font-bold">Gestión de Productos</h2>
-        <Button onClick={() => setIsAddDialogOpen(true)}>
-          <PlusCircle className="mr-2" />
-          Añadir Producto
-        </Button>
-      </div>
-      
-      <div className="rounded-lg border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[80px]">ID</TableHead>
-              <TableHead>Nombre</TableHead>
-              <TableHead>Marca</TableHead>
-              <TableHead>Modelo</TableHead>
-              <TableHead>Compatibilidad</TableHead>
-              <TableHead className="text-right">Precio</TableHead>
-              <TableHead className="text-center">Destacado</TableHead>
-              <TableHead className="w-[120px] text-center">Acciones</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {products.map((product) => (
-              <TableRow key={product.id}>
-                <TableCell className="font-medium">{product.id}</TableCell>
-                <TableCell>{product.name}</TableCell>
-                <TableCell>{product.brand}</TableCell>
-                <TableCell>{product.model}</TableCell>
-                <TableCell>{product.compatibility}</TableCell>
-                <TableCell className="text-right">{formatPrice(product.price)}</TableCell>
-                <TableCell className="text-center">
-                  <Button variant="ghost" size="icon" onClick={() => handleToggleFeatured(product.id)}>
-                    <Star className={cn("h-5 w-5", product.isFeatured ? "fill-primary text-primary" : "text-muted-foreground")} />
-                    <span className="sr-only">Toggle Destacado</span>
-                  </Button>
-                </TableCell>
-                <TableCell className="flex justify-center gap-2">
-                  <Button variant="outline" size="icon" onClick={() => { setProductToEdit(product); setIsEditDialogOpen(true); }}>
-                    <Pencil className="h-4 w-4" />
-                    <span className="sr-only">Editar</span>
-                  </Button>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                       <Button variant="destructive" size="icon">
-                         <Trash2 className="h-4 w-4" />
-                         <span className="sr-only">Eliminar</span>
-                       </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Esta acción no se puede deshacer. Esto eliminará permanentemente el producto.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => handleDeleteProduct(product.id)}>Eliminar</AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-      
       <ProductFormDialog
         isOpen={isAddDialogOpen}
         onOpenChange={setIsAddDialogOpen}
@@ -644,3 +649,4 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, categ
         </Dialog>
     );
 }
+
