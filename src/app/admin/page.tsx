@@ -188,6 +188,7 @@ export default function AdminPage() {
                 <TableHead>Nombre</TableHead>
                 <TableHead>Marca</TableHead>
                 <TableHead>Modelo</TableHead>
+                <TableHead>Compatibilidad</TableHead>
                 <TableHead className="text-right">Precio</TableHead>
                 <TableHead className="text-center">Destacado</TableHead>
                 <TableHead className="w-[120px] text-center">Acciones</TableHead>
@@ -200,6 +201,7 @@ export default function AdminPage() {
                   <TableCell>{product.name}</TableCell>
                   <TableCell>{product.brand}</TableCell>
                   <TableCell>{product.model}</TableCell>
+                  <TableCell>{product.compatibility}</TableCell>
                   <TableCell className="text-right">{formatPrice(product.price)}</TableCell>
                   <TableCell className="text-center">
                     <Button variant="ghost" size="icon" onClick={() => handleToggleFeatured(product.id)}>
