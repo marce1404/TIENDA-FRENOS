@@ -42,6 +42,7 @@ import { saveEnvSettings } from '@/actions/saveEnv';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
+import { Switch } from '@/components/ui/switch';
 
 
 export default function AdminPage() {
@@ -67,6 +68,7 @@ export default function AdminPage() {
   const [smtpUser, setSmtpUser] = useState('');
   const [smtpPass, setSmtpPass] = useState('');
   const [smtpToEmail, setSmtpToEmail] = useState('');
+  const [smtpSecure, setSmtpSecure] = useState(false);
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -196,6 +198,7 @@ export default function AdminPage() {
         SMTP_USER: smtpUser,
         SMTP_PASS: smtpPass,
         SMTP_TO_EMAIL: smtpToEmail,
+        SMTP_SECURE: smtpSecure.toString(),
     };
     const result = await saveEnvSettings(settings);
     setIsSavingEnv(false);
@@ -466,6 +469,10 @@ export default function AdminPage() {
                       <div className="space-y-2">
                           <Label htmlFor="smtp-port">Puerto (SMTP_PORT)</Label>
                           <Input id="smtp-port" placeholder="587" value={smtpPort} onChange={(e) => setSmtpPort(e.target.value)}/>
+                      </div>
+                       <div className="flex items-center space-x-2 mt-2">
+                          <Switch id="smtp-secure" checked={smtpSecure} onCheckedChange={setSmtpSecure} />
+                          <Label htmlFor="smtp-secure">Usar cifrado SSL/TLS (SMTP_SECURE)</Label>
                       </div>
                       <div className="space-y-2">
                           <Label htmlFor="smtp-user">Usuario (SMTP_USER)</Label>

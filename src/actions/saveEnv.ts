@@ -1,3 +1,4 @@
+
 'use server';
 
 import fs from 'fs/promises';
@@ -11,6 +12,7 @@ const envSchema = z.object({
   SMTP_USER: z.string().optional(),
   SMTP_PASS: z.string().optional(),
   SMTP_TO_EMAIL: z.string().optional(),
+  SMTP_SECURE: z.string().optional(),
 });
 
 type EnvSettings = z.infer<typeof envSchema>;

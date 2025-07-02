@@ -25,7 +25,7 @@ export async function sendEmail(formData: {
   
   const { name, email, subject, message } = parsed.data;
 
-  const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_TO_EMAIL } = process.env;
+  const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_TO_EMAIL, SMTP_SECURE } = process.env;
 
   if (!SMTP_HOST || !SMTP_PORT || !SMTP_USER || !SMTP_PASS || !SMTP_TO_EMAIL) {
     console.error('Las variables de entorno SMTP no están configuradas correctamente.');
@@ -35,7 +35,7 @@ export async function sendEmail(formData: {
   const transporter = nodemailer.createTransport({
     host: SMTP_HOST,
     port: parseInt(SMTP_PORT, 10),
-    secure: parseInt(SMTP_PORT, 10) === 465, // true for 465, false for other ports
+    secure: SMTP_SECURE === 'true',
     auth: {
       user: SMTP_USER,
       pass: SMTP_PASS,
