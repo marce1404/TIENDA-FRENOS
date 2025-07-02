@@ -45,7 +45,7 @@ export function CartSheet() {
     const messageLines = cartItems.map(item => 
         `- ${item.quantity}x ${item.name} (${item.brand}) - ${formatPrice(item.price * item.quantity)}`
     );
-    const message = `¡Hola! Quisiera cotizar los siguientes productos de todofrenos.cl:\n\n${messageLines.join('\n')}\n\n*Total: ${formatPrice(cartTotal)}*`;
+    const message = `¡Hola! Quisiera cotizar los siguientes productos de casafrenos.cl:\n\n${messageLines.join('\n')}\n\n*Total: ${formatPrice(cartTotal)}*`;
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };

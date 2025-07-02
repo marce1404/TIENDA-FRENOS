@@ -15,13 +15,12 @@ export const Logo = ({ className, ...props }: React.SVGProps<SVGSVGElement>) => 
       className={cn(className)}
       {...props}
     >
-      <title>todofrenos.cl Logo Freno de Disco Estilizado</title>
-      {/* Brake disc */}
-      <path d="M21 12a9 9 0 1 1-6.22-8.66" />
-      {/* Brake pad/caliper */}
-      <path d="M15.78 3.34 18 6l-2.22 2.66" />
-      {/* Inner circle for hub */}
-      <circle cx="12" cy="12" r="3" />
+      <title>casafrenos.cl Logo - La casa del freno</title>
+      {/* House shape */}
+      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+      {/* Brake disc inside */}
+      <circle cx="12" cy="15" r="4" />
+      <circle cx="12" cy="15" r="1" />
     </svg>
   );
 };

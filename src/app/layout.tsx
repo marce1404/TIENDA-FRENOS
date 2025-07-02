@@ -12,8 +12,8 @@ import { WhatsAppButton } from '@/components/WhatsAppButton';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'todofrenos.cl - Repuestos de Freno',
-  description: 'Tienda especialista en repuestos de frenos de alta calidad.',
+  title: 'casafrenos.cl - La casa del freno',
+  description: 'La casa del freno. Tienda especialista en repuestos de frenos de alta calidad.',
 };
 
 export default function RootLayout({

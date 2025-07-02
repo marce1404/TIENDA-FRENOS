@@ -1,6 +1,6 @@
-# todofrenos.cl
+# casafrenos.cl
 
-Una tienda en línea especializada en la venta de repuestos de frenos de alta calidad.
+La casa del freno. Una tienda en línea especializada en la venta de repuestos de frenos de alta calidad.
 
 ## Funcionalidades
 

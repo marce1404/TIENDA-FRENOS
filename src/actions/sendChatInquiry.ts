@@ -41,7 +41,7 @@ export async function sendChatInquiry(formData: {
 
   const emailHtml = `
     <div>
-      <h1>Nueva consulta desde el Chat de todofrenos.cl</h1>
+      <h1>Nueva consulta desde el Chat de casafrenos.cl</h1>
       <p><strong>Nombre:</strong> ${name}</p>
       <p><strong>Correo para responder:</strong> <a href="mailto:${email}">${email}</a></p>
       <p><strong>Mensaje:</strong></p>

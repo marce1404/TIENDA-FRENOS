@@ -26,7 +26,7 @@ export function Header() {
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 mr-6">
           <Logo className="h-8 w-8 text-primary" />
-          <span className="font-bold text-lg hidden sm:inline-block">todofrenos.cl</span>
+          <span className="font-bold text-lg hidden sm:inline-block">casafrenos.cl</span>
         </Link>
         
         {/* Desktop Navigation */}
@@ -53,7 +53,7 @@ export function Header() {
                 <SheetContent>
                   <Link href="/" className="flex items-center gap-2 mb-8">
                     <Logo className="h-8 w-8 text-primary" />
-                    <span className="font-bold text-lg">todofrenos.cl</span>
+                    <span className="font-bold text-lg">casafrenos.cl</span>
                   </Link>
                   <nav className="grid gap-4">
                     {navLinks.map((link) => (
