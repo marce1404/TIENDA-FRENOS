@@ -456,7 +456,7 @@ export default function AdminPage() {
                           <Label htmlFor="admin-password">Nueva Contraseña de Administrador (ADMIN_PASSWORD)</Label>
                           <Input id="admin-password" type="password" placeholder="Dejar en blanco para no cambiar" value={adminPasswordForEnv} onChange={(e) => setAdminPasswordForEnv(e.target.value)} />
                           <p className="text-xs text-muted-foreground">
-                             La contraseña para acceder a este panel de administración.
+                             Establece o cambia la contraseña para acceder a este panel. Déjalo en blanco para no modificarla.
                           </p>
                       </div>
                       <div className="space-y-2">
@@ -479,7 +479,7 @@ export default function AdminPage() {
                           <Label htmlFor="smtp-to">Correo de Destino (SMTP_TO_EMAIL)</Label>
                           <Input id="smtp-to" placeholder="correo_receptor@example.com" value={smtpToEmail} onChange={(e) => setSmtpToEmail(e.target.value)}/>
                            <p className="text-xs text-muted-foreground">
-                              El correo que recibirá los mensajes del formulario de contacto.
+                              Importante: Esta es la dirección de correo que recibirá los mensajes del formulario de contacto.
                           </p>
                       </div>
                        <p className="mt-4 text-sm text-destructive">
@@ -721,3 +721,5 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, categ
         </Dialog>
     );
 }
+
+    
