@@ -36,7 +36,7 @@ export default function ContactoPage() {
           <div className="space-y-4 text-lg">
              <div className="flex items-center gap-4">
                 <Mail className="h-6 w-6 text-primary" />
-                <span>contacto@aquifrenos.cl</span>
+                <span>contacto@todofrenos.cl</span>
              </div>
              <div className="flex items-center gap-4">
                 <Phone className="h-6 w-6 text-primary" />

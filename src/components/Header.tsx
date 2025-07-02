@@ -20,7 +20,7 @@ export function Header() {
         <div className="flex items-center gap-2">
             <Link href="/" className="flex items-center gap-2">
             <Logo className="h-8 w-8 text-primary" />
-            <span className="font-bold text-lg">aquifrenos.cl</span>
+            <span className="font-bold text-lg">todofrenos.cl</span>
             </Link>
         </div>
         

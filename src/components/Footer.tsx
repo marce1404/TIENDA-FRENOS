@@ -10,7 +10,7 @@ export function Footer() {
           <MapPin className="h-4 w-4" />
           <span>av la palmilla #4780 Conchalí, Santiago</span>
         </div>
-        <p>&copy; {currentYear} aquifrenos.cl. Todos los derechos reservados.</p>
+        <p>&copy; {currentYear} todofrenos.cl. Todos los derechos reservados.</p>
       </div>
     </footer>
   );

@@ -10,7 +10,7 @@ import { WhatsappButton } from '@/components/WhatsappButton';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'aquifrenos.cl - Repuestos de Freno',
+  title: 'todofrenos.cl - Repuestos de Freno',
   description: 'Tienda especialista en repuestos de frenos de alta calidad.',
 };
 

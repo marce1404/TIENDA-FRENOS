@@ -1,4 +1,4 @@
-# aquifrenos.cl
+# todofrenos.cl
 
 Una tienda en línea especializada en la venta de repuestos de frenos de alta calidad.
 
