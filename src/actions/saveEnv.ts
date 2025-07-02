@@ -22,7 +22,7 @@ async function readEnvFile(envPath: string): Promise<Record<string, string>> {
     content.split('\n').forEach(line => {
       const trimmedLine = line.trim();
       if (trimmedLine && !trimmedLine.startsWith('#')) {
-        const- [key, ...valueParts] = trimmedLine.split('=');
+        const [key, ...valueParts] = trimmedLine.split('=');
         if (key) {
           envVars[key.trim()] = valueParts.join('=').trim();
         }
