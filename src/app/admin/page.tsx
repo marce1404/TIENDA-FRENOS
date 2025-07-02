@@ -187,9 +187,6 @@ export default function AdminPage() {
   const handleAddProduct = (newProductData: Omit<Product, 'id'>) => {
     setProducts(prev => {
       const newProduct = { ...newProductData, id: prev.length > 0 ? Math.max(...prev.map(p => p.id)) + 1 : 1 };
-      if (!newProduct.imageUrl) {
-          newProduct.imageUrl = categoryImages[newProduct.category] || 'https://placehold.co/400x400.png';
-      }
       const updatedProducts = [...prev, newProduct];
       saveProducts(updatedProducts);
       return updatedProducts;
@@ -526,36 +523,28 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, categ
     const [formData, setFormData] = useState(getInitialFormData());
     const [imagePreview, setImagePreview] = useState<string>('');
 
-    // Effect to initialize the form when it opens
     useEffect(() => {
         if (isOpen) {
             const initialData = product ? { ...product } : getInitialFormData();
-            
-            // If the image is a placeholder or doesn't exist, try to set a category default.
-            if (!initialData.imageUrl || initialData.imageUrl.startsWith('https://placehold.co/')) {
-                 initialData.imageUrl = categoryImages[initialData.category] || 'https://placehold.co/400x400.png';
-            }
-            
             setFormData(initialData);
-            setImagePreview(initialData.imageUrl);
+
+            if (initialData.imageUrl && initialData.imageUrl.startsWith('data:image')) {
+                setImagePreview(initialData.imageUrl);
+            } else {
+                const defaultPreview = categoryImages[initialData.category] || 'https://placehold.co/400x400.png';
+                setImagePreview(defaultPreview);
+            }
         }
     }, [isOpen, product, categoryImages]);
 
-    // Effect to handle dynamic default image when the category is changed by the user.
     useEffect(() => {
         if (!isOpen) return;
 
-        // Check if the current image is a default one (placeholder or from categoryImages map)
-        const isDefaultImage = imagePreview.startsWith('https://placehold.co/') || Object.values(categoryImages).includes(imagePreview);
-
-        if (isDefaultImage) {
-            const newDefaultImage = categoryImages[formData.category] || 'https://placehold.co/400x400.png';
-            if (imagePreview !== newDefaultImage) {
-                setFormData(prev => ({ ...prev, imageUrl: newDefaultImage }));
-                setImagePreview(newDefaultImage);
-            }
+        if (!formData.imageUrl || !formData.imageUrl.startsWith('data:image')) {
+            const newDefaultPreview = categoryImages[formData.category] || 'https://placehold.co/400x400.png';
+            setImagePreview(newDefaultPreview);
         }
-    }, [formData.category, isOpen, categoryImages, imagePreview]);
+    }, [formData.category, formData.imageUrl, isOpen, categoryImages]);
 
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {

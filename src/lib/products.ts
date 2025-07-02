@@ -11,20 +11,40 @@ export function getProducts(): Product[] {
   }
   
   const savedProductsJSON = localStorage.getItem('products');
-  
+  let productsToAugment: Product[];
+
   if (savedProductsJSON) {
     try {
-      return JSON.parse(savedProductsJSON);
+      productsToAugment = JSON.parse(savedProductsJSON);
     } catch (e) {
-      console.error('Error parsing products from localStorage', e);
-      // If parsing fails, fall back to initial data
-      return initialProducts;
+      console.error('Error parsing products from localStorage, falling back to initial data.', e);
+      productsToAugment = initialProducts;
     }
+  } else {
+    // First time run, use initial data and save it to localStorage.
+    productsToAugment = initialProducts;
+    localStorage.setItem('products', JSON.stringify(initialProducts));
   }
+  
+  const categoryImagesJSON = localStorage.getItem('categoryImages');
+  const categoryImages: Record<string, string> = categoryImagesJSON ? JSON.parse(categoryImagesJSON) : {};
 
-  // If no products in localStorage, initialize with static data and save it.
-  localStorage.setItem('products', JSON.stringify(initialProducts));
-  return initialProducts;
+  const augmentedProducts = productsToAugment.map(product => {
+    // A product has a specific image if its URL is a data URI.
+    if (product.imageUrl && product.imageUrl.startsWith('data:image')) {
+      return product;
+    }
+    
+    // Otherwise, it needs a default. Try category-specific first.
+    const defaultImageUrl = categoryImages[product.category] || 'https://placehold.co/400x400.png';
+    
+    return {
+      ...product,
+      imageUrl: defaultImageUrl,
+    };
+  });
+
+  return augmentedProducts;
 }
 
 // This function should only be called on the client-side.
