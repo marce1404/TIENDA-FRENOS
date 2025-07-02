@@ -1,7 +1,7 @@
 
 'use server';
 
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 import { z } from 'zod';
 
 const sendEmailSchema = z.object({
@@ -20,19 +20,27 @@ export async function sendEmail(formData: {
   const parsed = sendEmailSchema.safeParse(formData);
 
   if (!parsed.success) {
-    return { success: false, error: 'Invalid form data' };
+    return { success: false, error: 'Datos de formulario inválidos.' };
   }
   
   const { name, email, subject, message } = parsed.data;
-  
-  const resendApiKey = process.env.RESEND_API_KEY;
 
-  if (!resendApiKey) {
-    console.error('RESEND_API_KEY no está configurada.');
-    return { success: false, error: 'El servidor no está configurado para enviar correos.' };
+  const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_TO_EMAIL } = process.env;
+
+  if (!SMTP_HOST || !SMTP_PORT || !SMTP_USER || !SMTP_PASS || !SMTP_TO_EMAIL) {
+    console.error('Las variables de entorno SMTP no están configuradas correctamente.');
+    return { success: false, error: 'El servidor no está configurado para enviar correos. Por favor, contacta al administrador.' };
   }
 
-  const resend = new Resend(resendApiKey);
+  const transporter = nodemailer.createTransport({
+    host: SMTP_HOST,
+    port: parseInt(SMTP_PORT, 10),
+    secure: parseInt(SMTP_PORT, 10) === 465, // true for 465, false for other ports
+    auth: {
+      user: SMTP_USER,
+      pass: SMTP_PASS,
+    },
+  });
 
   const emailHtml = `
     <div>
@@ -46,16 +54,17 @@ export async function sendEmail(formData: {
   `;
 
   try {
-    await resend.emails.send({
-      from: 'Contacto Web <onboarding@resend.dev>',
-      to: 'contacto@todofrenos.cl',
+    await transporter.verify();
+    await transporter.sendMail({
+      from: `"${name}" <${SMTP_USER}>`,
+      to: SMTP_TO_EMAIL,
+      replyTo: email,
       subject: `Nuevo Contacto: ${subject}`,
-      reply_to: email,
       html: emailHtml,
     });
     return { success: true };
   } catch (error) {
-    console.error('Error sending email:', error);
+    console.error('Error al enviar correo:', error);
     return { success: false, error: 'No se pudo enviar el correo.' };
   }
 }

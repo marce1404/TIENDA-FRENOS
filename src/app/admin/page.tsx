@@ -36,11 +36,10 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Pencil, Trash2, PlusCircle, LogIn, LogOut, Star, Phone, Settings, Image as ImageIcon, Save, Package } from 'lucide-react';
+import { Pencil, Trash2, PlusCircle, LogIn, LogOut, Star, Phone, Settings, Image as ImageIcon, Save, Package, Mail } from 'lucide-react';
 import { verifyPassword } from '@/actions/auth';
 import { cn } from '@/lib/utils';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 
 export default function AdminPage() {
@@ -269,146 +268,167 @@ export default function AdminPage() {
             Cerrar Sesión
           </Button>
       </div>
+      
+      <h2 className="text-2xl font-bold flex items-center gap-3 mb-4">
+        <Settings className="h-6 w-6" />
+        <span>Configuración General</span>
+      </h2>
 
-      <Accordion type="single" collapsible className="w-full mb-8">
-        <AccordionItem value="item-1">
-          <AccordionTrigger>
-            <div className="flex items-center gap-3">
-              <Settings className="h-6 w-6" />
-              <h2 className="text-2xl font-bold">Configuración General</h2>
-            </div>
-          </AccordionTrigger>
-          <AccordionContent>
-              <Card className="border-none">
-                  <CardHeader className="p-0 pb-4">
-                      <CardTitle className="flex items-center gap-2 text-xl">
-                          <Phone className="h-5 w-5" />
-                          <span>Contacto de WhatsApp</span>
-                      </CardTitle>
-                      <CardDescription>
-                          Define el nombre y número que se usará para el botón de contacto de WhatsApp.
-                      </CardDescription>
-                  </CardHeader>
-                  <form onSubmit={handleSaveWhatsapp}>
-                      <CardContent className="p-0">
-                          <div className="space-y-4">
-                              <div>
-                                  <Label htmlFor="contact-name">Nombre del Contacto</Label>
-                                  <Input
-                                      id="contact-name"
-                                      value={contactName}
-                                      onChange={(e) => setContactName(e.target.value)}
-                                      placeholder="Ej: Ventas"
-                                      className="mt-2"
-                                  />
-                                  <p className="text-xs text-muted-foreground mt-2">
-                                      Un nombre para tu referencia en el panel. No es visible para los clientes.
-                                  </p>
-                              </div>
-                              <div>
-                                  <Label htmlFor="whatsapp-number">Número de Teléfono</Label>
-                                  <Input
-                                      id="whatsapp-number"
-                                      value={whatsappNumber}
-                                      onChange={(e) => setWhatsappNumber(e.target.value)}
-                                      placeholder="Ej: 56912345678"
-                                      className="mt-2"
-                                  />
-                                  <p className="text-xs text-muted-foreground mt-2">
-                                      Incluye código de país, sin el símbolo '+' ni espacios.
-                                  </p>
-                              </div>
-                          </div>
-                      </CardContent>
-                      <CardFooter className="p-0 pt-6">
-                          <Button type="submit">Guardar Contacto</Button>
-                      </CardFooter>
-                  </form>
-              </Card>
+      <Tabs defaultValue="contact" className="w-full mb-8">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="contact"><Phone className="mr-2 h-4 w-4" />Contacto</TabsTrigger>
+          <TabsTrigger value="appearance"><ImageIcon className="mr-2 h-4 w-4" />Apariencia</TabsTrigger>
+          <TabsTrigger value="email"><Mail className="mr-2 h-4 w-4" />Correo</TabsTrigger>
+        </TabsList>
+        <TabsContent value="contact">
+          <Card className="mt-6">
+            <CardHeader>
+              <CardTitle>Contacto de WhatsApp</CardTitle>
+              <CardDescription>
+                  Define el nombre y número que se usará para el botón de contacto de WhatsApp.
+              </CardDescription>
+            </CardHeader>
+            <form onSubmit={handleSaveWhatsapp}>
+              <CardContent>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="contact-name">Nombre del Contacto</Label>
+                    <Input
+                      id="contact-name"
+                      value={contactName}
+                      onChange={(e) => setContactName(e.target.value)}
+                      placeholder="Ej: Ventas"
+                      className="mt-2"
+                    />
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Un nombre para tu referencia en el panel. No es visible para los clientes.
+                    </p>
+                  </div>
+                  <div>
+                    <Label htmlFor="whatsapp-number">Número de Teléfono</Label>
+                    <Input
+                      id="whatsapp-number"
+                      value={whatsappNumber}
+                      onChange={(e) => setWhatsappNumber(e.target.value)}
+                      placeholder="Ej: 56912345678"
+                      className="mt-2"
+                    />
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Incluye código de país, sin el símbolo '+' ni espacios.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button type="submit">Guardar Contacto</Button>
+              </CardFooter>
+            </form>
+          </Card>
+        </TabsContent>
+        <TabsContent value="appearance">
+          <Card className="mt-6">
+            <CardHeader>
+              <CardTitle>Imagen de Portada (Home)</CardTitle>
+              <CardDescription>
+                Cambia la imagen principal que se muestra en la página de inicio.
+              </CardDescription>
+            </CardHeader>
+            <form onSubmit={handleSaveHomeImage}>
+              <CardContent className="space-y-2">
+                <Label htmlFor="home-image-file">Seleccionar Imagen</Label>
+                <Input
+                  id="home-image-file"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleHomeImageChange}
+                />
+                {homeImageUrl && (
+                  <div className="mt-4">
+                    <p className="text-xs text-muted-foreground mb-2">Vista previa actual:</p>
+                    <Image
+                      src={homeImageUrl}
+                      alt="Vista previa de imagen de portada"
+                      width={200}
+                      height={120}
+                      className="rounded-md object-cover"
+                    />
+                  </div>
+                )}
+              </CardContent>
+              <CardFooter>
+                <Button type="submit">Guardar Imagen de Portada</Button>
+              </CardFooter>
+            </form>
+          </Card>
+          <Card className="mt-8">
+            <CardHeader>
+              <CardTitle>Imágenes de Categoría por Defecto</CardTitle>
+              <CardDescription>
+                Asigna una imagen predeterminada a cada categoría. Se usará si un producto no tiene su propia imagen.
+              </CardDescription>
+            </CardHeader>
+            <form onSubmit={handleSaveCategoryImages}>
+              <CardContent className="space-y-4">
+                {allCategories.map(category => (
+                  <div key={category} className="space-y-2">
+                    <Label htmlFor={`category-image-${category}`}>{category}</Label>
+                    <Input
+                      id={`category-image-${category}`}
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleCategoryImagesChange(category, e)}
+                      className="mt-1"
+                    />
+                    {categoryImages[category] && (
+                      <Image
+                        src={categoryImages[category]}
+                        alt={`Vista previa de ${category}`}
+                        width={100}
+                        height={100}
+                        className="mt-2 rounded-md object-cover"
+                      />
+                    )}
+                  </div>
+                ))}
+              </CardContent>
+              <CardFooter>
+                <Button type="submit">Guardar Imágenes de Categoría</Button>
+              </CardFooter>
+            </form>
+          </Card>
+        </TabsContent>
+        <TabsContent value="email">
+            <Card className="mt-6">
+              <CardHeader>
+                <CardTitle>Configuración de Correo (SMTP)</CardTitle>
+                <CardDescription>
+                    Para enviar correos desde el formulario de contacto, es necesario configurar las credenciales SMTP.
+                    Por seguridad, estas credenciales deben ser añadidas como variables de entorno en el archivo <code className="font-mono bg-muted px-1 py-0.5 rounded">.env</code> de tu proyecto.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="mb-4">
+                    A continuación se muestran las variables que necesitas añadir. Reemplaza los valores de ejemplo con tus datos reales.
+                </p>
+                <div className="bg-muted p-4 rounded-md text-sm text-muted-foreground font-mono overflow-x-auto">
+                    <p>ADMIN_PASSWORD=tu_contraseña_de_admin</p>
+                    <p className="mt-4"># Credenciales de correo</p>
+                    <p>SMTP_HOST=smtp.example.com</p>
+                    <p>SMTP_PORT=587</p>
+                    <p>SMTP_USER=user@example.com</p>
+                    <p>SMTP_PASS=your_smtp_password</p>
+                    <p>SMTP_TO_EMAIL=correo_receptor@example.com</p>
+                </div>
+                 <p className="mt-4 text-xs text-muted-foreground">
+                    <span className="font-bold">Importante:</span> Después de modificar el archivo <code className="font-mono bg-muted px-1 py-0.5 rounded">.env</code>, necesitarás reiniciar el servidor de desarrollo para que los cambios tomen efecto.
+                </p>
+              </CardContent>
+            </Card>
+        </TabsContent>
+      </Tabs>
 
-              <Card className="mt-8 border-x-0 border-b-0 rounded-none">
-                  <CardHeader className="p-0 pb-4">
-                      <CardTitle className="flex items-center gap-2 text-xl">
-                          <ImageIcon className="h-5 w-5" />
-                          <span>Imagen de Portada (Home)</span>
-                      </CardTitle>
-                      <CardDescription>
-                         Cambia la imagen principal que se muestra en la página de inicio.
-                      </CardDescription>
-                  </CardHeader>
-                  <form onSubmit={handleSaveHomeImage}>
-                      <CardContent className="p-0 space-y-2">
-                          <Label htmlFor="home-image-file">Seleccionar Imagen</Label>
-                          <Input
-                              id="home-image-file"
-                              type="file"
-                              accept="image/*"
-                              onChange={handleHomeImageChange}
-                              className="mt-2"
-                          />
-                          {homeImageUrl && (
-                              <div className="mt-4">
-                                  <p className="text-xs text-muted-foreground mb-2">Vista previa actual:</p>
-                                  <Image
-                                      src={homeImageUrl}
-                                      alt="Vista previa de imagen de portada"
-                                      width={200}
-                                      height={120}
-                                      className="rounded-md object-cover"
-                                  />
-                              </div>
-                          )}
-                      </CardContent>
-                      <CardFooter className="p-0 pt-6">
-                          <Button type="submit">Guardar Imagen de Portada</Button>
-                      </CardFooter>
-                  </form>
-              </Card>
 
-              <Card className="mt-8 border-x-0 border-b-0 rounded-none">
-                  <CardHeader className="p-0 pb-4">
-                      <CardTitle className="flex items-center gap-2 text-xl">
-                          <Package className="h-5 w-5" />
-                          <span>Imágenes de Categoría por Defecto</span>
-                      </CardTitle>
-                      <CardDescription>
-                         Asigna una imagen predeterminada a cada categoría. Se usará si un producto no tiene su propia imagen.
-                      </CardDescription>
-                  </CardHeader>
-                   <form onSubmit={handleSaveCategoryImages}>
-                      <CardContent className="p-0 space-y-4">
-                           {allCategories.map(category => (
-                              <div key={category} className="space-y-2">
-                                  <Label htmlFor={`category-image-${category}`}>{category}</Label>
-                                  <Input
-                                      id={`category-image-${category}`}
-                                      type="file"
-                                      accept="image/*"
-                                      onChange={(e) => handleCategoryImagesChange(category, e)}
-                                      className="mt-1"
-                                  />
-                                   {categoryImages[category] && (
-                                      <Image
-                                          src={categoryImages[category]}
-                                          alt={`Vista previa de ${category}`}
-                                          width={100}
-                                          height={100}
-                                          className="mt-2 rounded-md object-cover"
-                                      />
-                                  )}
-                              </div>
-                          ))}
-                      </CardContent>
-                      <CardFooter className="p-0 pt-6">
-                          <Button type="submit">Guardar Imágenes de Categoría</Button>
-                      </CardFooter>
-                  </form>
-              </Card>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
-
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-6 mt-12">
         <h2 className="text-2xl font-bold">Gestión de Productos</h2>
         <Button onClick={() => setIsAddDialogOpen(true)}>
           <PlusCircle className="mr-2" />
@@ -521,12 +541,11 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, categ
             const initialData = product ? { ...product } : getInitialFormData();
             setFormData(initialData);
 
-            if (initialData.imageUrl && initialData.imageUrl.startsWith('data:image')) {
-                setImagePreview(initialData.imageUrl);
-            } else {
-                const defaultPreview = categoryImages[initialData.category] || 'https://placehold.co/400x400.png';
-                setImagePreview(defaultPreview);
+            let previewUrl = initialData.imageUrl;
+            if (!previewUrl || !previewUrl.startsWith('data:image')) {
+                previewUrl = categoryImages[initialData.category] || 'https://placehold.co/400x400.png';
             }
+            setImagePreview(previewUrl);
         }
     }, [isOpen, product, categoryImages]);
 
