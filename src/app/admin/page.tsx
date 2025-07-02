@@ -36,10 +36,12 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Pencil, Trash2, PlusCircle, LogIn, LogOut, Star, Phone, Settings, Image as ImageIcon, Save, Package, Mail } from 'lucide-react';
+import { Pencil, Trash2, PlusCircle, LogIn, LogOut, Star, Phone, Settings, Image as ImageIcon, Save, Package, Mail, Loader2 } from 'lucide-react';
 import { verifyPassword } from '@/actions/auth';
+import { saveEnvSettings } from '@/actions/saveEnv';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useToast } from '@/hooks/use-toast';
 
 
 export default function AdminPage() {
@@ -49,12 +51,22 @@ export default function AdminPage() {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [isMounted, setIsMounted] = useState(false);
+  const { toast } = useToast();
   
   // State for settings
   const [whatsappNumber, setWhatsappNumber] = useState('');
   const [contactName, setContactName] = useState('');
   const [homeImageUrl, setHomeImageUrl] = useState('https://placehold.co/600x400.png');
   const [categoryImages, setCategoryImages] = useState<Record<string, string>>({});
+
+  // State for .env settings form
+  const [isSavingEnv, setIsSavingEnv] = useState(false);
+  const [adminPasswordForEnv, setAdminPasswordForEnv] = useState('');
+  const [smtpHost, setSmtpHost] = useState('');
+  const [smtpPort, setSmtpPort] = useState('');
+  const [smtpUser, setSmtpUser] = useState('');
+  const [smtpPass, setSmtpPass] = useState('');
+  const [smtpToEmail, setSmtpToEmail] = useState('');
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -171,6 +183,37 @@ export default function AdminPage() {
         setCategoryImages(prev => ({ ...prev, [category]: result }));
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSaveEnv = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSavingEnv(true);
+    const settings = {
+        ADMIN_PASSWORD: adminPasswordForEnv,
+        SMTP_HOST: smtpHost,
+        SMTP_PORT: smtpPort,
+        SMTP_USER: smtpUser,
+        SMTP_PASS: smtpPass,
+        SMTP_TO_EMAIL: smtpToEmail,
+    };
+    const result = await saveEnvSettings(settings);
+    setIsSavingEnv(false);
+    if (result.success) {
+        toast({
+            title: "¡Configuración Guardada!",
+            description: "Para que los cambios tomen efecto, por favor reinicia el servidor de la aplicación.",
+            duration: 9000
+        });
+        // Clear password fields after saving
+        setAdminPasswordForEnv('');
+        setSmtpPass('');
+    } else {
+        toast({
+            variant: "destructive",
+            title: "Error al Guardar",
+            description: result.error || "Ocurrió un problema al guardar la configuración.",
+        });
     }
   };
 
@@ -401,55 +444,59 @@ export default function AdminPage() {
             </TabsContent>
             <TabsContent value="email">
                 <Card className="mt-6">
-                  <CardHeader>
-                    <CardTitle>Configuración de Correo (SMTP)</CardTitle>
-                    <CardDescription>
-                        Añade las siguientes credenciales como variables de entorno en el archivo <code className="font-mono bg-muted px-1 py-0.5 rounded">.env</code> de tu proyecto.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-6 pt-6">
-                    <p className="text-sm text-muted-foreground -mt-4">
-                        Por razones de seguridad, las credenciales no se guardan desde este panel. Utiliza los siguientes campos como guía para rellenar tu archivo.
-                    </p>
-                    
-                    <div className="space-y-4">
+                  <form onSubmit={handleSaveEnv}>
+                    <CardHeader>
+                      <CardTitle>Configuración de Correo y Seguridad</CardTitle>
+                      <CardDescription>
+                          Introduce las credenciales para el envío de correos y la contraseña de administrador. Los campos vacíos no se actualizarán.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
                       <div className="space-y-2">
-                          <Label htmlFor="admin-password">Contraseña de Administrador (ADMIN_PASSWORD)</Label>
-                          <Input id="admin-password" type="password" placeholder="••••••••" readOnly />
+                          <Label htmlFor="admin-password">Nueva Contraseña de Administrador (ADMIN_PASSWORD)</Label>
+                          <Input id="admin-password" type="password" placeholder="Dejar en blanco para no cambiar" value={adminPasswordForEnv} onChange={(e) => setAdminPasswordForEnv(e.target.value)} />
                           <p className="text-xs text-muted-foreground">
                              La contraseña para acceder a este panel de administración.
                           </p>
                       </div>
-
                       <div className="space-y-2">
                           <Label htmlFor="smtp-host">Host del Servidor (SMTP_HOST)</Label>
-                          <Input id="smtp-host" placeholder="smtp.example.com" readOnly />
+                          <Input id="smtp-host" placeholder="smtp.example.com" value={smtpHost} onChange={(e) => setSmtpHost(e.target.value)}/>
                       </div>
                       <div className="space-y-2">
                           <Label htmlFor="smtp-port">Puerto (SMTP_PORT)</Label>
-                          <Input id="smtp-port" placeholder="587" readOnly />
+                          <Input id="smtp-port" placeholder="587" value={smtpPort} onChange={(e) => setSmtpPort(e.target.value)}/>
                       </div>
                       <div className="space-y-2">
                           <Label htmlFor="smtp-user">Usuario (SMTP_USER)</Label>
-                          <Input id="smtp-user" placeholder="user@example.com" readOnly />
+                          <Input id="smtp-user" placeholder="user@example.com" value={smtpUser} onChange={(e) => setSmtpUser(e.target.value)}/>
                       </div>
                       <div className="space-y-2">
                           <Label htmlFor="smtp-pass">Contraseña (SMTP_PASS)</Label>
-                          <Input id="smtp-pass" type="password" placeholder="••••••••" readOnly />
+                          <Input id="smtp-pass" type="password" placeholder="Dejar en blanco para no cambiar" value={smtpPass} onChange={(e) => setSmtpPass(e.target.value)}/>
                       </div>
                        <div className="space-y-2">
                           <Label htmlFor="smtp-to">Correo de Destino (SMTP_TO_EMAIL)</Label>
-                          <Input id="smtp-to" placeholder="correo_receptor@example.com" readOnly />
+                          <Input id="smtp-to" placeholder="correo_receptor@example.com" value={smtpToEmail} onChange={(e) => setSmtpToEmail(e.target.value)}/>
                            <p className="text-xs text-muted-foreground">
                               El correo que recibirá los mensajes del formulario de contacto.
                           </p>
                       </div>
-                    </div>
-                    
-                     <p className="mt-4 text-sm text-destructive">
-                        <span className="font-bold">Importante:</span> Después de añadir o modificar el archivo <code className="font-mono bg-muted text-destructive px-1 py-0.5 rounded">.env</code>, debes reiniciar el servidor para que los cambios tomen efecto.
-                    </p>
-                  </CardContent>
+                       <p className="mt-4 text-sm text-destructive">
+                          <span className="font-bold">Importante:</span> Después de guardar, debes reiniciar el servidor para que los cambios tomen efecto.
+                      </p>
+                    </CardContent>
+                    <CardFooter>
+                      <Button type="submit" disabled={isSavingEnv}>
+                        {isSavingEnv ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Guardando...
+                            </>
+                        ) : 'Guardar Configuración'}
+                      </Button>
+                    </CardFooter>
+                  </form>
                 </Card>
             </TabsContent>
           </Tabs>
@@ -674,4 +721,3 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, categ
         </Dialog>
     );
 }
-
