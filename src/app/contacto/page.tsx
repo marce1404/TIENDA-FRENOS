@@ -6,17 +6,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Mail, MapPin, MessageCircle } from 'lucide-react';
+import { Mail, MapPin, MessageCircle, Loader2 } from 'lucide-react';
+import { sendEmail } from '@/actions/sendEmail';
+import { useToast } from "@/hooks/use-toast";
 
 export default function ContactoPage() {
   const [whatsappNumber, setWhatsappNumber] = useState('56912345678');
   const [isMounted, setIsMounted] = useState(false);
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    subject: '',
-    message: '',
-  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     const savedInfo = localStorage.getItem('whatsappInfo');
@@ -39,20 +37,37 @@ export default function ContactoPage() {
     setIsMounted(true);
   }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    const formData = new FormData(e.currentTarget);
+    const data = {
+      name: formData.get('name') as string,
+      email: formData.get('email') as string,
+      subject: formData.get('subject') as string,
+      message: formData.get('message') as string,
+    };
+    
+    const result = await sendEmail(data);
+
+    setIsSubmitting(false);
+
+    if (result.success) {
+      toast({
+        title: "¡Mensaje Enviado!",
+        description: "Gracias por contactarnos. Te responderemos a la brevedad.",
+      });
+      (e.target as HTMLFormElement).reset();
+    } else {
+      const errorMessage = 'Ocurrió un error. Por favor, inténtalo de nuevo.';
+      toast({
+        variant: "destructive",
+        title: "Error al enviar",
+        description: errorMessage,
+      });
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const subject = encodeURIComponent(formData.subject);
-    const body = encodeURIComponent(
-      `Nombre: ${formData.name}\nCorreo: ${formData.email}\n\nMensaje:\n${formData.message}`
-    );
-    // This will open the user's default email client
-    window.location.href = `mailto:contacto@todofrenos.cl?subject=${subject}&body=${body}`;
-  };
 
   return (
     <div className="container mx-auto px-4 py-16">
@@ -73,34 +88,37 @@ export default function ContactoPage() {
               <Input
                 name="name"
                 placeholder="Tu Nombre"
-                value={formData.name}
-                onChange={handleChange}
                 required
+                disabled={isSubmitting}
               />
               <Input
                 name="email"
                 type="email"
                 placeholder="Tu Correo Electrónico"
-                value={formData.email}
-                onChange={handleChange}
                 required
+                disabled={isSubmitting}
               />
               <Input
                 name="subject"
                 placeholder="Asunto"
-                value={formData.subject}
-                onChange={handleChange}
                 required
+                disabled={isSubmitting}
               />
               <Textarea
                 name="message"
                 placeholder="Tu Mensaje"
                 rows={5}
-                value={formData.message}
-                onChange={handleChange}
                 required
+                disabled={isSubmitting}
               />
-              <Button type="submit" className="w-full">Enviar Mensaje</Button>
+              <Button type="submit" className="w-full" disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Enviando...
+                  </>
+                ) : 'Enviar Mensaje'}
+              </Button>
             </form>
           </CardContent>
         </Card>
