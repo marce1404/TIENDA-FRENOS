@@ -1,8 +1,8 @@
 
 'use client';
 
-import { useState, useMemo } from 'react';
-import { products as allProducts } from '@/data/products';
+import { useState, useMemo, useEffect } from 'react';
+import { getProducts } from '@/lib/products';
 import { ProductCard } from '@/components/ProductCard';
 import {
   SidebarProvider,
@@ -20,15 +20,23 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Header } from '@/components/Header';
 import { Search } from 'lucide-react';
 import type { Product } from '@/lib/types';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function ProductosPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState('price-asc');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [isMounted, setIsMounted] = useState(false);
 
-  const categories = [...new Set(allProducts.map((p) => p.category))];
-  const brands = [...new Set(allProducts.map((p) => p.brand))];
+  useEffect(() => {
+    setAllProducts(getProducts());
+    setIsMounted(true);
+  }, []);
+
+  const categories = useMemo(() => [...new Set(allProducts.map((p) => p.category))], [allProducts]);
+  const brands = useMemo(() => [...new Set(allProducts.map((p) => p.brand))], [allProducts]);
 
   const handleCategoryChange = (category: string, checked: boolean) => {
     setSelectedCategories((prev) =>
@@ -43,6 +51,8 @@ export default function ProductosPage() {
   };
 
   const products = useMemo(() => {
+    if (!isMounted) return [];
+    
     let filteredProducts: Product[] = [...allProducts];
 
     if (searchTerm) {
@@ -81,7 +91,19 @@ export default function ProductosPage() {
     }
 
     return filteredProducts;
-  }, [searchTerm, sortOrder, selectedCategories, selectedBrands]);
+  }, [searchTerm, sortOrder, selectedCategories, selectedBrands, allProducts, isMounted]);
+
+  const LoadingSkeleton = () => (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      {Array.from({ length: 8 }).map((_, i) => (
+        <div key={i} className="space-y-2">
+          <Skeleton className="h-48 w-full" />
+          <Skeleton className="h-4 w-3/4" />
+          <Skeleton className="h-4 w-1/2" />
+        </div>
+      ))}
+    </div>
+  );
 
   return (
     <SidebarProvider>
@@ -99,6 +121,7 @@ export default function ProductosPage() {
                       <RadioGroup
                         value={sortOrder}
                         onValueChange={setSortOrder}
+                        disabled={!isMounted}
                       >
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem value="price-asc" id="price-asc" />
@@ -124,7 +147,7 @@ export default function ProductosPage() {
                     <div>
                       <h3 className="text-sm font-semibold mb-2">Categoría</h3>
                       <div className="space-y-2">
-                        {categories.map((category) => (
+                        {isMounted ? categories.map((category) => (
                           <div
                             key={category}
                             className="flex items-center space-x-2"
@@ -143,14 +166,14 @@ export default function ProductosPage() {
                               {category}
                             </Label>
                           </div>
-                        ))}
+                        )) : Array.from({length: 3}).map((_, i) => <Skeleton key={i} className="h-6 w-3/4" />)}
                       </div>
                     </div>
 
                     <div>
                       <h3 className="text-sm font-semibold mb-2">Marca</h3>
                       <div className="space-y-2">
-                        {brands.map((brand) => (
+                         {isMounted ? brands.map((brand) => (
                           <div
                             key={brand}
                             className="flex items-center space-x-2"
@@ -169,7 +192,7 @@ export default function ProductosPage() {
                               {brand}
                             </Label>
                           </div>
-                        ))}
+                        )) : Array.from({length: 4}).map((_, i) => <Skeleton key={i} className="h-6 w-3/4" />)}
                       </div>
                     </div>
                   </div>
@@ -193,19 +216,23 @@ export default function ProductosPage() {
                   className="pl-10"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
+                  disabled={!isMounted}
                 />
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               </div>
+              
+              {!isMounted ? <LoadingSkeleton /> : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {products.length > 0 ? (
+                    products.map((product) => (
+                      <ProductCard key={product.id} product={product} />
+                    ))
+                  ) : (
+                     <p className="col-span-full text-center text-muted-foreground">No se encontraron productos que coincidan con tu búsqueda.</p>
+                  )}
+                </div>
+              )}
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {products.length > 0 ? (
-                  products.map((product) => (
-                    <ProductCard key={product.id} product={product} />
-                  ))
-                ) : (
-                   <p className="col-span-full text-center text-muted-foreground">No se encontraron productos que coincidan con tu búsqueda.</p>
-                )}
-              </div>
             </main>
           </SidebarInset>
         </div>

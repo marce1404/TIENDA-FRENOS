@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { products as initialProducts } from '@/data/products';
 import type { Product } from '@/lib/types';
+import { getProducts, saveProducts } from '@/lib/products';
 import {
   Table,
   TableBody,
@@ -64,7 +65,7 @@ export default function AdminPage() {
   const allCategories = [...new Set(initialProducts.map(p => p.category).concat(products.map(p => p.category)))];
 
   useEffect(() => {
-    setProducts(initialProducts);
+    setProducts(getProducts());
     const authStatus = sessionStorage.getItem('isAdminAuthenticated');
     if (authStatus === 'true') {
         setIsAuthenticated(true);
@@ -189,27 +190,39 @@ export default function AdminPage() {
       if (!newProduct.imageUrl) {
           newProduct.imageUrl = categoryImages[newProduct.category] || 'https://placehold.co/400x400.png';
       }
-      return [...prev, newProduct];
+      const updatedProducts = [...prev, newProduct];
+      saveProducts(updatedProducts);
+      return updatedProducts;
     });
     setIsAddDialogOpen(false);
   };
 
   const handleUpdateProduct = (updatedProduct: Product) => {
-    setProducts(prev => prev.map(p => p.id === updatedProduct.id ? updatedProduct : p));
+    setProducts(prev => {
+      const updatedProducts = prev.map(p => p.id === updatedProduct.id ? updatedProduct : p);
+      saveProducts(updatedProducts);
+      return updatedProducts;
+    });
     setIsEditDialogOpen(false);
     setProductToEdit(null);
   };
   
   const handleDeleteProduct = (productId: number) => {
-    setProducts(prev => prev.filter(p => p.id !== productId));
+    setProducts(prev => {
+      const updatedProducts = prev.filter(p => p.id !== productId);
+      saveProducts(updatedProducts);
+      return updatedProducts;
+    });
   };
 
   const handleToggleFeatured = (productId: number) => {
-    setProducts(prevProducts =>
-      prevProducts.map(p =>
+    setProducts(prevProducts => {
+      const updatedProducts = prevProducts.map(p =>
         p.id === productId ? { ...p, isFeatured: !p.isFeatured } : p
-      )
-    );
+      );
+      saveProducts(updatedProducts);
+      return updatedProducts;
+    });
   };
   
   if (!isMounted) {

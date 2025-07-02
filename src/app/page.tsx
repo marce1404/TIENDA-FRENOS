@@ -8,19 +8,23 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { products as allProducts } from '@/data/products';
+import { getProducts } from '@/lib/products';
 import { ProductCard } from '@/components/ProductCard';
 import { WhatsappButton } from '@/components/WhatsappButton';
+import type { Product } from '@/lib/types';
 
 export default function HomePage() {
   const [homeImageUrl, setHomeImageUrl] = useState('https://placehold.co/600x400.png');
   const [isMounted, setIsMounted] = useState(false);
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
 
   useEffect(() => {
     const savedUrl = localStorage.getItem('homeImageUrl');
     if (savedUrl) {
       setHomeImageUrl(savedUrl);
     }
+    const allProducts = getProducts();
+    setFeaturedProducts(allProducts.filter((product) => product.isFeatured));
     setIsMounted(true);
   }, []);
   
@@ -41,8 +45,6 @@ export default function HomePage() {
       description: 'Recibe tus repuestos a domicilio o retíralos directamente en nuestra tienda.',
     },
   ];
-
-  const featuredProducts = allProducts.filter((product) => product.isFeatured);
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
