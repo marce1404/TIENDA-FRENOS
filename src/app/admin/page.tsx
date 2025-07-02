@@ -67,7 +67,7 @@ export default function AdminPage() {
   const [smtpPort, setSmtpPort] = useState('');
   const [smtpUser, setSmtpUser] = useState('');
   const [smtpPass, setSmtpPass] = useState('');
-  const [smtpToEmail, setSmtpToEmail] = useState('');
+  const [smtpRecipients, setSmtpRecipients] = useState('');
   const [smtpSecure, setSmtpSecure] = useState(false);
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -197,7 +197,7 @@ export default function AdminPage() {
         SMTP_PORT: smtpPort,
         SMTP_USER: smtpUser,
         SMTP_PASS: smtpPass,
-        SMTP_TO_EMAIL: smtpToEmail,
+        SMTP_RECIPIENTS: smtpRecipients,
         SMTP_SECURE: smtpSecure.toString(),
     };
     const result = await saveEnvSettings(settings);
@@ -483,10 +483,10 @@ export default function AdminPage() {
                           <Input id="smtp-pass" type="password" placeholder="Dejar en blanco para no cambiar" value={smtpPass} onChange={(e) => setSmtpPass(e.target.value)}/>
                       </div>
                        <div className="space-y-2">
-                          <Label htmlFor="smtp-to">Correo de Destino (SMTP_TO_EMAIL)</Label>
-                          <Input id="smtp-to" placeholder="correo_receptor@example.com" value={smtpToEmail} onChange={(e) => setSmtpToEmail(e.target.value)}/>
+                          <Label htmlFor="smtp-recipients">Correos de Destino (SMTP_RECIPIENTS)</Label>
+                          <Input id="smtp-recipients" placeholder="correo1@example.com, correo2@example.com" value={smtpRecipients} onChange={(e) => setSmtpRecipients(e.target.value)}/>
                            <p className="text-xs text-muted-foreground">
-                              Importante: Esta es la dirección de correo que recibirá los mensajes del formulario de contacto.
+                              Importante: Esta es la lista de correos que recibirán los mensajes. Sepáralos por comas.
                           </p>
                       </div>
                        <p className="mt-4 text-sm text-destructive">

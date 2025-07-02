@@ -1,29 +1,26 @@
-
 'use server';
 
 import nodemailer from 'nodemailer';
 import { z } from 'zod';
 
-const sendEmailSchema = z.object({
+const sendChatInquirySchema = z.object({
   name: z.string().min(1, { message: 'El nombre es requerido.' }),
   email: z.string().email({ message: 'Correo electrónico inválido.' }),
-  subject: z.string().min(1, { message: 'El asunto es requerido.' }),
   message: z.string().min(1, { message: 'El mensaje es requerido.' }),
 });
 
-export async function sendEmail(formData: {
+export async function sendChatInquiry(formData: {
   name: string;
   email: string;
-  subject: string;
   message: string;
 }) {
-  const parsed = sendEmailSchema.safeParse(formData);
+  const parsed = sendChatInquirySchema.safeParse(formData);
 
   if (!parsed.success) {
     return { success: false, error: 'Datos de formulario inválidos.' };
   }
   
-  const { name, email, subject, message } = parsed.data;
+  const { name, email, message } = parsed.data;
 
   const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_RECIPIENTS, SMTP_SECURE } = process.env;
 
@@ -44,10 +41,9 @@ export async function sendEmail(formData: {
 
   const emailHtml = `
     <div>
-      <h1>Nuevo mensaje de contacto de todofrenos.cl</h1>
+      <h1>Nueva consulta desde el Chat de todofrenos.cl</h1>
       <p><strong>Nombre:</strong> ${name}</p>
-      <p><strong>Correo:</strong> ${email}</p>
-      <p><strong>Asunto:</strong> ${subject}</p>
+      <p><strong>Correo para responder:</strong> <a href="mailto:${email}">${email}</a></p>
       <p><strong>Mensaje:</strong></p>
       <p>${message.replace(/\n/g, '<br>')}</p>
     </div>
@@ -59,12 +55,12 @@ export async function sendEmail(formData: {
       from: `"${name}" <${SMTP_USER}>`,
       to: SMTP_RECIPIENTS,
       replyTo: email,
-      subject: `Nuevo Contacto: ${subject}`,
+      subject: `Nueva Consulta desde el Chat: ${name}`,
       html: emailHtml,
     });
     return { success: true };
   } catch (error) {
-    console.error('Error al enviar correo:', error);
+    console.error('Error al enviar correo de chat:', error);
     return { success: false, error: 'No se pudo enviar el correo.' };
   }
 }

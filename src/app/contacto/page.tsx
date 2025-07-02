@@ -1,41 +1,18 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Mail, MapPin, MessageCircle, Loader2 } from 'lucide-react';
+import { Mail, MapPin, Loader2 } from 'lucide-react';
 import { sendEmail } from '@/actions/sendEmail';
 import { useToast } from "@/hooks/use-toast";
 
 export default function ContactoPage() {
-  const [whatsappNumber, setWhatsappNumber] = useState('56912345678');
-  const [isMounted, setIsMounted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
-
-  useEffect(() => {
-    const savedInfo = localStorage.getItem('whatsappInfo');
-    if (savedInfo) {
-      try {
-        const { number } = JSON.parse(savedInfo);
-        if (number) {
-          setWhatsappNumber(number);
-        }
-      } catch (e) {
-        // Ignore error, use default
-      }
-    } else {
-      // Fallback for old key
-      const savedNumber = localStorage.getItem('whatsappNumber');
-      if (savedNumber) {
-        setWhatsappNumber(savedNumber);
-      }
-    }
-    setIsMounted(true);
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -59,11 +36,10 @@ export default function ContactoPage() {
       });
       (e.target as HTMLFormElement).reset();
     } else {
-      const errorMessage = 'Ocurrió un error. Por favor, inténtalo de nuevo.';
       toast({
         variant: "destructive",
         title: "Error al enviar",
-        description: errorMessage,
+        description: result.error || 'Ocurrió un error. Por favor, inténtalo de nuevo.',
       });
     }
   };
@@ -129,17 +105,6 @@ export default function ContactoPage() {
              <div className="flex items-center gap-4">
                 <Mail className="h-6 w-6 text-primary" />
                 <span>contacto@todofrenos.cl</span>
-             </div>
-             <div className="flex items-center gap-4">
-                <MessageCircle className="h-6 w-6 text-primary" />
-                {isMounted ? (
-                  <span>
-                    +
-                    {whatsappNumber} (Solo WhatsApp)
-                  </span>
-                ) : (
-                  <span>Cargando...</span>
-                )}
              </div>
              <div className="flex items-center gap-4">
                 <MapPin className="h-6 w-6 text-primary" />
