@@ -34,7 +34,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { Pencil, Trash2, PlusCircle, LogIn, LogOut, Star } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Pencil, Trash2, PlusCircle, LogIn, LogOut, Star, Phone } from 'lucide-react';
 import { verifyPassword } from '@/actions/auth';
 import { cn } from '@/lib/utils';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -46,6 +47,7 @@ export default function AdminPage() {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [isMounted, setIsMounted] = useState(false);
+  const [whatsappNumber, setWhatsappNumber] = useState('');
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -57,6 +59,8 @@ export default function AdminPage() {
     if (authStatus === 'true') {
         setIsAuthenticated(true);
     }
+    const savedNumber = localStorage.getItem('whatsappNumber') || '56912345678';
+    setWhatsappNumber(savedNumber);
     setIsMounted(true);
   }, []);
 
@@ -85,6 +89,12 @@ export default function AdminPage() {
     sessionStorage.removeItem('isAdminAuthenticated');
     setIsAuthenticated(false);
     setPassword('');
+  };
+
+  const handleSaveWhatsapp = (e: React.FormEvent) => {
+    e.preventDefault();
+    localStorage.setItem('whatsappNumber', whatsappNumber);
+    alert('Número de WhatsApp actualizado.');
   };
 
   const formatPrice = (price: number) => {
@@ -166,18 +176,50 @@ export default function AdminPage() {
     <div className="flex flex-col min-h-screen">
       <Header />
       <main className="flex-1 p-6 container mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Gestión de Productos</h1>
-          <div className="flex items-center gap-4">
-            <Button onClick={() => setIsAddDialogOpen(true)}>
-              <PlusCircle className="mr-2" />
-              Añadir Producto
-            </Button>
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold">Panel de Administración</h1>
             <Button variant="outline" onClick={handleLogout}>
               <LogOut className="mr-2 h-4 w-4" />
               Cerrar Sesión
             </Button>
-          </div>
+        </div>
+
+        <Card className="mb-8">
+          <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                  <Phone className="h-5 w-5" />
+                  <span>Administrar WhatsApp</span>
+              </CardTitle>
+              <CardDescription>
+                  Actualiza el número de teléfono para el botón de contacto por WhatsApp.
+              </CardDescription>
+          </CardHeader>
+          <form onSubmit={handleSaveWhatsapp}>
+              <CardContent>
+                  <Label htmlFor="whatsapp-number">Número de Teléfono</Label>
+                  <Input
+                      id="whatsapp-number"
+                      value={whatsappNumber}
+                      onChange={(e) => setWhatsappNumber(e.target.value)}
+                      placeholder="Ej: 56912345678"
+                      className="mt-2"
+                  />
+                  <p className="text-xs text-muted-foreground mt-2">
+                      Ingresa el número completo, incluyendo el código de país, sin espacios ni el símbolo '+'.
+                  </p>
+              </CardContent>
+              <CardFooter>
+                  <Button type="submit">Guardar Número</Button>
+              </CardFooter>
+          </form>
+        </Card>
+
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold">Gestión de Productos</h2>
+          <Button onClick={() => setIsAddDialogOpen(true)}>
+            <PlusCircle className="mr-2" />
+            Añadir Producto
+          </Button>
         </div>
         
         <div className="rounded-lg border">

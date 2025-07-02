@@ -1,12 +1,13 @@
 
 import { Header } from '@/components/Header';
-import { ShieldCheck, Users, Truck, Medal, MessageCircle } from 'lucide-react';
+import { ShieldCheck, Users, Truck, Medal } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { products as allProducts } from '@/data/products';
 import { ProductCard } from '@/components/ProductCard';
+import { WhatsappButton } from '@/components/WhatsappButton';
 
 export default function HomePage() {
   const features = [
@@ -96,15 +97,7 @@ export default function HomePage() {
         </section>
       </main>
 
-      <Link
-        href="https://wa.me/56912345678"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="fixed bottom-6 right-6 bg-green-500 text-white h-14 w-14 rounded-full flex items-center justify-center shadow-lg hover:bg-green-600 transition-colors"
-        aria-label="Contactar por WhatsApp"
-      >
-        <MessageCircle className="h-8 w-8" />
-      </Link>
+      <WhatsappButton />
     </div>
   );
 }
