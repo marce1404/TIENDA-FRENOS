@@ -4,21 +4,13 @@
 import { useState, useMemo, useEffect } from 'react';
 import { getProducts } from '@/lib/products';
 import { ProductCard } from '@/components/ProductCard';
-import {
-  SidebarProvider,
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupLabel,
-  SidebarGroupContent,
-  SidebarInset,
-} from '@/components/ui/sidebar';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Header } from '@/components/Header';
-import { Search } from 'lucide-react';
+import { Search, Filter } from 'lucide-react';
 import type { Product } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -94,7 +86,7 @@ export default function ProductosPage() {
   }, [searchTerm, sortOrder, selectedCategories, selectedBrands, allProducts, isMounted]);
 
   const LoadingSkeleton = () => (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
       {Array.from({ length: 8 }).map((_, i) => (
         <div key={i} className="space-y-2">
           <Skeleton className="h-48 w-full" />
@@ -106,105 +98,11 @@ export default function ProductosPage() {
   );
 
   return (
-    <SidebarProvider>
       <div className="flex flex-col min-h-screen">
         <Header />
-        <div className="flex flex-1">
-          <Sidebar side="left" collapsible="icon" variant="sidebar">
-            <SidebarContent>
-              <SidebarGroup>
-                <SidebarGroupLabel>Filtros</SidebarGroupLabel>
-                <SidebarGroupContent>
-                  <div className="space-y-6">
-                    <div>
-                      <h3 className="text-sm font-semibold mb-2">Ordenar por</h3>
-                      <RadioGroup
-                        value={sortOrder}
-                        onValueChange={setSortOrder}
-                        disabled={!isMounted}
-                      >
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="price-asc" id="price-asc" />
-                          <Label htmlFor="price-asc" className="font-normal">
-                            Precio: Menor a Mayor
-                          </Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="price-desc" id="price-desc" />
-                          <Label htmlFor="price-desc" className="font-normal">
-                            Precio: Mayor a Menor
-                          </Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="name-asc" id="name-asc" />
-                          <Label htmlFor="name-asc" className="font-normal">
-                            Nombre: A-Z
-                          </Label>
-                        </div>
-                      </RadioGroup>
-                    </div>
-
-                    <div>
-                      <h3 className="text-sm font-semibold mb-2">Categoría</h3>
-                      <div className="space-y-2">
-                        {isMounted ? categories.map((category) => (
-                          <div
-                            key={category}
-                            className="flex items-center space-x-2"
-                          >
-                            <Checkbox
-                              id={`cat-${category}`}
-                              onCheckedChange={(checked) =>
-                                handleCategoryChange(category, !!checked)
-                              }
-                              checked={selectedCategories.includes(category)}
-                            />
-                            <Label
-                              htmlFor={`cat-${category}`}
-                              className="font-normal"
-                            >
-                              {category}
-                            </Label>
-                          </div>
-                        )) : Array.from({length: 3}).map((_, i) => <Skeleton key={i} className="h-6 w-3/4" />)}
-                      </div>
-                    </div>
-
-                    <div>
-                      <h3 className="text-sm font-semibold mb-2">Marca</h3>
-                      <div className="space-y-2">
-                         {isMounted ? brands.map((brand) => (
-                          <div
-                            key={brand}
-                            className="flex items-center space-x-2"
-                          >
-                            <Checkbox
-                              id={`brand-${brand}`}
-                              onCheckedChange={(checked) =>
-                                handleBrandChange(brand, !!checked)
-                              }
-                              checked={selectedBrands.includes(brand)}
-                            />
-                            <Label
-                              htmlFor={`brand-${brand}`}
-                              className="font-normal"
-                            >
-                              {brand}
-                            </Label>
-                          </div>
-                        )) : Array.from({length: 4}).map((_, i) => <Skeleton key={i} className="h-6 w-3/4" />)}
-                      </div>
-                    </div>
-                  </div>
-                </SidebarGroupContent>
-              </SidebarGroup>
-            </SidebarContent>
-          </Sidebar>
-
-          <SidebarInset>
-            <main className="flex-1 p-6">
+            <main className="flex-1 p-6 container mx-auto">
               <div className="mb-6">
-                <h1 className="text-2xl font-bold">Nuestros Productos</h1>
+                <h1 className="text-3xl font-bold">Nuestros Productos</h1>
                 <p className="text-muted-foreground">
                   Encuentra los mejores repuestos de frenos para tu vehículo.
                 </p>
@@ -221,8 +119,102 @@ export default function ProductosPage() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               </div>
               
+              <Accordion type="single" collapsible className="w-full mb-8 border rounded-lg px-4">
+                <AccordionItem value="filters" className="border-b-0">
+                  <AccordionTrigger>
+                      <div className="flex items-center gap-3">
+                          <Filter className="h-5 w-5" />
+                          <span className="font-semibold">Filtros y Orden</span>
+                      </div>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-4">
+                          <div>
+                            <h3 className="text-base font-semibold mb-3">Ordenar por</h3>
+                            <RadioGroup
+                              value={sortOrder}
+                              onValueChange={setSortOrder}
+                              disabled={!isMounted}
+                            >
+                              <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="price-asc" id="price-asc" />
+                                <Label htmlFor="price-asc" className="font-normal">
+                                  Precio: Menor a Mayor
+                                </Label>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="price-desc" id="price-desc" />
+                                <Label htmlFor="price-desc" className="font-normal">
+                                  Precio: Mayor a Menor
+                                </Label>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="name-asc" id="name-asc" />
+                                <Label htmlFor="name-asc" className="font-normal">
+                                  Nombre: A-Z
+                                </Label>
+                              </div>
+                            </RadioGroup>
+                          </div>
+
+                          <div>
+                            <h3 className="text-base font-semibold mb-3">Categoría</h3>
+                            <div className="space-y-2">
+                              {isMounted ? categories.map((category) => (
+                                <div
+                                  key={category}
+                                  className="flex items-center space-x-2"
+                                >
+                                  <Checkbox
+                                    id={`cat-${category}`}
+                                    onCheckedChange={(checked) =>
+                                      handleCategoryChange(category, !!checked)
+                                    }
+                                    checked={selectedCategories.includes(category)}
+                                  />
+                                  <Label
+                                    htmlFor={`cat-${category}`}
+                                    className="font-normal"
+                                  >
+                                    {category}
+                                  </Label>
+                                </div>
+                              )) : Array.from({length: 3}).map((_, i) => <Skeleton key={i} className="h-6 w-3/4" />)}
+                            </div>
+                          </div>
+
+                          <div>
+                            <h3 className="text-base font-semibold mb-3">Marca</h3>
+                            <div className="space-y-2">
+                                {isMounted ? brands.map((brand) => (
+                                <div
+                                  key={brand}
+                                  className="flex items-center space-x-2"
+                                >
+                                  <Checkbox
+                                    id={`brand-${brand}`}
+                                    onCheckedChange={(checked) =>
+                                      handleBrandChange(brand, !!checked)
+                                    }
+                                    checked={selectedBrands.includes(brand)}
+                                  />
+                                  <Label
+                                    htmlFor={`brand-${brand}`}
+                                    className="font-normal"
+                                  >
+                                    {brand}
+                                  </Label>
+                                </div>
+                              )) : Array.from({length: 4}).map((_, i) => <Skeleton key={i} className="h-6 w-3/4" />)}
+                            </div>
+                          </div>
+                      </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+              
               {!isMounted ? <LoadingSkeleton /> : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                   {products.length > 0 ? (
                     products.map((product) => (
                       <ProductCard key={product.id} product={product} />
@@ -234,9 +226,6 @@ export default function ProductosPage() {
               )}
 
             </main>
-          </SidebarInset>
-        </div>
       </div>
-    </SidebarProvider>
   );
 }
