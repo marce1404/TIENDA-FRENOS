@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -33,8 +34,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { Pencil, Trash2, PlusCircle, LogIn, LogOut, Check, X } from 'lucide-react';
+import { Pencil, Trash2, PlusCircle, LogIn, LogOut, Star } from 'lucide-react';
 import { verifyPassword } from '@/actions/auth';
+import { cn } from '@/lib/utils';
 import { Checkbox } from '@/components/ui/checkbox';
 
 export default function AdminPage() {
@@ -108,6 +110,14 @@ export default function AdminPage() {
   
   const handleDeleteProduct = (productId: number) => {
     setProducts(prev => prev.filter(p => p.id !== productId));
+  };
+
+  const handleToggleFeatured = (productId: number) => {
+    setProducts(prevProducts =>
+      prevProducts.map(p =>
+        p.id === productId ? { ...p, isFeatured: !p.isFeatured } : p
+      )
+    );
   };
   
   if (!isMounted) {
@@ -192,11 +202,10 @@ export default function AdminPage() {
                   <TableCell>{product.model}</TableCell>
                   <TableCell className="text-right">{formatPrice(product.price)}</TableCell>
                   <TableCell className="text-center">
-                    {product.isFeatured ? (
-                      <Check className="h-5 w-5 mx-auto text-primary" />
-                    ) : (
-                      <X className="h-5 w-5 mx-auto text-muted-foreground" />
-                    )}
+                    <Button variant="ghost" size="icon" onClick={() => handleToggleFeatured(product.id)}>
+                      <Star className={cn("h-5 w-5", product.isFeatured ? "fill-primary text-primary" : "text-muted-foreground")} />
+                      <span className="sr-only">Toggle Destacado</span>
+                    </Button>
                   </TableCell>
                   <TableCell className="flex justify-center gap-2">
                     <Button variant="outline" size="icon" onClick={() => { setProductToEdit(product); setIsEditDialogOpen(true); }}>
@@ -335,16 +344,6 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title }: Pro
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="price" className="text-right">Precio</Label>
                             <Input id="price" type="number" value={formData.price} onChange={handleChange} className="col-span-3" required />
-                        </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="isFeatured" className="text-right">Destacado</Label>
-                            <div className="col-span-3">
-                                <Checkbox
-                                    id="isFeatured"
-                                    checked={formData.isFeatured}
-                                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isFeatured: !!checked }))}
-                                />
-                            </div>
                         </div>
                     </div>
                     <DialogFooter>
