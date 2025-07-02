@@ -11,6 +11,12 @@ import { Mail, MapPin, MessageCircle } from 'lucide-react';
 export default function ContactoPage() {
   const [whatsappNumber, setWhatsappNumber] = useState('56912345678');
   const [isMounted, setIsMounted] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    subject: '',
+    message: '',
+  });
 
   useEffect(() => {
     const savedInfo = localStorage.getItem('whatsappInfo');
@@ -33,6 +39,21 @@ export default function ContactoPage() {
     setIsMounted(true);
   }, []);
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const subject = encodeURIComponent(formData.subject);
+    const body = encodeURIComponent(
+      `Nombre: ${formData.name}\nCorreo: ${formData.email}\n\nMensaje:\n${formData.message}`
+    );
+    // This will open the user's default email client
+    window.location.href = `mailto:contacto@todofrenos.cl?subject=${subject}&body=${body}`;
+  };
+
   return (
     <div className="container mx-auto px-4 py-16">
       <div className="mb-12 text-center">
@@ -48,11 +69,37 @@ export default function ContactoPage() {
             <CardTitle>Envíanos un Mensaje</CardTitle>
           </CardHeader>
           <CardContent>
-            <form className="space-y-4">
-              <Input placeholder="Tu Nombre" />
-              <Input type="email" placeholder="Tu Correo Electrónico" />
-              <Input placeholder="Asunto" />
-              <Textarea placeholder="Tu Mensaje" rows={5} />
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <Input
+                name="name"
+                placeholder="Tu Nombre"
+                value={formData.name}
+                onChange={handleChange}
+                required
+              />
+              <Input
+                name="email"
+                type="email"
+                placeholder="Tu Correo Electrónico"
+                value={formData.email}
+                onChange={handleChange}
+                required
+              />
+              <Input
+                name="subject"
+                placeholder="Asunto"
+                value={formData.subject}
+                onChange={handleChange}
+                required
+              />
+              <Textarea
+                name="message"
+                placeholder="Tu Mensaje"
+                rows={5}
+                value={formData.message}
+                onChange={handleChange}
+                required
+              />
               <Button type="submit" className="w-full">Enviar Mensaje</Button>
             </form>
           </CardContent>
