@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -34,8 +33,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { Pencil, Trash2, PlusCircle, LogIn, LogOut } from 'lucide-react';
+import { Pencil, Trash2, PlusCircle, LogIn, LogOut, Check, X } from 'lucide-react';
 import { verifyPassword } from '@/actions/auth';
+import { Checkbox } from '@/components/ui/checkbox';
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -177,7 +177,9 @@ export default function AdminPage() {
                 <TableHead className="w-[80px]">ID</TableHead>
                 <TableHead>Nombre</TableHead>
                 <TableHead>Marca</TableHead>
+                <TableHead>Modelo</TableHead>
                 <TableHead className="text-right">Precio</TableHead>
+                <TableHead className="text-center">Destacado</TableHead>
                 <TableHead className="w-[120px] text-center">Acciones</TableHead>
               </TableRow>
             </TableHeader>
@@ -187,7 +189,15 @@ export default function AdminPage() {
                   <TableCell className="font-medium">{product.id}</TableCell>
                   <TableCell>{product.name}</TableCell>
                   <TableCell>{product.brand}</TableCell>
+                  <TableCell>{product.model}</TableCell>
                   <TableCell className="text-right">{formatPrice(product.price)}</TableCell>
+                  <TableCell className="text-center">
+                    {product.isFeatured ? (
+                      <Check className="h-5 w-5 mx-auto text-primary" />
+                    ) : (
+                      <X className="h-5 w-5 mx-auto text-muted-foreground" />
+                    )}
+                  </TableCell>
                   <TableCell className="flex justify-center gap-2">
                     <Button variant="outline" size="icon" onClick={() => { setProductToEdit(product); setIsEditDialogOpen(true); }}>
                       <Pencil className="h-4 w-4" />
@@ -250,34 +260,35 @@ interface ProductFormDialogProps {
 }
 
 function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title }: ProductFormDialogProps) {
-    const [formData, setFormData] = useState({
+    const getInitialFormData = () => ({
         name: '',
         brand: '',
+        model: '',
         compatibility: '',
         price: 0,
         category: '',
         imageUrl: 'https://placehold.co/400x400.png',
+        isFeatured: false,
     });
+    
+    const [formData, setFormData] = useState(getInitialFormData());
 
     useEffect(() => {
-        if (product) {
-            setFormData({
-                name: product.name,
-                brand: product.brand,
-                compatibility: product.compatibility,
-                price: product.price,
-                category: product.category,
-                imageUrl: product.imageUrl,
-            });
-        } else {
-             setFormData({
-                name: '',
-                brand: '',
-                compatibility: '',
-                price: 0,
-                category: '',
-                imageUrl: 'https://placehold.co/400x400.png',
-            });
+        if (isOpen) {
+            if (product) {
+                setFormData({
+                    name: product.name,
+                    brand: product.brand,
+                    model: product.model,
+                    compatibility: product.compatibility,
+                    price: product.price,
+                    category: product.category,
+                    imageUrl: product.imageUrl,
+                    isFeatured: product.isFeatured,
+                });
+            } else {
+                 setFormData(getInitialFormData());
+            }
         }
     }, [product, isOpen]);
     
@@ -309,6 +320,10 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title }: Pro
                             <Label htmlFor="brand" className="text-right">Marca</Label>
                             <Input id="brand" value={formData.brand} onChange={handleChange} className="col-span-3" required />
                         </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="model" className="text-right">Modelo</Label>
+                            <Input id="model" value={formData.model} onChange={handleChange} className="col-span-3" required />
+                        </div>
                          <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="category" className="text-right">Categoría</Label>
                             <Input id="category" value={formData.category} onChange={handleChange} className="col-span-3" required />
@@ -320,6 +335,16 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title }: Pro
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="price" className="text-right">Precio</Label>
                             <Input id="price" type="number" value={formData.price} onChange={handleChange} className="col-span-3" required />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="isFeatured" className="text-right">Destacado</Label>
+                            <div className="col-span-3">
+                                <Checkbox
+                                    id="isFeatured"
+                                    checked={formData.isFeatured}
+                                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isFeatured: !!checked }))}
+                                />
+                            </div>
                         </div>
                     </div>
                     <DialogFooter>

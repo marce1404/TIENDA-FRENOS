@@ -51,6 +51,7 @@ export default function ProductosPage() {
         (p) =>
           p.name.toLowerCase().includes(lowercasedTerm) ||
           p.brand.toLowerCase().includes(lowercasedTerm) ||
+          p.model.toLowerCase().includes(lowercasedTerm) ||
           p.compatibility.toLowerCase().includes(lowercasedTerm)
       );
     }
@@ -188,7 +189,7 @@ export default function ProductosPage() {
 
               <div className="mb-6 relative">
                 <Input
-                  placeholder="Buscar por producto, marca o compatibilidad..."
+                  placeholder="Buscar por producto, marca, modelo o compatibilidad..."
                   className="pl-10"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}

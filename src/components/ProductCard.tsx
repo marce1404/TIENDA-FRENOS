@@ -36,6 +36,9 @@ export function ProductCard({ product }: ProductCardProps) {
           Marca: {product.brand}
         </CardDescription>
         <CardDescription className="text-xs text-muted-foreground">
+          Modelo: {product.model}
+        </CardDescription>
+        <CardDescription className="text-xs text-muted-foreground">
           Compatibilidad: {product.compatibility}
         </CardDescription>
       </CardContent>

@@ -27,7 +27,7 @@ export default function HomePage() {
     },
   ];
 
-  const featuredProducts = allProducts.slice(0, 4);
+  const featuredProducts = allProducts.filter((product) => product.isFeatured);
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
