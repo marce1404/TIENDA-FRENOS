@@ -7,6 +7,7 @@ import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { LiveChatWidget } from '@/components/LiveChatWidget';
 import { CartProvider } from '@/hooks/use-cart';
+import { WhatsAppButton } from '@/components/WhatsAppButton';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -29,6 +30,7 @@ export default function RootLayout({
             <main className="flex-1">{children}</main>
             <Footer />
           </div>
+          <WhatsAppButton />
           <LiveChatWidget />
           <Toaster />
         </CartProvider>
