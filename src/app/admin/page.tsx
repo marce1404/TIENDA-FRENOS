@@ -34,7 +34,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { Pencil, Trash2, PlusCircle, LogIn } from 'lucide-react';
+import { Pencil, Trash2, PlusCircle, LogIn, LogOut } from 'lucide-react';
 import { verifyPassword } from '@/actions/auth';
 
 export default function AdminPage() {
@@ -77,6 +77,12 @@ export default function AdminPage() {
     } finally {
       setIsLoggingIn(false);
     }
+  };
+  
+  const handleLogout = () => {
+    sessionStorage.removeItem('isAdminAuthenticated');
+    setIsAuthenticated(false);
+    setPassword('');
   };
 
   const formatPrice = (price: number) => {
@@ -152,10 +158,16 @@ export default function AdminPage() {
       <main className="flex-1 p-6 container mx-auto">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">Gestión de Productos</h1>
-          <Button onClick={() => setIsAddDialogOpen(true)}>
-            <PlusCircle className="mr-2" />
-            Añadir Producto
-          </Button>
+          <div className="flex items-center gap-4">
+            <Button onClick={() => setIsAddDialogOpen(true)}>
+              <PlusCircle className="mr-2" />
+              Añadir Producto
+            </Button>
+            <Button variant="outline" onClick={handleLogout}>
+              <LogOut className="mr-2 h-4 w-4" />
+              Cerrar Sesión
+            </Button>
+          </div>
         </div>
         
         <div className="rounded-lg border">
