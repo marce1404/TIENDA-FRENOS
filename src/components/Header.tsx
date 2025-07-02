@@ -11,7 +11,6 @@ export function Header() {
     { href: '/', label: 'Home' },
     { href: '/productos', label: 'Productos' },
     { href: '/contacto', label: 'Contacto' },
-    { href: '/admin', label: 'Admin' },
   ];
 
   return (
