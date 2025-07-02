@@ -8,6 +8,7 @@ import { ShoppingCart } from 'lucide-react';
 export function Header() {
   
   const navLinks = [
+    { href: '/', label: 'Home' },
     { href: '/productos', label: 'Productos' },
     { href: '/contacto', label: 'Contacto' },
     { href: '/admin', label: 'Admin' },
