@@ -3,6 +3,9 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
+import { Header } from '@/components/Header';
+import { Footer } from '@/components/Footer';
+import { WhatsappButton } from '@/components/WhatsappButton';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -19,7 +22,12 @@ export default function RootLayout({
   return (
     <html lang="es" className="dark">
       <body className={`${inter.className} antialiased`}>
-        {children}
+        <div className="relative flex min-h-screen flex-col bg-background">
+          <Header />
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </div>
+        <WhatsappButton />
         <Toaster />
       </body>
     </html>

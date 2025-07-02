@@ -5,7 +5,6 @@ import { useState, useMemo, useEffect } from 'react';
 import { getProducts } from '@/lib/products';
 import { ProductCard } from '@/components/ProductCard';
 import { Input } from '@/components/ui/input';
-import { Header } from '@/components/Header';
 import { Search } from 'lucide-react';
 import type { Product } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -65,59 +64,56 @@ export default function ProductosPage() {
   );
 
   return (
-      <div className="flex flex-col min-h-screen">
-        <Header />
-            <main className="flex-1 p-6 container mx-auto">
-              <div className="mb-6">
-                <h1 className="text-3xl font-bold">Nuestros Productos</h1>
-                <p className="text-muted-foreground">
-                  Encuentra los mejores repuestos de frenos para tu vehículo.
-                </p>
-              </div>
+      <div className="container mx-auto p-6">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold">Nuestros Productos</h1>
+          <p className="text-muted-foreground">
+            Encuentra los mejores repuestos de frenos para tu vehículo.
+          </p>
+        </div>
 
-              <div className="mb-6 relative">
-                <Input
-                  placeholder="Buscar por producto, marca, modelo o compatibilidad..."
-                  className="pl-10"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  disabled={!isMounted}
-                />
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              </div>
-              
-              <div className="flex justify-center mb-8">
-                <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="w-full sm:w-auto">
-                    <TabsList>
-                        <TabsTrigger value="all">Todos</TabsTrigger>
-                        {isMounted ? categories.map((category) => (
-                            <TabsTrigger key={category} value={category}>
-                                {category}
-                            </TabsTrigger>
-                        )) : (
-                          <>
-                            <Skeleton className="h-10 w-20 rounded-md" />
-                            <Skeleton className="h-10 w-20 rounded-md" />
-                            <Skeleton className="h-10 w-20 rounded-md" />
-                          </>
-                        )}
-                    </TabsList>
-                </Tabs>
-              </div>
-              
-              {!isMounted ? <LoadingSkeleton /> : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {products.length > 0 ? (
-                    products.map((product) => (
-                      <ProductCard key={product.id} product={product} />
-                    ))
-                  ) : (
-                     <p className="col-span-full text-center text-muted-foreground">No se encontraron productos que coincidan con tu búsqueda.</p>
+        <div className="relative mb-6">
+          <Input
+            placeholder="Buscar por producto, marca, modelo o compatibilidad..."
+            className="pl-10"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            disabled={!isMounted}
+          />
+          <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+        </div>
+        
+        <div className="mb-8 flex justify-center">
+          <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="w-full sm:w-auto">
+              <TabsList>
+                  <TabsTrigger value="all">Todos</TabsTrigger>
+                  {isMounted ? categories.map((category) => (
+                      <TabsTrigger key={category} value={category}>
+                          {category}
+                      </TabsTrigger>
+                  )) : (
+                    <>
+                      <Skeleton className="h-10 w-20 rounded-md" />
+                      <Skeleton className="h-10 w-20 rounded-md" />
+                      <Skeleton className="h-10 w-20 rounded-md" />
+                    </>
                   )}
-                </div>
-              )}
+              </TabsList>
+          </Tabs>
+        </div>
+        
+        {!isMounted ? <LoadingSkeleton /> : (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {products.length > 0 ? (
+              products.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))
+            ) : (
+               <p className="col-span-full text-center text-muted-foreground">No se encontraron productos que coincidan con tu búsqueda.</p>
+            )}
+          </div>
+        )}
 
-            </main>
       </div>
   );
 }

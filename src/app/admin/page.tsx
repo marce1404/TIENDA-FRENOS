@@ -15,7 +15,6 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Header } from '@/components/Header';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -228,261 +227,255 @@ export default function AdminPage() {
 
   if (!isAuthenticated) {
     return (
-      <div className="flex flex-col min-h-screen">
-        <Header />
-        <main className="flex-1 flex items-center justify-center p-6 bg-background">
-          <div className="w-full max-w-sm mx-auto">
-            <form onSubmit={handleLogin} className="bg-card p-8 rounded-lg shadow-lg border border-border">
-              <h1 className="text-2xl font-bold text-center mb-4">Acceso de Administrador</h1>
-              <p className="text-muted-foreground text-center mb-6">Ingresa la contraseña para continuar.</p>
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="password">Contraseña</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    required
-                  />
-                </div>
-                {error && <p className="text-sm text-destructive">{error}</p>}
+      <div className="flex flex-1 items-center justify-center p-6 bg-background">
+        <div className="w-full max-w-sm mx-auto">
+          <form onSubmit={handleLogin} className="bg-card p-8 rounded-lg shadow-lg border border-border">
+            <h1 className="text-2xl font-bold text-center mb-4">Acceso de Administrador</h1>
+            <p className="text-muted-foreground text-center mb-6">Ingresa la contraseña para continuar.</p>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="password">Contraseña</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                />
               </div>
-              <Button type="submit" className="w-full mt-6" disabled={isLoggingIn}>
-                {isLoggingIn ? 'Verificando...' : (
-                  <>
-                    <LogIn className="mr-2 h-4 w-4" />
-                    Ingresar
-                  </>
-                )}
-              </Button>
-            </form>
-          </div>
-        </main>
+              {error && <p className="text-sm text-destructive">{error}</p>}
+            </div>
+            <Button type="submit" className="w-full mt-6" disabled={isLoggingIn}>
+              {isLoggingIn ? 'Verificando...' : (
+                <>
+                  <LogIn className="mr-2 h-4 w-4" />
+                  Ingresar
+                </>
+              )}
+            </Button>
+          </form>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <Header />
-      <main className="flex-1 p-6 container mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">Panel de Administración</h1>
-            <Button variant="outline" onClick={handleLogout}>
-              <LogOut className="mr-2 h-4 w-4" />
-              Cerrar Sesión
-            </Button>
-        </div>
-
-        <Accordion type="single" collapsible className="w-full mb-8">
-          <AccordionItem value="item-1">
-            <AccordionTrigger>
-              <div className="flex items-center gap-3">
-                <Settings className="h-6 w-6" />
-                <h2 className="text-2xl font-bold">Configuración General</h2>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent>
-                <Card className="border-none">
-                    <CardHeader className="p-0 pb-4">
-                        <CardTitle className="flex items-center gap-2 text-xl">
-                            <Phone className="h-5 w-5" />
-                            <span>Contacto de WhatsApp</span>
-                        </CardTitle>
-                        <CardDescription>
-                            Define el nombre y número que se usará para el botón de contacto de WhatsApp.
-                        </CardDescription>
-                    </CardHeader>
-                    <form onSubmit={handleSaveWhatsapp}>
-                        <CardContent className="p-0">
-                            <div className="space-y-4">
-                                <div>
-                                    <Label htmlFor="contact-name">Nombre del Contacto</Label>
-                                    <Input
-                                        id="contact-name"
-                                        value={contactName}
-                                        onChange={(e) => setContactName(e.target.value)}
-                                        placeholder="Ej: Ventas"
-                                        className="mt-2"
-                                    />
-                                    <p className="text-xs text-muted-foreground mt-2">
-                                        Un nombre para tu referencia en el panel. No es visible para los clientes.
-                                    </p>
-                                </div>
-                                <div>
-                                    <Label htmlFor="whatsapp-number">Número de Teléfono</Label>
-                                    <Input
-                                        id="whatsapp-number"
-                                        value={whatsappNumber}
-                                        onChange={(e) => setWhatsappNumber(e.target.value)}
-                                        placeholder="Ej: 56912345678"
-                                        className="mt-2"
-                                    />
-                                    <p className="text-xs text-muted-foreground mt-2">
-                                        Incluye código de país, sin el símbolo '+' ni espacios.
-                                    </p>
-                                </div>
-                            </div>
-                        </CardContent>
-                        <CardFooter className="p-0 pt-6">
-                            <Button type="submit">Guardar Contacto</Button>
-                        </CardFooter>
-                    </form>
-                </Card>
-
-                <Card className="mt-8 border-x-0 border-b-0 rounded-none">
-                    <CardHeader className="p-0 pb-4">
-                        <CardTitle className="flex items-center gap-2 text-xl">
-                            <ImageIcon className="h-5 w-5" />
-                            <span>Imagen de Portada (Home)</span>
-                        </CardTitle>
-                        <CardDescription>
-                           Cambia la imagen principal que se muestra en la página de inicio.
-                        </CardDescription>
-                    </CardHeader>
-                    <form onSubmit={handleSaveHomeImage}>
-                        <CardContent className="p-0 space-y-2">
-                            <Label htmlFor="home-image-file">Seleccionar Imagen</Label>
-                            <Input
-                                id="home-image-file"
-                                type="file"
-                                accept="image/*"
-                                onChange={handleHomeImageChange}
-                                className="mt-2"
-                            />
-                            {homeImageUrl && (
-                                <div className="mt-4">
-                                    <p className="text-xs text-muted-foreground mb-2">Vista previa actual:</p>
-                                    <Image
-                                        src={homeImageUrl}
-                                        alt="Vista previa de imagen de portada"
-                                        width={200}
-                                        height={120}
-                                        className="rounded-md object-cover"
-                                    />
-                                </div>
-                            )}
-                        </CardContent>
-                        <CardFooter className="p-0 pt-6">
-                            <Button type="submit">Guardar Imagen de Portada</Button>
-                        </CardFooter>
-                    </form>
-                </Card>
-
-                <Card className="mt-8 border-x-0 border-b-0 rounded-none">
-                    <CardHeader className="p-0 pb-4">
-                        <CardTitle className="flex items-center gap-2 text-xl">
-                            <Package className="h-5 w-5" />
-                            <span>Imágenes de Categoría por Defecto</span>
-                        </CardTitle>
-                        <CardDescription>
-                           Asigna una imagen predeterminada a cada categoría. Se usará si un producto no tiene su propia imagen.
-                        </CardDescription>
-                    </CardHeader>
-                     <form onSubmit={handleSaveCategoryImages}>
-                        <CardContent className="p-0 space-y-4">
-                             {allCategories.map(category => (
-                                <div key={category} className="space-y-2">
-                                    <Label htmlFor={`category-image-${category}`}>{category}</Label>
-                                    <Input
-                                        id={`category-image-${category}`}
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={(e) => handleCategoryImagesChange(category, e)}
-                                        className="mt-1"
-                                    />
-                                     {categoryImages[category] && (
-                                        <Image
-                                            src={categoryImages[category]}
-                                            alt={`Vista previa de ${category}`}
-                                            width={100}
-                                            height={100}
-                                            className="mt-2 rounded-md object-cover"
-                                        />
-                                    )}
-                                </div>
-                            ))}
-                        </CardContent>
-                        <CardFooter className="p-0 pt-6">
-                            <Button type="submit">Guardar Imágenes de Categoría</Button>
-                        </CardFooter>
-                    </form>
-                </Card>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
-
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">Gestión de Productos</h2>
-          <Button onClick={() => setIsAddDialogOpen(true)}>
-            <PlusCircle className="mr-2" />
-            Añadir Producto
+    <div className="container mx-auto p-6">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold">Panel de Administración</h1>
+          <Button variant="outline" onClick={handleLogout}>
+            <LogOut className="mr-2 h-4 w-4" />
+            Cerrar Sesión
           </Button>
-        </div>
-        
-        <div className="rounded-lg border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[80px]">ID</TableHead>
-                <TableHead>Nombre</TableHead>
-                <TableHead>Marca</TableHead>
-                <TableHead>Modelo</TableHead>
-                <TableHead>Compatibilidad</TableHead>
-                <TableHead className="text-right">Precio</TableHead>
-                <TableHead className="text-center">Destacado</TableHead>
-                <TableHead className="w-[120px] text-center">Acciones</TableHead>
+      </div>
+
+      <Accordion type="single" collapsible className="w-full mb-8">
+        <AccordionItem value="item-1">
+          <AccordionTrigger>
+            <div className="flex items-center gap-3">
+              <Settings className="h-6 w-6" />
+              <h2 className="text-2xl font-bold">Configuración General</h2>
+            </div>
+          </AccordionTrigger>
+          <AccordionContent>
+              <Card className="border-none">
+                  <CardHeader className="p-0 pb-4">
+                      <CardTitle className="flex items-center gap-2 text-xl">
+                          <Phone className="h-5 w-5" />
+                          <span>Contacto de WhatsApp</span>
+                      </CardTitle>
+                      <CardDescription>
+                          Define el nombre y número que se usará para el botón de contacto de WhatsApp.
+                      </CardDescription>
+                  </CardHeader>
+                  <form onSubmit={handleSaveWhatsapp}>
+                      <CardContent className="p-0">
+                          <div className="space-y-4">
+                              <div>
+                                  <Label htmlFor="contact-name">Nombre del Contacto</Label>
+                                  <Input
+                                      id="contact-name"
+                                      value={contactName}
+                                      onChange={(e) => setContactName(e.target.value)}
+                                      placeholder="Ej: Ventas"
+                                      className="mt-2"
+                                  />
+                                  <p className="text-xs text-muted-foreground mt-2">
+                                      Un nombre para tu referencia en el panel. No es visible para los clientes.
+                                  </p>
+                              </div>
+                              <div>
+                                  <Label htmlFor="whatsapp-number">Número de Teléfono</Label>
+                                  <Input
+                                      id="whatsapp-number"
+                                      value={whatsappNumber}
+                                      onChange={(e) => setWhatsappNumber(e.target.value)}
+                                      placeholder="Ej: 56912345678"
+                                      className="mt-2"
+                                  />
+                                  <p className="text-xs text-muted-foreground mt-2">
+                                      Incluye código de país, sin el símbolo '+' ni espacios.
+                                  </p>
+                              </div>
+                          </div>
+                      </CardContent>
+                      <CardFooter className="p-0 pt-6">
+                          <Button type="submit">Guardar Contacto</Button>
+                      </CardFooter>
+                  </form>
+              </Card>
+
+              <Card className="mt-8 border-x-0 border-b-0 rounded-none">
+                  <CardHeader className="p-0 pb-4">
+                      <CardTitle className="flex items-center gap-2 text-xl">
+                          <ImageIcon className="h-5 w-5" />
+                          <span>Imagen de Portada (Home)</span>
+                      </CardTitle>
+                      <CardDescription>
+                         Cambia la imagen principal que se muestra en la página de inicio.
+                      </CardDescription>
+                  </CardHeader>
+                  <form onSubmit={handleSaveHomeImage}>
+                      <CardContent className="p-0 space-y-2">
+                          <Label htmlFor="home-image-file">Seleccionar Imagen</Label>
+                          <Input
+                              id="home-image-file"
+                              type="file"
+                              accept="image/*"
+                              onChange={handleHomeImageChange}
+                              className="mt-2"
+                          />
+                          {homeImageUrl && (
+                              <div className="mt-4">
+                                  <p className="text-xs text-muted-foreground mb-2">Vista previa actual:</p>
+                                  <Image
+                                      src={homeImageUrl}
+                                      alt="Vista previa de imagen de portada"
+                                      width={200}
+                                      height={120}
+                                      className="rounded-md object-cover"
+                                  />
+                              </div>
+                          )}
+                      </CardContent>
+                      <CardFooter className="p-0 pt-6">
+                          <Button type="submit">Guardar Imagen de Portada</Button>
+                      </CardFooter>
+                  </form>
+              </Card>
+
+              <Card className="mt-8 border-x-0 border-b-0 rounded-none">
+                  <CardHeader className="p-0 pb-4">
+                      <CardTitle className="flex items-center gap-2 text-xl">
+                          <Package className="h-5 w-5" />
+                          <span>Imágenes de Categoría por Defecto</span>
+                      </CardTitle>
+                      <CardDescription>
+                         Asigna una imagen predeterminada a cada categoría. Se usará si un producto no tiene su propia imagen.
+                      </CardDescription>
+                  </CardHeader>
+                   <form onSubmit={handleSaveCategoryImages}>
+                      <CardContent className="p-0 space-y-4">
+                           {allCategories.map(category => (
+                              <div key={category} className="space-y-2">
+                                  <Label htmlFor={`category-image-${category}`}>{category}</Label>
+                                  <Input
+                                      id={`category-image-${category}`}
+                                      type="file"
+                                      accept="image/*"
+                                      onChange={(e) => handleCategoryImagesChange(category, e)}
+                                      className="mt-1"
+                                  />
+                                   {categoryImages[category] && (
+                                      <Image
+                                          src={categoryImages[category]}
+                                          alt={`Vista previa de ${category}`}
+                                          width={100}
+                                          height={100}
+                                          className="mt-2 rounded-md object-cover"
+                                      />
+                                  )}
+                              </div>
+                          ))}
+                      </CardContent>
+                      <CardFooter className="p-0 pt-6">
+                          <Button type="submit">Guardar Imágenes de Categoría</Button>
+                      </CardFooter>
+                  </form>
+              </Card>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold">Gestión de Productos</h2>
+        <Button onClick={() => setIsAddDialogOpen(true)}>
+          <PlusCircle className="mr-2" />
+          Añadir Producto
+        </Button>
+      </div>
+      
+      <div className="rounded-lg border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[80px]">ID</TableHead>
+              <TableHead>Nombre</TableHead>
+              <TableHead>Marca</TableHead>
+              <TableHead>Modelo</TableHead>
+              <TableHead>Compatibilidad</TableHead>
+              <TableHead className="text-right">Precio</TableHead>
+              <TableHead className="text-center">Destacado</TableHead>
+              <TableHead className="w-[120px] text-center">Acciones</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {products.map((product) => (
+              <TableRow key={product.id}>
+                <TableCell className="font-medium">{product.id}</TableCell>
+                <TableCell>{product.name}</TableCell>
+                <TableCell>{product.brand}</TableCell>
+                <TableCell>{product.model}</TableCell>
+                <TableCell>{product.compatibility}</TableCell>
+                <TableCell className="text-right">{formatPrice(product.price)}</TableCell>
+                <TableCell className="text-center">
+                  <Button variant="ghost" size="icon" onClick={() => handleToggleFeatured(product.id)}>
+                    <Star className={cn("h-5 w-5", product.isFeatured ? "fill-primary text-primary" : "text-muted-foreground")} />
+                    <span className="sr-only">Toggle Destacado</span>
+                  </Button>
+                </TableCell>
+                <TableCell className="flex justify-center gap-2">
+                  <Button variant="outline" size="icon" onClick={() => { setProductToEdit(product); setIsEditDialogOpen(true); }}>
+                    <Pencil className="h-4 w-4" />
+                    <span className="sr-only">Editar</span>
+                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                       <Button variant="destructive" size="icon">
+                         <Trash2 className="h-4 w-4" />
+                         <span className="sr-only">Eliminar</span>
+                       </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Esta acción no se puede deshacer. Esto eliminará permanentemente el producto.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => handleDeleteProduct(product.id)}>Eliminar</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {products.map((product) => (
-                <TableRow key={product.id}>
-                  <TableCell className="font-medium">{product.id}</TableCell>
-                  <TableCell>{product.name}</TableCell>
-                  <TableCell>{product.brand}</TableCell>
-                  <TableCell>{product.model}</TableCell>
-                  <TableCell>{product.compatibility}</TableCell>
-                  <TableCell className="text-right">{formatPrice(product.price)}</TableCell>
-                  <TableCell className="text-center">
-                    <Button variant="ghost" size="icon" onClick={() => handleToggleFeatured(product.id)}>
-                      <Star className={cn("h-5 w-5", product.isFeatured ? "fill-primary text-primary" : "text-muted-foreground")} />
-                      <span className="sr-only">Toggle Destacado</span>
-                    </Button>
-                  </TableCell>
-                  <TableCell className="flex justify-center gap-2">
-                    <Button variant="outline" size="icon" onClick={() => { setProductToEdit(product); setIsEditDialogOpen(true); }}>
-                      <Pencil className="h-4 w-4" />
-                      <span className="sr-only">Editar</span>
-                    </Button>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                         <Button variant="destructive" size="icon">
-                           <Trash2 className="h-4 w-4" />
-                           <span className="sr-only">Eliminar</span>
-                         </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Esta acción no se puede deshacer. Esto eliminará permanentemente el producto.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => handleDeleteProduct(product.id)}>Eliminar</AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      </main>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
       
       <ProductFormDialog
         isOpen={isAddDialogOpen}
