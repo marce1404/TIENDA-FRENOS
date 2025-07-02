@@ -1,11 +1,38 @@
 
+'use client';
+
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Mail, Phone, MapPin } from 'lucide-react';
+import { Mail, MapPin, MessageCircle } from 'lucide-react';
 
 export default function ContactoPage() {
+  const [whatsappNumber, setWhatsappNumber] = useState('56912345678');
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    const savedInfo = localStorage.getItem('whatsappInfo');
+    if (savedInfo) {
+      try {
+        const { number } = JSON.parse(savedInfo);
+        if (number) {
+          setWhatsappNumber(number);
+        }
+      } catch (e) {
+        // Ignore error, use default
+      }
+    } else {
+      // Fallback for old key
+      const savedNumber = localStorage.getItem('whatsappNumber');
+      if (savedNumber) {
+        setWhatsappNumber(savedNumber);
+      }
+    }
+    setIsMounted(true);
+  }, []);
+
   return (
     <div className="container mx-auto px-4 py-16">
       <div className="mb-12 text-center">
@@ -39,12 +66,19 @@ export default function ContactoPage() {
                 <span>contacto@todofrenos.cl</span>
              </div>
              <div className="flex items-center gap-4">
-                <Phone className="h-6 w-6 text-primary" />
-                <span>+56 9 1234 5678</span>
+                <MessageCircle className="h-6 w-6 text-primary" />
+                {isMounted ? (
+                  <span>
+                    +
+                    {whatsappNumber} (Solo WhatsApp)
+                  </span>
+                ) : (
+                  <span>Cargando...</span>
+                )}
              </div>
              <div className="flex items-center gap-4">
                 <MapPin className="h-6 w-6 text-primary" />
-                <span>Av. Principal 123, Santiago, Chile</span>
+                <span>av la palmilla #4780 Conchalí, Santiago</span>
              </div>
           </div>
         </div>
