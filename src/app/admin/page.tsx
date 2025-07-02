@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { products as initialProducts } from '@/data/products';
 import type { Product } from '@/lib/types';
 import {
@@ -60,7 +61,7 @@ export default function AdminPage() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [productToEdit, setProductToEdit] = useState<Product | null>(null);
   
-  const allCategories = [...new Set(products.map(p => p.category))];
+  const allCategories = [...new Set(initialProducts.map(p => p.category).concat(products.map(p => p.category)))];
 
   useEffect(() => {
     setProducts(initialProducts);
@@ -144,6 +145,17 @@ export default function AdminPage() {
     localStorage.setItem('homeImageUrl', homeImageUrl);
     alert('Imagen de portada actualizada.');
   };
+  
+  const handleHomeImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setHomeImageUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleSaveCategoryImages = (e: React.FormEvent) => {
     e.preventDefault();
@@ -151,9 +163,18 @@ export default function AdminPage() {
     alert('Imágenes de categoría actualizadas.');
   };
 
-  const handleCategoryImagesChange = (category: string, url: string) => {
-    setCategoryImages(prev => ({ ...prev, [category]: url }));
+  const handleCategoryImagesChange = (category: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const result = reader.result as string;
+        setCategoryImages(prev => ({ ...prev, [category]: result }));
+      };
+      reader.readAsDataURL(file);
+    }
   };
+
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('es-CL', {
@@ -163,11 +184,13 @@ export default function AdminPage() {
   };
 
   const handleAddProduct = (newProductData: Omit<Product, 'id'>) => {
-    const newProduct = { ...newProductData, id: prev.length > 0 ? Math.max(...prev.map(p => p.id)) + 1 : 1 };
-    if (!newProduct.imageUrl) {
-        newProduct.imageUrl = categoryImages[newProduct.category] || 'https://placehold.co/400x400.png';
-    }
-    setProducts(prev => [...prev, newProduct]);
+    setProducts(prev => {
+      const newProduct = { ...newProductData, id: prev.length > 0 ? Math.max(...prev.map(p => p.id)) + 1 : 1 };
+      if (!newProduct.imageUrl) {
+          newProduct.imageUrl = categoryImages[newProduct.category] || 'https://placehold.co/400x400.png';
+      }
+      return [...prev, newProduct];
+    });
     setIsAddDialogOpen(false);
   };
 
@@ -310,15 +333,27 @@ export default function AdminPage() {
                         </CardDescription>
                     </CardHeader>
                     <form onSubmit={handleSaveHomeImage}>
-                        <CardContent className="p-0">
-                             <Label htmlFor="home-image-url">URL de la Imagen</Label>
-                              <Input
-                                id="home-image-url"
-                                value={homeImageUrl}
-                                onChange={(e) => setHomeImageUrl(e.target.value)}
-                                placeholder="https://ejemplo.com/imagen.png"
+                        <CardContent className="p-0 space-y-2">
+                            <Label htmlFor="home-image-file">Seleccionar Imagen</Label>
+                            <Input
+                                id="home-image-file"
+                                type="file"
+                                accept="image/*"
+                                onChange={handleHomeImageChange}
                                 className="mt-2"
-                              />
+                            />
+                            {homeImageUrl && (
+                                <div className="mt-4">
+                                    <p className="text-xs text-muted-foreground mb-2">Vista previa actual:</p>
+                                    <Image
+                                        src={homeImageUrl}
+                                        alt="Vista previa de imagen de portada"
+                                        width={200}
+                                        height={120}
+                                        className="rounded-md object-cover"
+                                    />
+                                </div>
+                            )}
                         </CardContent>
                         <CardFooter className="p-0 pt-6">
                             <Button type="submit">Guardar Imagen de Portada</Button>
@@ -339,15 +374,24 @@ export default function AdminPage() {
                      <form onSubmit={handleSaveCategoryImages}>
                         <CardContent className="p-0 space-y-4">
                              {allCategories.map(category => (
-                                <div key={category}>
+                                <div key={category} className="space-y-2">
                                     <Label htmlFor={`category-image-${category}`}>{category}</Label>
                                     <Input
                                         id={`category-image-${category}`}
-                                        value={categoryImages[category] || ''}
-                                        onChange={(e) => handleCategoryImagesChange(category, e.target.value)}
-                                        placeholder={`https://ejemplo.com/imagen-${category.toLowerCase()}.png`}
-                                        className="mt-2"
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e) => handleCategoryImagesChange(category, e)}
+                                        className="mt-1"
                                     />
+                                     {categoryImages[category] && (
+                                        <Image
+                                            src={categoryImages[category]}
+                                            alt={`Vista previa de ${category}`}
+                                            width={100}
+                                            height={100}
+                                            className="mt-2 rounded-md object-cover"
+                                        />
+                                    )}
                                 </div>
                             ))}
                         </CardContent>
@@ -463,55 +507,56 @@ interface ProductFormDialogProps {
 
 function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, categoryImages }: ProductFormDialogProps) {
     const getInitialFormData = () => ({
-        name: '',
-        brand: '',
-        model: '',
-        compatibility: '',
-        price: 0,
-        category: '',
-        imageUrl: '',
-        isFeatured: false,
+        name: '', brand: '', model: '', compatibility: '', price: 0, category: '', imageUrl: '', isFeatured: false,
     });
     
     const [formData, setFormData] = useState(getInitialFormData());
+    const [imagePreview, setImagePreview] = useState<string>('');
 
     useEffect(() => {
         if (isOpen) {
             if (product) {
-                setFormData({
-                    name: product.name,
-                    brand: product.brand,
-                    model: product.model,
-                    compatibility: product.compatibility,
-                    price: product.price,
-                    category: product.category,
-                    imageUrl: product.imageUrl,
-                    isFeatured: product.isFeatured,
-                });
+                const productData = { ...product };
+                setFormData(productData);
+                setImagePreview(productData.imageUrl);
             } else {
-                 const initialData = getInitialFormData();
-                 if (initialData.category && categoryImages[initialData.category]) {
-                    initialData.imageUrl = categoryImages[initialData.category];
-                 } else {
-                    initialData.imageUrl = 'https://placehold.co/400x400.png';
-                 }
-                 setFormData(initialData);
+                const initialData = getInitialFormData();
+                const defaultImageUrl = categoryImages[initialData.category] || 'https://placehold.co/400x400.png';
+                const finalData = { ...initialData, imageUrl: defaultImageUrl };
+                setFormData(finalData);
+                setImagePreview(finalData.imageUrl);
             }
         }
-    }, [product, isOpen, categoryImages]);
-    
+    }, [product, isOpen]);
+
+    useEffect(() => {
+        if (isOpen && !product) { // Only for new products
+            const isDefaultImage = imagePreview.startsWith('https://placehold.co/') || Object.values(categoryImages).includes(imagePreview);
+            if (isDefaultImage) {
+                const newDefaultImage = categoryImages[formData.category] || 'https://placehold.co/400x400.png';
+                setFormData(prev => ({ ...prev, imageUrl: newDefaultImage }));
+                setImagePreview(newDefaultImage);
+            }
+        }
+    }, [formData.category, isOpen, product, categoryImages, imagePreview]);
+
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { id, value, type } = e.target;
-        const newFormData = { ...formData, [id]: type === 'number' ? parseFloat(value) || 0 : value };
-        
-        if (id === 'category' && !product) {
-            const defaultImageUrl = categoryImages[value] || 'https://placehold.co/400x400.png';
-            if (formData.imageUrl === 'https://placehold.co/400x400.png' || (formData.category && categoryImages[formData.category] === formData.imageUrl)) {
-                 newFormData.imageUrl = defaultImageUrl;
-            }
+        setFormData(prev => ({ ...prev, [id]: type === 'number' ? parseFloat(value) || 0 : value }));
+    };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const result = reader.result as string;
+                setFormData(prev => ({ ...prev, imageUrl: result }));
+                setImagePreview(result);
+            };
+            reader.readAsDataURL(file);
         }
-        
-        setFormData(newFormData);
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -553,9 +598,24 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, categ
                             <Input id="price" type="number" value={formData.price} onChange={handleChange} className="col-span-3" required />
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="imageUrl" className="text-right">URL Imagen</Label>
-                            <Input id="imageUrl" value={formData.imageUrl} onChange={handleChange} className="col-span-3" placeholder="https://..." />
+                            <Label htmlFor="imageFile" className="text-right">Imagen</Label>
+                            <Input id="imageFile" type="file" accept="image/*" onChange={handleFileChange} className="col-span-3" />
                         </div>
+                        {imagePreview && (
+                             <div className="grid grid-cols-4 items-start gap-4">
+                                <div />
+                                <div className="col-span-3">
+                                    <p className="text-xs text-muted-foreground mb-2">Vista previa:</p>
+                                    <Image
+                                        src={imagePreview}
+                                        alt="Vista previa del producto"
+                                        width={100}
+                                        height={100}
+                                        className="rounded-md object-cover"
+                                    />
+                                </div>
+                            </div>
+                        )}
                     </div>
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
