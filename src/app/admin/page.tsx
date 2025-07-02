@@ -35,7 +35,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Pencil, Trash2, PlusCircle, LogIn, LogOut, Star, Phone, Settings } from 'lucide-react';
+import { Pencil, Trash2, PlusCircle, LogIn, LogOut, Star, Phone, Settings, Image as ImageIcon, Save, Package } from 'lucide-react';
 import { verifyPassword } from '@/actions/auth';
 import { cn } from '@/lib/utils';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -49,12 +49,18 @@ export default function AdminPage() {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [isMounted, setIsMounted] = useState(false);
+  
+  // State for settings
   const [whatsappNumber, setWhatsappNumber] = useState('');
   const [contactName, setContactName] = useState('');
+  const [homeImageUrl, setHomeImageUrl] = useState('https://placehold.co/600x400.png');
+  const [categoryImages, setCategoryImages] = useState<Record<string, string>>({});
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [productToEdit, setProductToEdit] = useState<Product | null>(null);
+  
+  const allCategories = [...new Set(products.map(p => p.category))];
 
   useEffect(() => {
     setProducts(initialProducts);
@@ -62,6 +68,7 @@ export default function AdminPage() {
     if (authStatus === 'true') {
         setIsAuthenticated(true);
     }
+    // Load contact info
     const savedInfo = localStorage.getItem('whatsappInfo');
     if (savedInfo) {
         try {
@@ -77,6 +84,20 @@ export default function AdminPage() {
         setContactName('Ventas');
         setWhatsappNumber(savedNumber);
     }
+    
+    // Load appearance settings
+    const savedHomeImage = localStorage.getItem('homeImageUrl');
+    if (savedHomeImage) setHomeImageUrl(savedHomeImage);
+    
+    const savedCategoryImages = localStorage.getItem('categoryImages');
+    if (savedCategoryImages) {
+        try {
+            setCategoryImages(JSON.parse(savedCategoryImages));
+        } catch (e) {
+            console.error('Error parsing category images from localStorage', e);
+        }
+    }
+
     setIsMounted(true);
   }, []);
 
@@ -118,6 +139,22 @@ export default function AdminPage() {
     alert('Configuración de contacto actualizada.');
   };
 
+  const handleSaveHomeImage = (e: React.FormEvent) => {
+    e.preventDefault();
+    localStorage.setItem('homeImageUrl', homeImageUrl);
+    alert('Imagen de portada actualizada.');
+  };
+
+  const handleSaveCategoryImages = (e: React.FormEvent) => {
+    e.preventDefault();
+    localStorage.setItem('categoryImages', JSON.stringify(categoryImages));
+    alert('Imágenes de categoría actualizadas.');
+  };
+
+  const handleCategoryImagesChange = (category: string, url: string) => {
+    setCategoryImages(prev => ({ ...prev, [category]: url }));
+  };
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('es-CL', {
       style: 'currency',
@@ -126,10 +163,11 @@ export default function AdminPage() {
   };
 
   const handleAddProduct = (newProductData: Omit<Product, 'id'>) => {
-    setProducts(prev => [
-        ...prev,
-        { ...newProductData, id: prev.length > 0 ? Math.max(...prev.map(p => p.id)) + 1 : 1 }
-    ]);
+    const newProduct = { ...newProductData, id: prev.length > 0 ? Math.max(...prev.map(p => p.id)) + 1 : 1 };
+    if (!newProduct.imageUrl) {
+        newProduct.imageUrl = categoryImages[newProduct.category] || 'https://placehold.co/400x400.png';
+    }
+    setProducts(prev => [...prev, newProduct]);
     setIsAddDialogOpen(false);
   };
 
@@ -214,52 +252,110 @@ export default function AdminPage() {
               </div>
             </AccordionTrigger>
             <AccordionContent>
-              <Card className="border-t pt-4 mt-2">
-                <CardHeader className="p-0 pb-4">
-                    <CardTitle className="flex items-center gap-2 text-xl">
-                        <Phone className="h-5 w-5" />
-                        <span>Contacto de WhatsApp</span>
-                    </CardTitle>
-                    <CardDescription>
-                        Define el nombre y número que se usará para el botón de contacto de WhatsApp.
-                    </CardDescription>
-                </CardHeader>
-                <form onSubmit={handleSaveWhatsapp}>
-                    <CardContent className="p-0">
-                        <div className="space-y-4">
-                            <div>
-                                <Label htmlFor="contact-name">Nombre del Contacto</Label>
-                                <Input
-                                    id="contact-name"
-                                    value={contactName}
-                                    onChange={(e) => setContactName(e.target.value)}
-                                    placeholder="Ej: Ventas"
-                                    className="mt-2"
-                                />
-                                 <p className="text-xs text-muted-foreground mt-2">
-                                    Un nombre para tu referencia en el panel. No es visible para los clientes.
-                                </p>
+                <Card className="border-none">
+                    <CardHeader className="p-0 pb-4">
+                        <CardTitle className="flex items-center gap-2 text-xl">
+                            <Phone className="h-5 w-5" />
+                            <span>Contacto de WhatsApp</span>
+                        </CardTitle>
+                        <CardDescription>
+                            Define el nombre y número que se usará para el botón de contacto de WhatsApp.
+                        </CardDescription>
+                    </CardHeader>
+                    <form onSubmit={handleSaveWhatsapp}>
+                        <CardContent className="p-0">
+                            <div className="space-y-4">
+                                <div>
+                                    <Label htmlFor="contact-name">Nombre del Contacto</Label>
+                                    <Input
+                                        id="contact-name"
+                                        value={contactName}
+                                        onChange={(e) => setContactName(e.target.value)}
+                                        placeholder="Ej: Ventas"
+                                        className="mt-2"
+                                    />
+                                    <p className="text-xs text-muted-foreground mt-2">
+                                        Un nombre para tu referencia en el panel. No es visible para los clientes.
+                                    </p>
+                                </div>
+                                <div>
+                                    <Label htmlFor="whatsapp-number">Número de Teléfono</Label>
+                                    <Input
+                                        id="whatsapp-number"
+                                        value={whatsappNumber}
+                                        onChange={(e) => setWhatsappNumber(e.target.value)}
+                                        placeholder="Ej: 56912345678"
+                                        className="mt-2"
+                                    />
+                                    <p className="text-xs text-muted-foreground mt-2">
+                                        Incluye código de país, sin el símbolo '+' ni espacios.
+                                    </p>
+                                </div>
                             </div>
-                            <div>
-                                <Label htmlFor="whatsapp-number">Número de Teléfono</Label>
-                                <Input
-                                    id="whatsapp-number"
-                                    value={whatsappNumber}
-                                    onChange={(e) => setWhatsappNumber(e.target.value)}
-                                    placeholder="Ej: 56912345678"
-                                    className="mt-2"
-                                />
-                                <p className="text-xs text-muted-foreground mt-2">
-                                    Incluye código de país, sin el símbolo '+' ni espacios.
-                                </p>
-                            </div>
-                        </div>
-                    </CardContent>
-                    <CardFooter className="p-0 pt-6">
-                        <Button type="submit">Guardar Configuración</Button>
-                    </CardFooter>
-                </form>
-              </Card>
+                        </CardContent>
+                        <CardFooter className="p-0 pt-6">
+                            <Button type="submit">Guardar Contacto</Button>
+                        </CardFooter>
+                    </form>
+                </Card>
+
+                <Card className="mt-8 border-x-0 border-b-0 rounded-none">
+                    <CardHeader className="p-0 pb-4">
+                        <CardTitle className="flex items-center gap-2 text-xl">
+                            <ImageIcon className="h-5 w-5" />
+                            <span>Imagen de Portada (Home)</span>
+                        </CardTitle>
+                        <CardDescription>
+                           Cambia la imagen principal que se muestra en la página de inicio.
+                        </CardDescription>
+                    </CardHeader>
+                    <form onSubmit={handleSaveHomeImage}>
+                        <CardContent className="p-0">
+                             <Label htmlFor="home-image-url">URL de la Imagen</Label>
+                              <Input
+                                id="home-image-url"
+                                value={homeImageUrl}
+                                onChange={(e) => setHomeImageUrl(e.target.value)}
+                                placeholder="https://ejemplo.com/imagen.png"
+                                className="mt-2"
+                              />
+                        </CardContent>
+                        <CardFooter className="p-0 pt-6">
+                            <Button type="submit">Guardar Imagen de Portada</Button>
+                        </CardFooter>
+                    </form>
+                </Card>
+
+                <Card className="mt-8 border-x-0 border-b-0 rounded-none">
+                    <CardHeader className="p-0 pb-4">
+                        <CardTitle className="flex items-center gap-2 text-xl">
+                            <Package className="h-5 w-5" />
+                            <span>Imágenes de Categoría por Defecto</span>
+                        </CardTitle>
+                        <CardDescription>
+                           Asigna una imagen predeterminada a cada categoría. Se usará si un producto no tiene su propia imagen.
+                        </CardDescription>
+                    </CardHeader>
+                     <form onSubmit={handleSaveCategoryImages}>
+                        <CardContent className="p-0 space-y-4">
+                             {allCategories.map(category => (
+                                <div key={category}>
+                                    <Label htmlFor={`category-image-${category}`}>{category}</Label>
+                                    <Input
+                                        id={`category-image-${category}`}
+                                        value={categoryImages[category] || ''}
+                                        onChange={(e) => handleCategoryImagesChange(category, e.target.value)}
+                                        placeholder={`https://ejemplo.com/imagen-${category.toLowerCase()}.png`}
+                                        className="mt-2"
+                                    />
+                                </div>
+                            ))}
+                        </CardContent>
+                        <CardFooter className="p-0 pt-6">
+                            <Button type="submit">Guardar Imágenes de Categoría</Button>
+                        </CardFooter>
+                    </form>
+                </Card>
             </AccordionContent>
           </AccordionItem>
         </Accordion>
@@ -339,6 +435,7 @@ export default function AdminPage() {
         onOpenChange={setIsAddDialogOpen}
         onSave={handleAddProduct}
         title="Añadir Nuevo Producto"
+        categoryImages={categoryImages}
       />
 
       {productToEdit && (
@@ -348,6 +445,7 @@ export default function AdminPage() {
            onSave={handleUpdateProduct}
            product={productToEdit}
            title="Editar Producto"
+           categoryImages={categoryImages}
          />
       )}
     </div>
@@ -360,9 +458,10 @@ interface ProductFormDialogProps {
     onSave: (product: any) => void;
     product?: Product | null;
     title: string;
+    categoryImages: Record<string, string>;
 }
 
-function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title }: ProductFormDialogProps) {
+function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, categoryImages }: ProductFormDialogProps) {
     const getInitialFormData = () => ({
         name: '',
         brand: '',
@@ -370,7 +469,7 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title }: Pro
         compatibility: '',
         price: 0,
         category: '',
-        imageUrl: 'https://placehold.co/400x400.png',
+        imageUrl: '',
         isFeatured: false,
     });
     
@@ -390,15 +489,29 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title }: Pro
                     isFeatured: product.isFeatured,
                 });
             } else {
-                 setFormData(getInitialFormData());
+                 const initialData = getInitialFormData();
+                 if (initialData.category && categoryImages[initialData.category]) {
+                    initialData.imageUrl = categoryImages[initialData.category];
+                 } else {
+                    initialData.imageUrl = 'https://placehold.co/400x400.png';
+                 }
+                 setFormData(initialData);
             }
         }
-    }, [product, isOpen]);
+    }, [product, isOpen, categoryImages]);
     
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { id, value, type } = e.target;
-        // @ts-ignore
-        setFormData(prev => ({ ...prev, [id]: type === 'number' ? parseFloat(value) || 0 : value }));
+        const newFormData = { ...formData, [id]: type === 'number' ? parseFloat(value) || 0 : value };
+        
+        if (id === 'category' && !product) {
+            const defaultImageUrl = categoryImages[value] || 'https://placehold.co/400x400.png';
+            if (formData.imageUrl === 'https://placehold.co/400x400.png' || (formData.category && categoryImages[formData.category] === formData.imageUrl)) {
+                 newFormData.imageUrl = defaultImageUrl;
+            }
+        }
+        
+        setFormData(newFormData);
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -438,6 +551,10 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title }: Pro
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="price" className="text-right">Precio</Label>
                             <Input id="price" type="number" value={formData.price} onChange={handleChange} className="col-span-3" required />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="imageUrl" className="text-right">URL Imagen</Label>
+                            <Input id="imageUrl" value={formData.imageUrl} onChange={handleChange} className="col-span-3" placeholder="https://..." />
                         </div>
                     </div>
                     <DialogFooter>

@@ -1,4 +1,7 @@
 
+'use client';
+
+import { useState, useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { ShieldCheck, Users, Truck, Medal } from 'lucide-react';
 import Link from 'next/link';
@@ -10,6 +13,17 @@ import { ProductCard } from '@/components/ProductCard';
 import { WhatsappButton } from '@/components/WhatsappButton';
 
 export default function HomePage() {
+  const [homeImageUrl, setHomeImageUrl] = useState('https://placehold.co/600x400.png');
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    const savedUrl = localStorage.getItem('homeImageUrl');
+    if (savedUrl) {
+      setHomeImageUrl(savedUrl);
+    }
+    setIsMounted(true);
+  }, []);
+  
   const features = [
     {
       icon: <ShieldCheck className="h-10 w-10 text-primary" />,
@@ -38,15 +52,17 @@ export default function HomePage() {
         <section className="container mx-auto px-4 py-12 md:py-20 text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-6">La Potencia de Frenado que Necesitas</h1>
           <div className="max-w-xl mx-auto mb-8">
-            <Image
-              src="https://placehold.co/600x400.png"
-              alt="Mecánico instalando frenos de alto rendimiento"
-              width={600}
-              height={400}
-              className="rounded-lg shadow-xl mx-auto"
-              data-ai-hint="brake repair"
-              priority
-            />
+            {isMounted && (
+              <Image
+                src={homeImageUrl}
+                alt="Mecánico instalando frenos de alto rendimiento"
+                width={600}
+                height={400}
+                className="rounded-lg shadow-xl mx-auto"
+                data-ai-hint="brake repair"
+                priority
+              />
+            )}
           </div>
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
             Discos y pastillas de freno de alto rendimiento para todas las marcas. Seguridad y confianza en cada kilómetro.
