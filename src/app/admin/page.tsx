@@ -526,32 +526,36 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, categ
     const [formData, setFormData] = useState(getInitialFormData());
     const [imagePreview, setImagePreview] = useState<string>('');
 
+    // Effect to initialize the form when it opens
     useEffect(() => {
         if (isOpen) {
-            if (product) {
-                const productData = { ...product };
-                setFormData(productData);
-                setImagePreview(productData.imageUrl);
-            } else {
-                const initialData = getInitialFormData();
-                const defaultImageUrl = categoryImages[initialData.category] || 'https://placehold.co/400x400.png';
-                const finalData = { ...initialData, imageUrl: defaultImageUrl };
-                setFormData(finalData);
-                setImagePreview(finalData.imageUrl);
+            const initialData = product ? { ...product } : getInitialFormData();
+            
+            // If the image is a placeholder or doesn't exist, try to set a category default.
+            if (!initialData.imageUrl || initialData.imageUrl.startsWith('https://placehold.co/')) {
+                 initialData.imageUrl = categoryImages[initialData.category] || 'https://placehold.co/400x400.png';
             }
+            
+            setFormData(initialData);
+            setImagePreview(initialData.imageUrl);
         }
-    }, [product, isOpen]);
+    }, [isOpen, product, categoryImages]);
 
+    // Effect to handle dynamic default image when the category is changed by the user.
     useEffect(() => {
-        if (isOpen && !product) { // Only for new products
-            const isDefaultImage = imagePreview.startsWith('https://placehold.co/') || Object.values(categoryImages).includes(imagePreview);
-            if (isDefaultImage) {
-                const newDefaultImage = categoryImages[formData.category] || 'https://placehold.co/400x400.png';
+        if (!isOpen) return;
+
+        // Check if the current image is a default one (placeholder or from categoryImages map)
+        const isDefaultImage = imagePreview.startsWith('https://placehold.co/') || Object.values(categoryImages).includes(imagePreview);
+
+        if (isDefaultImage) {
+            const newDefaultImage = categoryImages[formData.category] || 'https://placehold.co/400x400.png';
+            if (imagePreview !== newDefaultImage) {
                 setFormData(prev => ({ ...prev, imageUrl: newDefaultImage }));
                 setImagePreview(newDefaultImage);
             }
         }
-    }, [formData.category, isOpen, product, categoryImages, imagePreview]);
+    }, [formData.category, isOpen, categoryImages, imagePreview]);
 
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
