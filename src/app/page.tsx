@@ -43,7 +43,6 @@ export default function HomePage() {
       description: 'Recibe tus repuestos a domicilio o retíralos directamente en nuestra tienda.',
     },
   ];
-
   return (
     <>
       <section className="container mx-auto px-4 py-12 md:py-20 text-center">
@@ -70,11 +69,10 @@ export default function HomePage() {
           <Button size="lg">Ver Productos</Button>
         </Link>
       </section>
-
       <section className="bg-card/50">
           <div className="container mx-auto px-4 py-16 md:py-24">
               <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center">Productos Destacados</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
                   {featuredProducts.map((product) => (
                       <ProductCard key={product.id} product={product} />
                   ))}

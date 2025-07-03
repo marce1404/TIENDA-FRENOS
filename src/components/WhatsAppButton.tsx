@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -22,13 +21,14 @@ export function WhatsAppButton() {
     if (savedInfo) {
       try {
         const { number } = JSON.parse(savedInfo);
-        if (number) loadedNumber = number;
+        if (number) {
+            loadedNumber = number;
+        }
       } catch (e) {
-        // use default
+        // use default if parsing fails
       }
-    } finally {
-      setWhatsappNumber(loadedNumber);
     }
+    setWhatsappNumber(loadedNumber);
     setIsMounted(true);
   }, []);
 
