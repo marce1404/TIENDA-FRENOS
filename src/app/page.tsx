@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { getProducts } from '@/lib/products';
 import { ProductCard } from '@/components/ProductCard';
 import type { Product } from '@/lib/types';
+import { BrakeDiscIcon } from '@/components/icons/BrakeDiscIcon';
 
 export default function HomePage() {
   const [isMounted, setIsMounted] = useState(false);
@@ -43,11 +44,11 @@ export default function HomePage() {
         <div className="mb-8">
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-primary">La casa del freno</h1>
         </div>
-        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-          Discos y pastillas de freno de alto rendimiento para todas las marcas. Seguridad y confianza en cada kilómetro.
+        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8 drop-shadow-md">
+ Discos y pastillas de freno de alto rendimiento para todas las marcas. Seguridad y confianza en cada kilómetro.
         </p>
         <Link href="/productos">
-          <Button size="lg">Ver Productos</Button>
+          <Button size="lg" className="bg-gray-200 text-black">Ver Productos</Button>
         </Link>
       </section>
       <section className="bg-card/50">
