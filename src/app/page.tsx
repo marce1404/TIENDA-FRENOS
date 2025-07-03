@@ -46,8 +46,10 @@ export default function HomePage() {
   return (
     <>
       <section className="container mx-auto px-4 py-12 md:py-20 text-center">
-        <h1 className="text-4xl md:text-5xl font-bold mb-4">casafrenos.cl</h1>
-        <p className="text-xl md:text-2xl text-muted-foreground mb-8">La casa del freno</p>
+        <div className="mb-8">
+          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-foreground">casafrenos.cl</h1>
+          <p className="text-2xl md:text-3xl text-primary font-medium mt-2">La casa del freno</p>
+        </div>
         <div className="max-w-xl mx-auto mb-8">
           {isMounted && (
             <Image
