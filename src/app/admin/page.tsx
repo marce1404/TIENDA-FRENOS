@@ -680,7 +680,7 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, categ
 
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-2xl">
+            <DialogContent className="sm:max-w-3xl bg-card">
                 <form onSubmit={handleSubmit}>
                     <DialogHeader>
                         <DialogTitle>{title}</DialogTitle>
@@ -703,7 +703,6 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, categ
                             <Select
                                 value={formData.category}
                                 onValueChange={handleCategoryChange}
-                                required
                             >
                                 <SelectTrigger id="category" className="col-span-3">
                                     <SelectValue placeholder="Selecciona una categoría" />
@@ -760,5 +759,7 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, categ
         </Dialog>
     );
 }
+
+    
 
     
