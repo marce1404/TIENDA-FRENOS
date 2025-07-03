@@ -43,6 +43,7 @@ import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 
 export default function AdminPage() {
@@ -74,7 +75,7 @@ export default function AdminPage() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [productToEdit, setProductToEdit] = useState<Product | null>(null);
   
-  const allCategories = [...new Set(initialProducts.map(p => p.category).concat(products.map(p => p.category)))];
+  const allCategories = ['Pastillas', 'Discos'];
 
   useEffect(() => {
     setProducts(getProducts());
@@ -648,6 +649,12 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, categ
         setFormData(prev => ({ ...prev, [id]: type === 'number' ? parseFloat(value) || 0 : value }));
     };
 
+    const handleCategoryChange = (value: string) => {
+        if (value) {
+            setFormData(prev => ({ ...prev, category: value }));
+        }
+    };
+
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
@@ -689,7 +696,19 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, categ
                         </div>
                          <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="category" className="text-right">Categoría</Label>
-                            <Input id="category" value={formData.category} onChange={handleChange} className="col-span-3" required />
+                            <Select
+                                value={formData.category}
+                                onValueChange={handleCategoryChange}
+                                required
+                            >
+                                <SelectTrigger id="category" className="col-span-3">
+                                    <SelectValue placeholder="Selecciona una categoría" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Pastillas">Pastillas</SelectItem>
+                                    <SelectItem value="Discos">Discos</SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
                          <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="compatibility" className="text-right">Compatibilidad</Label>
@@ -728,5 +747,3 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, categ
         </Dialog>
     );
 }
-
-    
