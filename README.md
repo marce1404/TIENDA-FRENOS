@@ -1,4 +1,4 @@
-# casafrenos.cl
+# La Casa del Freno
 
 La casa del freno. Una tienda en línea especializada en la venta de repuestos de frenos de alta calidad.
 

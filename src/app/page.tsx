@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -47,8 +48,7 @@ export default function HomePage() {
     <>
       <section className="container mx-auto px-4 py-12 md:py-20 text-center">
         <div className="mb-8">
-          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-foreground">casafrenos.cl</h1>
-          <p className="text-2xl md:text-3xl text-primary font-medium mt-2">La casa del freno</p>
+          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-primary">La casa del freno</h1>
         </div>
         <div className="max-w-xl mx-auto mb-8">
           {isMounted && (
