@@ -5,13 +5,14 @@ import { useState, useMemo, useEffect } from 'react';
 import { getProducts } from '@/lib/products';
 import { products as initialProducts } from '@/data/products';
 import { Input } from '@/components/ui/input';
-import { Search } from 'lucide-react';
+import { Search, ShoppingCart } from 'lucide-react';
 import type { Product } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowLeftIcon, ArrowRightIcon } from '@radix-ui/react-icons';
+import { useCart } from '@/hooks/use-cart';
 
 export default function ProductosPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -20,13 +21,20 @@ export default function ProductosPage() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [isMounted, setIsMounted] = useState(false);
+  const { addToCart } = useCart();
 
   useEffect(() => {
     setAllProducts(getProducts());
     setIsMounted(true);
   }, []);
 
-  const categories = useMemo(() => [...new Set(initialProducts.map((p) => p.category))], []);
+  const categories = useMemo(() => {
+    // Derive categories from the actual products data to avoid showing stale ones
+    if (isMounted) {
+      return [...new Set(allProducts.map((p) => p.category))];
+    }
+    return [...new Set(initialProducts.map((p) => p.category))];
+  }, [isMounted, allProducts]);
 
   const filteredProducts = useMemo(() => {
     if (!isMounted) return [];
@@ -131,9 +139,10 @@ export default function ProductosPage() {
                             <p className="text-lg font-bold">
                                 {new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(product.price)}
                             </p>
-                             <Link href={`/productos/${product.id}`}>
-                               <Button variant="outline" size="sm">Ver Detalles</Button>
-                            </Link>
+                             <Button size="sm" onClick={() => addToCart(product)}>
+                                <ShoppingCart className="mr-2 h-4 w-4"/>
+                                Añadir
+                             </Button>
                         </div>
                       </div>
                     ))}
