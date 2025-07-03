@@ -15,7 +15,7 @@ export const Logo = ({ className, ...props }: React.SVGProps<SVGSVGElement>) => 
       className={cn(className)}
       {...props}
     >
-      <title>La Casa del Freno Logo</title>
+      <title>REPUFRENOS.CL Logo</title>
       {/* House shape */}
       <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
       {/* Brake disc inside */}

@@ -42,7 +42,7 @@ export async function sendChatInquiry(formData: {
 
   const emailHtml = `
     <div>
-      <h1>Nueva consulta desde el Chat de La Casa del Freno</h1>
+      <h1>Nueva consulta desde el Chat de REPUFRENOS.CL</h1>
       <p><strong>Nombre:</strong> ${name}</p>
       <p><strong>Correo para responder:</strong> <a href="mailto:${email}">${email}</a></p>
       <p><strong>Mensaje:</strong></p>
@@ -56,7 +56,7 @@ export async function sendChatInquiry(formData: {
       from: `"${name}" <${SMTP_USER}>`,
       to: SMTP_RECIPIENTS,
       replyTo: email,
-      subject: `Nueva Consulta desde el Chat: ${name}`,
+      subject: `Nueva Consulta desde FRENOTOTAL.CL Chat: ${name}`,
       html: emailHtml,
     });
     return { success: true };

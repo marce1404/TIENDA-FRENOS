@@ -1,6 +1,6 @@
-# La Casa del Freno
+# REPUFRENOS.CL
 
-La casa del freno. Una tienda en línea especializada en la venta de repuestos de frenos de alta calidad.
+REPUFRENOS.CL. Una tienda en línea especializada en la venta de repuestos de frenos de alta calidad.
 
 ## Funcionalidades
 

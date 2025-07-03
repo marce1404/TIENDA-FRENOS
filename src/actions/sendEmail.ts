@@ -44,7 +44,7 @@ export async function sendEmail(formData: {
 
   const emailHtml = `
     <div>
-      <h1>Nuevo mensaje de contacto de La Casa del Freno</h1>
+      <h1>Nuevo mensaje de contacto de REPUFRENOS.CL</h1>
       <p><strong>Nombre:</strong> ${name}</p>
       <p><strong>Correo:</strong> ${email}</p>
       <p><strong>Asunto:</strong> ${subject}</p>
