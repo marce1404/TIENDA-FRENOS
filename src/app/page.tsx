@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -47,7 +46,8 @@ export default function HomePage() {
   return (
     <>
       <section className="container mx-auto px-4 py-12 md:py-20 text-center">
-        <h1 className="text-4xl md:text-5xl font-bold mb-6">La Casa del Freno</h1>
+        <h1 className="text-4xl md:text-5xl font-bold mb-4">casafrenos.cl</h1>
+        <p className="text-xl md:text-2xl text-muted-foreground mb-8">La casa del freno</p>
         <div className="max-w-xl mx-auto mb-8">
           {isMounted && (
             <Image
@@ -62,7 +62,7 @@ export default function HomePage() {
           )}
         </div>
         <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-          casafrenos.cl: Discos y pastillas de freno de alto rendimiento para todas las marcas. Seguridad y confianza en cada kilómetro.
+          Discos y pastillas de freno de alto rendimiento para todas las marcas. Seguridad y confianza en cada kilómetro.
         </p>
         <Link href="/productos">
           <Button size="lg">Ver Productos</Button>
