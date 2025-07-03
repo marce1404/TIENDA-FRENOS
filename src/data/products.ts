@@ -1,4 +1,3 @@
-
 import type { Product } from '@/lib/types';
 
 export const products: Product[] = [
@@ -10,7 +9,6 @@ export const products: Product[] = [
     compatibility: 'Chevrolet Spark, Suzuki Alto',
     price: 35000,
     category: 'Pastillas',
-    imageUrl: 'https://placehold.co/400x400.png',
     isFeatured: true,
   },
   {
@@ -21,7 +19,6 @@ export const products: Product[] = [
     compatibility: 'Toyota Yaris 2018-2022',
     price: 89990,
     category: 'Pastillas',
-    imageUrl: 'https://placehold.co/400x400.png',
     isFeatured: true,
   },
   {
@@ -32,7 +29,6 @@ export const products: Product[] = [
     compatibility: 'Chevrolet Onix 2020-2023',
     price: 129990,
     category: 'Discos',
-    imageUrl: 'https://placehold.co/400x400.png',
     isFeatured: true,
   },
   {
@@ -43,7 +39,6 @@ export const products: Product[] = [
     compatibility: 'Volkswagen Golf MK7',
     price: 95000,
     category: 'Discos',
-    imageUrl: 'https://placehold.co/400x400.png',
     isFeatured: false,
   },
   {
@@ -54,7 +49,6 @@ export const products: Product[] = [
     compatibility: 'Ford F-150 2015-2020',
     price: 75000,
     category: 'Pastillas',
-    imageUrl: 'https://placehold.co/400x400.png',
     isFeatured: false,
   },
   {
@@ -65,7 +59,6 @@ export const products: Product[] = [
     compatibility: 'Hyundai Accent 2017-2021',
     price: 65000,
     category: 'Discos',
-    imageUrl: 'https://placehold.co/400x400.png',
     isFeatured: false,
   },
   {
@@ -76,7 +69,6 @@ export const products: Product[] = [
     compatibility: 'Honda Civic 2016-2021',
     price: 68000,
     category: 'Pastillas',
-    imageUrl: 'https://placehold.co/400x400.png',
     isFeatured: false,
   },
   {
@@ -87,7 +79,6 @@ export const products: Product[] = [
     compatibility: 'Kia Rio 2018-2023',
     price: 55000,
     category: 'Discos',
-    imageUrl: 'https://placehold.co/400x400.png',
     isFeatured: true,
   },
   {
@@ -98,7 +89,6 @@ export const products: Product[] = [
     compatibility: 'Mazda 3 2019-2023',
     price: 82000,
     category: 'Pastillas',
-    imageUrl: 'https://placehold.co/400x400.png',
     isFeatured: false,
   },
   {
@@ -109,7 +99,6 @@ export const products: Product[] = [
     compatibility: 'Peugeot 208 2020-2024',
     price: 78000,
     category: 'Discos',
-    imageUrl: 'https://placehold.co/400x400.png',
     isFeatured: false,
   },
   {
@@ -120,7 +109,6 @@ export const products: Product[] = [
     compatibility: 'BMW Serie 3 F30',
     price: 99000,
     category: 'Pastillas',
-    imageUrl: 'https://placehold.co/400x400.png',
     isFeatured: false,
   },
   {
@@ -131,7 +119,6 @@ export const products: Product[] = [
     compatibility: 'Audi A3 2015-2020',
     price: 115000,
     category: 'Discos',
-    imageUrl: 'https://placehold.co/400x400.png',
     isFeatured: false,
   },
 ];

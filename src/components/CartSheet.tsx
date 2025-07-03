@@ -13,10 +13,11 @@ import {
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { ShoppingCart, Trash2, Plus, Minus } from 'lucide-react';
-import Image from 'next/image';
 import { ScrollArea } from './ui/scroll-area';
 import { Separator } from './ui/separator';
 import { useEffect, useState } from 'react';
+import { BrakePadIcon } from './icons/BrakePadIcon';
+import { BrakeDiscIcon } from './icons/BrakeDiscIcon';
 
 const formatPrice = (price: number) => {
     return new Intl.NumberFormat('es-CL', {
@@ -78,13 +79,13 @@ export function CartSheet() {
               <div className="flex flex-col gap-4 py-4 pr-6">
                 {cartItems.map((item) => (
                   <div key={item.id} className="flex items-center gap-4">
-                    <Image
-                      src={item.imageUrl}
-                      alt={item.name}
-                      width={64}
-                      height={64}
-                      className="rounded-md object-cover"
-                    />
+                    <div className="flex-shrink-0 w-16 h-16 rounded-md bg-muted/50 flex items-center justify-center">
+                      {item.category === 'Pastillas' ? (
+                        <BrakePadIcon className="w-8 h-8 text-muted-foreground" />
+                      ) : (
+                        <BrakeDiscIcon className="w-8 h-8 text-muted-foreground" />
+                      )}
+                    </div>
                     <div className="flex-1 space-y-1">
                       <p className="font-medium">{item.name}</p>
                       <p className="text-sm text-muted-foreground">{formatPrice(item.price)}</p>

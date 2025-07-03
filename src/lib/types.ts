@@ -7,7 +7,6 @@ export interface Product {
   compatibility: string;
   price: number;
   category: string;
-  imageUrl: string;
   isFeatured: boolean;
 }
 

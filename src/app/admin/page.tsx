@@ -2,7 +2,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
 import { products as initialProducts } from '@/data/products';
 import type { Product } from '@/lib/types';
 import { getProducts, saveProducts } from '@/lib/products';
@@ -36,7 +35,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Pencil, Trash2, PlusCircle, LogIn, LogOut, Star, Phone, Settings, Image as ImageIcon, Save, Package, Mail, Loader2 } from 'lucide-react';
+import { Pencil, Trash2, PlusCircle, LogIn, LogOut, Star, Phone, Settings, Save, Package, Mail, Loader2 } from 'lucide-react';
 import { verifyPassword } from '@/actions/auth';
 import { saveEnvSettings } from '@/actions/saveEnv';
 import { cn } from '@/lib/utils';
@@ -58,8 +57,6 @@ export default function AdminPage() {
   // State for settings
   const [whatsappNumber, setWhatsappNumber] = useState('');
   const [contactName, setContactName] = useState('');
-  const [homeImageUrl, setHomeImageUrl] = useState('https://placehold.co/600x400.png');
-  const [categoryImages, setCategoryImages] = useState<Record<string, string>>({});
 
   // State for .env settings form
   const [isSavingEnv, setIsSavingEnv] = useState(false);
@@ -98,19 +95,6 @@ export default function AdminPage() {
         const savedNumber = localStorage.getItem('whatsappNumber') || '56912345678';
         setContactName('Ventas');
         setWhatsappNumber(savedNumber);
-    }
-    
-    // Load appearance settings
-    const savedHomeImage = localStorage.getItem('homeImageUrl');
-    if (savedHomeImage) setHomeImageUrl(savedHomeImage);
-    
-    const savedCategoryImages = localStorage.getItem('categoryImages');
-    if (savedCategoryImages) {
-        try {
-            setCategoryImages(JSON.parse(savedCategoryImages));
-        } catch (e) {
-            console.error('Error parsing category images from localStorage', e);
-        }
     }
 
     setIsMounted(true);
@@ -152,41 +136,6 @@ export default function AdminPage() {
     localStorage.setItem('whatsappInfo', JSON.stringify(whatsappInfo));
     localStorage.removeItem('whatsappNumber'); 
     alert('Configuración de contacto actualizada.');
-  };
-
-  const handleSaveHomeImage = (e: React.FormEvent) => {
-    e.preventDefault();
-    localStorage.setItem('homeImageUrl', homeImageUrl);
-    alert('Imagen de portada actualizada.');
-  };
-  
-  const handleHomeImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setHomeImageUrl(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleSaveCategoryImages = (e: React.FormEvent) => {
-    e.preventDefault();
-    localStorage.setItem('categoryImages', JSON.stringify(categoryImages));
-    alert('Imágenes de categoría actualizadas.');
-  };
-
-  const handleCategoryImagesChange = (category: string, e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const result = reader.result as string;
-        setCategoryImages(prev => ({ ...prev, [category]: result }));
-      };
-      reader.readAsDataURL(file);
-    }
   };
 
   const handleSaveEnv = async (e: React.FormEvent) => {
@@ -324,9 +273,8 @@ export default function AdminPage() {
 
         <TabsContent value="settings" className="mt-6">
           <Tabs defaultValue="contact" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="contact"><Phone className="mr-2 h-4 w-4" />Contacto</TabsTrigger>
-              <TabsTrigger value="appearance"><ImageIcon className="mr-2 h-4 w-4" />Apariencia</TabsTrigger>
               <TabsTrigger value="email"><Mail className="mr-2 h-4 w-4" />Correo</TabsTrigger>
             </TabsList>
             <TabsContent value="contact">
@@ -370,78 +318,6 @@ export default function AdminPage() {
                   </CardContent>
                   <CardFooter>
                     <Button type="submit">Guardar Contacto</Button>
-                  </CardFooter>
-                </form>
-              </Card>
-            </TabsContent>
-            <TabsContent value="appearance">
-              <Card className="mt-6">
-                <CardHeader>
-                  <CardTitle>Imagen de Portada (Home)</CardTitle>
-                  <CardDescription>
-                    Cambia la imagen principal que se muestra en la página de inicio.
-                  </CardDescription>
-                </CardHeader>
-                <form onSubmit={handleSaveHomeImage}>
-                  <CardContent className="space-y-2">
-                    <Label htmlFor="home-image-file">Seleccionar Imagen</Label>
-                    <Input
-                      id="home-image-file"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleHomeImageChange}
-                    />
-                    {homeImageUrl && (
-                      <div className="mt-4">
-                        <p className="text-xs text-muted-foreground mb-2">Vista previa actual:</p>
-                        <Image
-                          src={homeImageUrl}
-                          alt="Vista previa de imagen de portada"
-                          width={200}
-                          height={120}
-                          className="rounded-md object-cover"
-                        />
-                      </div>
-                    )}
-                  </CardContent>
-                  <CardFooter>
-                    <Button type="submit">Guardar Imagen de Portada</Button>
-                  </CardFooter>
-                </form>
-              </Card>
-              <Card className="mt-8">
-                <CardHeader>
-                  <CardTitle>Imágenes de Categoría por Defecto</CardTitle>
-                  <CardDescription>
-                    Asigna una imagen predeterminada a cada categoría. Se usará si un producto no tiene su propia imagen.
-                  </CardDescription>
-                </CardHeader>
-                <form onSubmit={handleSaveCategoryImages}>
-                  <CardContent className="space-y-4">
-                    {allCategories.map(category => (
-                      <div key={category} className="space-y-2">
-                        <Label htmlFor={`category-image-${category}`}>{category}</Label>
-                        <Input
-                          id={`category-image-${category}`}
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => handleCategoryImagesChange(category, e)}
-                          className="mt-1"
-                        />
-                        {categoryImages[category] && (
-                          <Image
-                            src={categoryImages[category]}
-                            alt={`Vista previa de ${category}`}
-                            width={100}
-                            height={100}
-                            className="mt-2 rounded-md object-cover"
-                          />
-                        )}
-                      </div>
-                    ))}
-                  </CardContent>
-                  <CardFooter>
-                    <Button type="submit">Guardar Imágenes de Categoría</Button>
                   </CardFooter>
                 </form>
               </Card>
@@ -587,7 +463,6 @@ export default function AdminPage() {
         onOpenChange={setIsAddDialogOpen}
         onSave={handleAddProduct}
         title="Añadir Nuevo Producto"
-        categoryImages={categoryImages}
       />
 
       {productToEdit && (
@@ -597,7 +472,6 @@ export default function AdminPage() {
            onSave={handleUpdateProduct}
            product={productToEdit}
            title="Editar Producto"
-           categoryImages={categoryImages}
          />
       )}
     </div>
@@ -610,39 +484,21 @@ interface ProductFormDialogProps {
     onSave: (product: any) => void;
     product?: Product | null;
     title: string;
-    categoryImages: Record<string, string>;
 }
 
-function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, categoryImages }: ProductFormDialogProps) {
+function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title }: ProductFormDialogProps) {
     const getInitialFormData = () => ({
-        name: '', brand: '', model: '', compatibility: '', price: 0, category: '', imageUrl: '', isFeatured: false,
+        name: '', brand: '', model: '', compatibility: '', price: 0, category: '', isFeatured: false,
     });
     
     const [formData, setFormData] = useState(getInitialFormData());
-    const [imagePreview, setImagePreview] = useState<string>('');
 
     useEffect(() => {
         if (isOpen) {
             const initialData = product ? { ...product } : getInitialFormData();
             setFormData(initialData);
-
-            let previewUrl = initialData.imageUrl;
-            if (!previewUrl || !previewUrl.startsWith('data:image')) {
-                previewUrl = categoryImages[initialData.category] || 'https://placehold.co/400x400.png';
-            }
-            setImagePreview(previewUrl);
         }
-    }, [isOpen, product, categoryImages]);
-
-    useEffect(() => {
-        if (!isOpen) return;
-
-        if (!formData.imageUrl || !formData.imageUrl.startsWith('data:image')) {
-            const newDefaultPreview = categoryImages[formData.category] || 'https://placehold.co/400x400.png';
-            setImagePreview(newDefaultPreview);
-        }
-    }, [formData.category, formData.imageUrl, isOpen, categoryImages]);
-
+    }, [isOpen, product]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { id, value, type } = e.target;
@@ -657,19 +513,6 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, categ
     
     const handleFeaturedChange = (checked: boolean) => {
         setFormData(prev => ({ ...prev, isFeatured: checked }));
-    };
-
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                const result = reader.result as string;
-                setFormData(prev => ({ ...prev, imageUrl: result }));
-                setImagePreview(result);
-            };
-            reader.readAsDataURL(file);
-        }
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -703,6 +546,7 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, categ
                             <Select
                                 value={formData.category}
                                 onValueChange={handleCategoryChange}
+                                required
                             >
                                 <SelectTrigger id="category" className="col-span-3">
                                     <SelectValue placeholder="Selecciona una categoría" />
@@ -720,24 +564,6 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, categ
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="price" className="text-right">Precio</Label>
                             <Input id="price" type="number" value={formData.price} onChange={handleChange} required className="col-span-3" />
-                        </div>
-                        <div className="grid grid-cols-4 items-start gap-4">
-                            <Label htmlFor="imageFile" className="text-right pt-2">Imagen</Label>
-                            <div className="col-span-3 space-y-2">
-                               <Input id="imageFile" type="file" accept="image/*" onChange={handleFileChange} />
-                               {imagePreview && (
-                                  <div>
-                                      <Label className="text-xs text-muted-foreground">Vista previa actual:</Label>
-                                      <Image
-                                          src={imagePreview}
-                                          alt="Vista previa del producto"
-                                          width={100}
-                                          height={100}
-                                          className="mt-2 rounded-md object-cover"
-                                      />
-                                  </div>
-                               )}
-                            </div>
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
                           <Label htmlFor="isFeatured" className="text-right">Destacado</Label>
@@ -759,7 +585,3 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, categ
         </Dialog>
     );
 }
-
-    
-
-    

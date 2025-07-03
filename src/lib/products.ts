@@ -10,48 +10,39 @@ export function getProducts(): Product[] {
   }
   
   const savedProductsJSON = localStorage.getItem('products');
-  let productsFromStorage: Product[] = [];
-
-  if (savedProductsJSON) {
-    try {
-      productsFromStorage = JSON.parse(savedProductsJSON);
-    } catch (e) {
-      console.error('Error parsing products from localStorage, falling back to initial data.', e);
-      productsFromStorage = [];
-    }
+  
+  // If there are no saved products, initialize with the default list.
+  if (!savedProductsJSON) {
+    localStorage.setItem('products', JSON.stringify(initialProducts));
+    return initialProducts;
   }
 
-  // If the stored products contain categories that are not in the master list,
-  // or if storage is empty, reset it. This is the source of truth.
-  const validCategories = new Set(initialProducts.map(p => p.category));
-  const storageHasInvalidCategories = productsFromStorage.some(p => !validCategories.has(p.category));
+  try {
+    const productsFromStorage: Product[] = JSON.parse(savedProductsJSON);
 
-  if (productsFromStorage.length === 0 || storageHasInvalidCategories) {
-    productsFromStorage = initialProducts;
-    localStorage.setItem('products', JSON.stringify(productsFromStorage));
-  }
-  
-  let productsToAugment = productsFromStorage;
-  
-  const categoryImagesJSON = localStorage.getItem('categoryImages');
-  const categoryImages: Record<string, string> = categoryImagesJSON ? JSON.parse(categoryImagesJSON) : {};
+    // Basic validation: Check if products in storage have a valid structure.
+    // This helps detect outdated data structures (e.g., ones with imageUrl).
+    const hasValidStructure = productsFromStorage.every(p => 
+        'id' in p && 'name' in p && 'category' in p && typeof p.isFeatured === 'boolean' && !('imageUrl' in p)
+    );
+    
+    // Check if there are any categories that are not 'Pastillas' or 'Discos'
+    const allowedCategories = new Set(['Pastillas', 'Discos']);
+    const hasInvalidCategories = productsFromStorage.some(p => !allowedCategories.has(p.category));
 
-  const augmentedProducts = productsToAugment.map(product => {
-    // A product has a specific image if its URL is a data URI.
-    if (product.imageUrl && product.imageUrl.startsWith('data:image')) {
-      return product;
+    // If structure is invalid or there are disallowed categories, reset with initial products.
+    if (!hasValidStructure || hasInvalidCategories) {
+      localStorage.setItem('products', JSON.stringify(initialProducts));
+      return initialProducts;
     }
     
-    // Otherwise, it needs a default. Try category-specific first.
-    const defaultImageUrl = categoryImages[product.category] || 'https://placehold.co/400x400.png';
-    
-    return {
-      ...product,
-      imageUrl: defaultImageUrl,
-    };
-  });
+    return productsFromStorage;
 
-  return augmentedProducts;
+  } catch (e) {
+    console.error('Error parsing products from localStorage, falling back to initial data.', e);
+    localStorage.setItem('products', JSON.stringify(initialProducts));
+    return initialProducts;
+  }
 }
 
 // This function should only be called on the client-side.

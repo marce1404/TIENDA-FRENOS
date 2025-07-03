@@ -33,7 +33,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     const savedCart = localStorage.getItem('cart');
     if (savedCart) {
       try {
-        setCartItems(JSON.parse(savedCart));
+        const parsedCart = JSON.parse(savedCart);
+        // Add validation to ensure cart items don't have imageUrl
+        const validCart = parsedCart.filter((item: any) => !item.imageUrl);
+        setCartItems(validCart);
       } catch (e) {
         setCartItems([]);
       }

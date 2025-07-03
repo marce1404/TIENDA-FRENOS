@@ -12,6 +12,8 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowLeftIcon, ArrowRightIcon } from '@radix-ui/react-icons';
 import { useCart } from '@/hooks/use-cart';
+import { BrakePadIcon } from '@/components/icons/BrakePadIcon';
+import { BrakeDiscIcon } from '@/components/icons/BrakeDiscIcon';
 
 export default function ProductosPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -27,10 +29,7 @@ export default function ProductosPage() {
     setIsMounted(true);
   }, []);
 
-  const categories = useMemo(() => {
-    // Derive categories only from the current set of products to avoid stale data.
-    return [...new Set(allProducts.map((p) => p.category))];
-  }, [allProducts]);
+  const categories = ['Pastillas', 'Discos'];
 
   const filteredProducts = useMemo(() => {
     if (!isMounted) return [];
@@ -123,13 +122,22 @@ export default function ProductosPage() {
                 {paginatedProducts.length > 0 ? (
                   <>
                     {paginatedProducts.map((product) => (
-                      <div key={product.id} className="rounded-lg border bg-card text-card-foreground shadow-sm p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                        <Link href={`/productos/${product.id}`} className="flex-grow">
-                            <h2 className="text-lg font-semibold">{product.name}</h2>
-                            <p className="text-sm text-muted-foreground">{product.brand} | {product.model}</p>
-                            {product.compatibility && (
-                               <p className="text-xs text-muted-foreground mt-1">Compatibilidad: {product.compatibility}</p>
-                            )}
+                      <div key={product.id} className="rounded-lg border bg-card text-card-foreground shadow-sm p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <Link href={`/productos/${product.id}`} className="flex flex-grow items-center gap-4">
+                            <div className="flex-shrink-0 w-16 h-16 rounded-md bg-muted/20 flex items-center justify-center">
+                                {product.category === 'Pastillas' ? (
+                                    <BrakePadIcon className="w-8 h-8 text-muted-foreground" />
+                                ) : (
+                                    <BrakeDiscIcon className="w-8 h-8 text-muted-foreground" />
+                                )}
+                            </div>
+                            <div className="flex-grow">
+                                <h2 className="text-lg font-semibold">{product.name}</h2>
+                                <p className="text-sm text-muted-foreground">{product.brand} | {product.model}</p>
+                                {product.compatibility && (
+                                <p className="text-xs text-muted-foreground mt-1">Compatibilidad: {product.compatibility}</p>
+                                )}
+                            </div>
                         </Link>
                         <div className="flex flex-col items-start sm:items-end gap-2">
                             <p className="text-lg font-bold">
