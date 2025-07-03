@@ -56,7 +56,7 @@ export async function sendChatInquiry(formData: {
       from: `"${name}" <${SMTP_USER}>`,
       to: SMTP_RECIPIENTS,
       replyTo: email,
-      subject: `Nueva Consulta desde FRENOTOTAL.CL Chat: ${name}`,
+      subject: `Nueva Consulta desde REPUFRENOS.CL Chat: ${name}`,
       html: emailHtml,
     });
     return { success: true };

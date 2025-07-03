@@ -60,6 +60,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     toast({
       title: "¡Producto añadido!",
       description: `${product.name} se ha añadido al carrito.`,
+      duration: 2000, // Duration in milliseconds
     });
   }, [toast]);
 
