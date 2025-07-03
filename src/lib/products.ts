@@ -1,4 +1,3 @@
-
 'use client';
 
 import { products as initialProducts } from '@/data/products';
@@ -22,14 +21,12 @@ export function getProducts(): Product[] {
     }
   }
 
-  // Robust check: Compare the set of product IDs from the code with localStorage.
-  // If they differ, it means the product data has been updated in the code.
-  const initialProductIds = new Set(initialProducts.map(p => p.id));
-  const storageProductIds = new Set(productsFromStorage.map(p => p.id));
-  const areIdsSame = initialProductIds.size === storageProductIds.size && 
-                     [...initialProductIds].every(id => storageProductIds.has(id));
+  // If the stored products contain categories that are not in the master list,
+  // or if storage is empty, reset it. This is the source of truth.
+  const validCategories = new Set(initialProducts.map(p => p.category));
+  const storageHasInvalidCategories = productsFromStorage.some(p => !validCategories.has(p.category));
 
-  if (productsFromStorage.length === 0 || !areIdsSame) {
+  if (productsFromStorage.length === 0 || storageHasInvalidCategories) {
     productsFromStorage = initialProducts;
     localStorage.setItem('products', JSON.stringify(productsFromStorage));
   }

@@ -3,7 +3,6 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { getProducts } from '@/lib/products';
-import { products as initialProducts } from '@/data/products';
 import { Input } from '@/components/ui/input';
 import { Search, ShoppingCart } from 'lucide-react';
 import type { Product } from '@/lib/types';
@@ -29,12 +28,9 @@ export default function ProductosPage() {
   }, []);
 
   const categories = useMemo(() => {
-    // Derive categories from the actual products data to avoid showing stale ones
-    if (isMounted) {
-      return [...new Set(allProducts.map((p) => p.category))];
-    }
-    return [...new Set(initialProducts.map((p) => p.category))];
-  }, [isMounted, allProducts]);
+    // Derive categories only from the current set of products to avoid stale data.
+    return [...new Set(allProducts.map((p) => p.category))];
+  }, [allProducts]);
 
   const filteredProducts = useMemo(() => {
     if (!isMounted) return [];
@@ -139,7 +135,7 @@ export default function ProductosPage() {
                             <p className="text-lg font-bold">
                                 {new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(product.price)}
                             </p>
-                             <Button size="sm" onClick={() => addToCart(product)}>
+                             <Button size="sm" onClick={(e) => { e.preventDefault(); addToCart(product); }}>
                                 <ShoppingCart className="mr-2 h-4 w-4"/>
                                 Añadir
                              </Button>
