@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -50,7 +51,7 @@ export function LiveChatWidget() {
       <div className={cn("fixed bottom-6 right-6 z-50 transition-opacity", isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100')}>
         <Button
           onClick={() => setIsOpen(true)}
-          className="h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90"
+          className="h-14 w-14 rounded-full bg-secondary text-secondary-foreground shadow-lg hover:bg-secondary/80"
           aria-label="Abrir chat de ayuda"
         >
           <MessageSquare className="h-8 w-8" />
