@@ -26,9 +26,9 @@ export function ProductCard({ product }: ProductCardProps) {
       <CardHeader className="p-0">
         <div className="aspect-square relative flex items-center justify-center bg-muted/20">
           {product.category === 'Pastillas' ? (
-            <BrakePadIcon className="w-1/3 h-1/3 text-muted-foreground" />
+            <BrakePadIcon className="w-1/4 h-1/4 text-muted-foreground" />
           ) : (
-            <BrakeDiscIcon className="w-1/3 h-1/3 text-muted-foreground" />
+            <BrakeDiscIcon className="w-1/4 h-1/4 text-muted-foreground" />
           )}
         </div>
       </CardHeader>
