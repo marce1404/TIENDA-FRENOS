@@ -24,7 +24,7 @@ export function ProductCard({ product }: ProductCardProps) {
     <Card className="relative flex flex-col overflow-hidden transition-transform duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10">
       {product.isFeatured && (
         <div className="absolute top-2 right-2 z-10">
-          <Star className="h-5 w-5 fill-primary text-primary" />
+          <Star className="h-5 w-5 fill-muted-foreground text-muted-foreground" />
         </div>
       )}
       <CardContent className="p-4 flex-grow space-y-2">
