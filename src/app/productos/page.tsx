@@ -3,6 +3,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { getProducts } from '@/lib/products';
+import { products as initialProducts } from '@/data/products';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
 import type { Product } from '@/lib/types';
@@ -25,7 +26,7 @@ export default function ProductosPage() {
     setIsMounted(true);
   }, []);
 
-  const categories = useMemo(() => [...new Set(allProducts.map((p) => p.category))], [allProducts]);
+  const categories = useMemo(() => [...new Set(initialProducts.map((p) => p.category))], []);
 
   const filteredProducts = useMemo(() => {
     if (!isMounted) return [];
@@ -103,7 +104,6 @@ export default function ProductosPage() {
                       </TabsTrigger>
                   )) : (
                     <>
-                      <Skeleton className="h-10 w-20 rounded-md" />
                       <Skeleton className="h-10 w-20 rounded-md" />
                       <Skeleton className="h-10 w-20 rounded-md" />
                     </>

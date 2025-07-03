@@ -22,7 +22,14 @@ export function getProducts(): Product[] {
     }
   }
 
-  if (productsFromStorage.length < initialProducts.length || productsFromStorage.length === 0) {
+  // Robust check: Compare the set of product IDs from the code with localStorage.
+  // If they differ, it means the product data has been updated in the code.
+  const initialProductIds = new Set(initialProducts.map(p => p.id));
+  const storageProductIds = new Set(productsFromStorage.map(p => p.id));
+  const areIdsSame = initialProductIds.size === storageProductIds.size && 
+                     [...initialProductIds].every(id => storageProductIds.has(id));
+
+  if (productsFromStorage.length === 0 || !areIdsSame) {
     productsFromStorage = initialProducts;
     localStorage.setItem('products', JSON.stringify(productsFromStorage));
   }
