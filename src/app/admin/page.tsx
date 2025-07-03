@@ -654,6 +654,10 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, categ
             setFormData(prev => ({ ...prev, category: value }));
         }
     };
+    
+    const handleFeaturedChange = (checked: boolean) => {
+        setFormData(prev => ({ ...prev, isFeatured: checked }));
+    };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -676,32 +680,32 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, categ
 
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-lg">
                 <form onSubmit={handleSubmit}>
                     <DialogHeader>
                         <DialogTitle>{title}</DialogTitle>
                     </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="name" className="text-right">Nombre</Label>
-                            <Input id="name" value={formData.name} onChange={handleChange} className="col-span-3" required />
+                    <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="name">Nombre</Label>
+                            <Input id="name" value={formData.name} onChange={handleChange} required />
                         </div>
-                         <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="brand" className="text-right">Marca</Label>
-                            <Input id="brand" value={formData.brand} onChange={handleChange} className="col-span-3" required />
+                         <div className="space-y-2">
+                            <Label htmlFor="brand">Marca</Label>
+                            <Input id="brand" value={formData.brand} onChange={handleChange} required />
                         </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="model" className="text-right">Modelo</Label>
-                            <Input id="model" value={formData.model} onChange={handleChange} className="col-span-3" required />
+                        <div className="space-y-2">
+                            <Label htmlFor="model">Modelo</Label>
+                            <Input id="model" value={formData.model} onChange={handleChange} required />
                         </div>
-                         <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="category" className="text-right">Categoría</Label>
+                         <div className="space-y-2">
+                            <Label htmlFor="category">Categoría</Label>
                             <Select
                                 value={formData.category}
                                 onValueChange={handleCategoryChange}
                                 required
                             >
-                                <SelectTrigger id="category" className="col-span-3">
+                                <SelectTrigger id="category">
                                     <SelectValue placeholder="Selecciona una categoría" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -710,33 +714,38 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, categ
                                 </SelectContent>
                             </Select>
                         </div>
-                         <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="compatibility" className="text-right">Compatibilidad</Label>
-                            <Input id="compatibility" value={formData.compatibility} onChange={handleChange} className="col-span-3" required />
+                         <div className="space-y-2">
+                            <Label htmlFor="compatibility">Compatibilidad</Label>
+                            <Input id="compatibility" value={formData.compatibility} onChange={handleChange} required />
                         </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="price" className="text-right">Precio</Label>
-                            <Input id="price" type="number" value={formData.price} onChange={handleChange} className="col-span-3" required />
+                        <div className="space-y-2">
+                            <Label htmlFor="price">Precio</Label>
+                            <Input id="price" type="number" value={formData.price} onChange={handleChange} required />
                         </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="imageFile" className="text-right">Imagen</Label>
-                            <Input id="imageFile" type="file" accept="image/*" onChange={handleFileChange} className="col-span-3" />
+                        <div className="space-y-2">
+                            <Label htmlFor="imageFile">Imagen</Label>
+                            <Input id="imageFile" type="file" accept="image/*" onChange={handleFileChange} />
                         </div>
                         {imagePreview && (
-                             <div className="grid grid-cols-4 items-start gap-4">
-                                <div />
-                                <div className="col-span-3">
-                                    <p className="text-xs text-muted-foreground mb-2">Vista previa:</p>
-                                    <Image
-                                        src={imagePreview}
-                                        alt="Vista previa del producto"
-                                        width={100}
-                                        height={100}
-                                        className="rounded-md object-cover"
-                                    />
-                                </div>
+                            <div className="space-y-2">
+                                <Label>Vista previa</Label>
+                                <Image
+                                    src={imagePreview}
+                                    alt="Vista previa del producto"
+                                    width={100}
+                                    height={100}
+                                    className="rounded-md object-cover"
+                                />
                             </div>
                         )}
+                        <div className="flex items-center space-x-2 pt-2">
+                            <Switch
+                                id="isFeatured"
+                                checked={formData.isFeatured}
+                                onCheckedChange={handleFeaturedChange}
+                            />
+                            <Label htmlFor="isFeatured">Marcar como producto destacado</Label>
+                        </div>
                     </div>
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
