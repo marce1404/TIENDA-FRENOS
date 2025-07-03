@@ -11,20 +11,23 @@ export function getProducts(): Product[] {
   }
   
   const savedProductsJSON = localStorage.getItem('products');
-  let productsToAugment: Product[];
+  let productsFromStorage: Product[] = [];
 
   if (savedProductsJSON) {
     try {
-      productsToAugment = JSON.parse(savedProductsJSON);
+      productsFromStorage = JSON.parse(savedProductsJSON);
     } catch (e) {
       console.error('Error parsing products from localStorage, falling back to initial data.', e);
-      productsToAugment = initialProducts;
+      productsFromStorage = [];
     }
-  } else {
-    // First time run, use initial data and save it to localStorage.
-    productsToAugment = initialProducts;
-    localStorage.setItem('products', JSON.stringify(initialProducts));
   }
+
+  if (productsFromStorage.length < initialProducts.length || productsFromStorage.length === 0) {
+    productsFromStorage = initialProducts;
+    localStorage.setItem('products', JSON.stringify(productsFromStorage));
+  }
+  
+  let productsToAugment = productsFromStorage;
   
   const categoryImagesJSON = localStorage.getItem('categoryImages');
   const categoryImages: Record<string, string> = categoryImagesJSON ? JSON.parse(categoryImagesJSON) : {};
