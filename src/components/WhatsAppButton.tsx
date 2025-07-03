@@ -17,14 +17,17 @@ export function WhatsAppButton() {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    let loadedNumber = '56912345678'; // Default number
     const savedInfo = localStorage.getItem('whatsappInfo');
     if (savedInfo) {
       try {
         const { number } = JSON.parse(savedInfo);
-        if (number) setWhatsappNumber(number);
+        if (number) loadedNumber = number;
       } catch (e) {
         // use default
       }
+    } finally {
+      setWhatsappNumber(loadedNumber);
     }
     setIsMounted(true);
   }, []);
