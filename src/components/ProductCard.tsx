@@ -4,6 +4,7 @@ import type { Product } from '@/lib/types';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardTitle } from './ui/card';
 import { useCart } from '@/hooks/use-cart';
+import { Star } from 'lucide-react';
 
 interface ProductCardProps {
   product: Product;
@@ -20,7 +21,12 @@ export function ProductCard({ product }: ProductCardProps) {
   };
 
   return (
-    <Card className="flex flex-col overflow-hidden transition-transform duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10">
+    <Card className="relative flex flex-col overflow-hidden transition-transform duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10">
+      {product.isFeatured && (
+        <div className="absolute top-2 right-2 z-10">
+          <Star className="h-5 w-5 fill-primary text-primary" />
+        </div>
+      )}
       <CardContent className="p-4 flex-grow space-y-2">
         <CardTitle className="text-base font-bold leading-tight">{product.name}</CardTitle>
         <CardDescription className="text-xs text-muted-foreground">
