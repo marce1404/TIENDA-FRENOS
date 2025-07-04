@@ -56,17 +56,20 @@ export async function saveEnvSettings(settings: EnvSettings) {
   try {
     const currentEnv = await readEnvFile(envPath);
 
-    // Remove old single-user keys for migration if user 1 is being set.
-    if (parsed.data.ADMIN_USER_1_USERNAME) {
+    // If user 1's username is being submitted (even if empty), consider it a migration action.
+    if (parsed.data.ADMIN_USER_1_USERNAME !== undefined) {
         delete currentEnv.ADMIN_USERNAME;
         delete currentEnv.ADMIN_PASSWORD;
     }
 
-    // Merge new settings, only updating keys that have a non-empty value
+    // Merge new settings. If a value is provided, update it. If it's an empty string, remove the key.
     for (const [key, value] of Object.entries(parsed.data)) {
-      if (value !== undefined && value !== null && value !== '') {
-        currentEnv[key] = value;
-      }
+        if (value) { // This handles non-empty strings
+            currentEnv[key] = value;
+        } else if (value === '') { // This handles empty strings, meaning "delete this setting"
+            delete currentEnv[key];
+        }
+        // `null` or `undefined` values from the form are ignored and do not change the file.
     }
     
     const newEnvContent = Object.entries(currentEnv)

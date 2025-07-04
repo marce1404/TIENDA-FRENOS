@@ -74,8 +74,9 @@ export async function getEnvSettings(): Promise<EnvConfig> {
         let username = combinedEnv[usernameKey];
         let password = combinedEnv[passwordKey];
 
-        // Migration for user 1 from old variables if new ones don't exist
-        if (i === 1 && username === undefined && combinedEnv.ADMIN_USERNAME) {
+        // Migration for user 1 from old variables if new ones don't exist or are empty.
+        // This makes sure the old admin user shows up until the settings are saved for the first time.
+        if (i === 1 && !username && combinedEnv.ADMIN_USERNAME) {
             username = combinedEnv.ADMIN_USERNAME;
             password = combinedEnv.ADMIN_PASSWORD;
         }
