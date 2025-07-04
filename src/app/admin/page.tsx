@@ -36,6 +36,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Pencil, Trash2, PlusCircle, LogIn, LogOut, Star, Phone, Settings, Save, Package, Mail, Loader2, Search, Users, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeftIcon, ArrowRightIcon } from '@radix-ui/react-icons';
 import { verifyCredentials } from '@/actions/auth';
 import { saveEnvSettings } from '@/actions/saveEnv';
 import { cn } from '@/lib/utils';
@@ -80,6 +81,10 @@ export default function AdminPage() {
   const [productToEdit, setProductToEdit] = useState<Product | null>(null);
   
   const [adminSearchTerm, setAdminSearchTerm] = useState('');
+  
+  // State for pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [productsPerPage] = useState(10);
 
   const allCategories = ['Pastillas', 'Discos'];
 
@@ -332,22 +337,46 @@ export default function AdminPage() {
     });
   };
   
-  const filteredAdminProducts = useMemo(() => {
-    if (!adminSearchTerm) {
-        return products;
-    }
-    const lowercasedTerm = adminSearchTerm.toLowerCase();
-    return products.filter(p =>
+  const filteredProducts = useMemo(() => {
+    return products.filter(p => {
+      if (!adminSearchTerm) {
+        return true;
+      }
+      const lowercasedTerm = adminSearchTerm.toLowerCase();
+      return (
         p.name.toLowerCase().includes(lowercasedTerm) ||
         p.brand.toLowerCase().includes(lowercasedTerm) ||
         p.model.toLowerCase().includes(lowercasedTerm) ||
         p.compatibility.toLowerCase().includes(lowercasedTerm) ||
         p.id.toString().includes(lowercasedTerm)
-    );
+      );
+    });
   }, [products, adminSearchTerm]);
 
+  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+
+  // This effect handles resetting the page when filters change
+  useEffect(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+        setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
+  const paginatedAdminProducts = useMemo(() => {
+    const indexOfLastProduct = currentPage * productsPerPage;
+    const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+    return filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+  }, [filteredProducts, currentPage, productsPerPage]);
+
+  useEffect(() => {
+    if (!isMounted) return;
+    if (currentPage > totalPages) {
+        setCurrentPage(totalPages > 0 ? totalPages : 1);
+    }
+  }, [filteredProducts, currentPage, totalPages, productsPerPage, isMounted]);
+
   if (!isMounted) {
-    return null;
+    return null; // Or a loading spinner
   }
 
   if (!isAuthenticated) {
@@ -630,7 +659,7 @@ export default function AdminPage() {
                 placeholder="Buscar por ID, nombre, marca, modelo..."
                 className="pl-10"
                 value={adminSearchTerm}
-                onChange={(e) => setAdminSearchTerm(e.target.value)}
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
               <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
             </div>
@@ -650,7 +679,7 @@ export default function AdminPage() {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {filteredAdminProducts.map((product) => (
+                    {paginatedAdminProducts.map((product) => (
                     <TableRow key={product.id}>
                         <TableCell className="font-medium">{product.id}</TableCell>
                         <TableCell>{product.name}</TableCell>
@@ -695,6 +724,31 @@ export default function AdminPage() {
                 </TableBody>
                 </Table>
             </div>
+            {totalPages > 1 && (
+                <div className="flex justify-center items-center gap-4 mt-8">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                        disabled={currentPage === 1}
+                    >
+                        <ArrowLeftIcon className="h-4 w-4 mr-2" />
+                        Anterior
+                    </Button>
+                    <span className="text-muted-foreground">
+                        Página {currentPage} de {totalPages}
+                    </span>
+                    <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                            disabled={currentPage === totalPages}
+                    >
+                        Siguiente
+                            <ArrowRightIcon className="h-4 w-4 ml-2" />
+                    </Button>
+                </div>
+            )}
         </TabsContent>
       </Tabs>
 
