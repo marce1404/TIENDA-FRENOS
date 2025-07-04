@@ -43,6 +43,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { getAdminSettingsForForm } from '@/actions/getAdminSettings';
 
 
 export default function AdminPage() {
@@ -62,6 +63,8 @@ export default function AdminPage() {
   // State for .env settings form
   const [isSavingEnv, setIsSavingEnv] = useState(false);
   const [adminUsers, setAdminUsers] = useState(() => Array(3).fill(null).map(() => ({ username: '', password: '', repeatPassword: '' })));
+  const [savedUsernames, setSavedUsernames] = useState<(string | undefined)[]>([]);
+  const [initialSettingsLoaded, setInitialSettingsLoaded] = useState(false);
   const [showPasswords, setShowPasswords] = useState([false, false, false]);
   const [showRepeatPasswords, setShowRepeatPasswords] = useState([false, false, false]);
   const [smtpHost, setSmtpHost] = useState('');
@@ -105,6 +108,44 @@ export default function AdminPage() {
     setIsMounted(true);
   }, []);
 
+  useEffect(() => {
+    const loadInitialSettings = async () => {
+        if (isAuthenticated && !initialSettingsLoaded) {
+            try {
+                const settings = await getAdminSettingsForForm();
+
+                const loadedUsers = Array(3).fill(null).map(() => ({ username: '', password: '', repeatPassword: '' }));
+                const currentSavedUsernames: (string | undefined)[] = [];
+                settings.users.forEach((user, index) => {
+                    if (user.username) {
+                        loadedUsers[index].username = user.username;
+                        currentSavedUsernames[index] = user.username;
+                    }
+                });
+                setAdminUsers(loadedUsers);
+                setSavedUsernames(currentSavedUsernames);
+
+                setSmtpHost(settings.smtp.host || '');
+                setSmtpPort(settings.smtp.port || '');
+                setSmtpUser(settings.smtp.user || '');
+                setSmtpRecipients(settings.smtp.recipients || '');
+                setSmtpSecure(settings.smtp.secure || false);
+
+                setInitialSettingsLoaded(true);
+            } catch (error) {
+                console.error("Failed to load admin settings", error);
+                toast({
+                    variant: "destructive",
+                    title: "Error",
+                    description: "No se pudieron cargar las configuraciones del administrador.",
+                });
+            }
+        }
+    };
+    
+    loadInitialSettings();
+  }, [isAuthenticated, initialSettingsLoaded, toast]);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoggingIn(true);
@@ -131,6 +172,7 @@ export default function AdminPage() {
     setIsAuthenticated(false);
     setUsername('');
     setPassword('');
+    setInitialSettingsLoaded(false); // Reset for next login
   };
 
   const handleSaveWhatsapp = (e: React.FormEvent) => {
@@ -155,17 +197,16 @@ export default function AdminPage() {
   const handleSaveEnv = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validation check for passwords
     for (let i = 0; i < adminUsers.length; i++) {
         const user = adminUsers[i];
-        if (user.password || user.repeatPassword) { // Only validate if a password is being entered
+        if (user.password || user.repeatPassword) {
             if (user.password !== user.repeatPassword) {
                 toast({
                     variant: "destructive",
                     title: "Error de Contraseña",
                     description: `Las contraseñas para el usuario ${i + 1} no coinciden.`,
                 });
-                return; // Stop submission
+                return;
             }
         }
     }
@@ -182,7 +223,6 @@ export default function AdminPage() {
     };
     adminUsers.forEach((user, index) => {
         settings[`ADMIN_USER_${index + 1}_USERNAME`] = user.username;
-        // Only pass password if it's set and valid
         if (user.password && user.password === user.repeatPassword) {
             settings[`ADMIN_USER_${index + 1}_PASSWORD`] = user.password;
         }
@@ -195,8 +235,11 @@ export default function AdminPage() {
             title: "¡Configuración Guardada!",
             description: "Tus cambios se han guardado y aplicado correctamente.",
         });
-        // Clear sensitive fields after saving
-        setAdminUsers(prev => prev.map(u => ({ username: u.username, password: '', repeatPassword: '' })));
+        
+        const newSavedUsernames = adminUsers.map(u => u.username || undefined);
+        setSavedUsernames(newSavedUsernames);
+        
+        setAdminUsers(prev => prev.map(u => ({ ...u, password: '', repeatPassword: '' })));
         setSmtpPass('');
     } else {
         toast({
@@ -400,7 +443,9 @@ export default function AdminPage() {
                               {adminUsers.map((user, index) => (
                                   <div key={index} className="p-4 border rounded-lg space-y-4">
                                       <div>
-                                          <Label htmlFor={`admin-username-${index}`}>Usuario {index + 1}</Label>
+                                          <Label htmlFor={`admin-username-${index}`}>
+                                            Usuario {index + 1} {savedUsernames[index] ? `(${savedUsernames[index]})` : ''}
+                                          </Label>
                                           <Input id={`admin-username-${index}`} placeholder="Nombre de usuario" value={user.username} onChange={e => handleUserChange(index, 'username', e.target.value)} className="mt-1" />
                                       </div>
                                       
@@ -492,7 +537,7 @@ export default function AdminPage() {
                       </div>
                     </CardContent>
                     <CardFooter>
-                      <Button type="submit" disabled={isSavingEnv}>
+                      <Button type="submit" disabled={isSavingEnv || !initialSettingsLoaded}>
                         {isSavingEnv ? (
                             <>
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
