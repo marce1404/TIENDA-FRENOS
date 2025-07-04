@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { products as initialProducts } from '@/data/products';
 import type { Product } from '@/lib/types';
 import { getProducts, saveProducts } from '@/lib/products';
@@ -35,7 +35,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Pencil, Trash2, PlusCircle, LogIn, LogOut, Star, Phone, Settings, Save, Package, Mail, Loader2 } from 'lucide-react';
+import { Pencil, Trash2, PlusCircle, LogIn, LogOut, Star, Phone, Settings, Save, Package, Mail, Loader2, Search } from 'lucide-react';
 import { verifyPassword } from '@/actions/auth';
 import { saveEnvSettings } from '@/actions/saveEnv';
 import { cn } from '@/lib/utils';
@@ -72,6 +72,8 @@ export default function AdminPage() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [productToEdit, setProductToEdit] = useState<Product | null>(null);
   
+  const [adminSearchTerm, setAdminSearchTerm] = useState('');
+
   const allCategories = ['Pastillas', 'Discos'];
 
   useEffect(() => {
@@ -216,6 +218,20 @@ export default function AdminPage() {
     });
   };
   
+  const filteredAdminProducts = useMemo(() => {
+    if (!adminSearchTerm) {
+        return products;
+    }
+    const lowercasedTerm = adminSearchTerm.toLowerCase();
+    return products.filter(p =>
+        p.name.toLowerCase().includes(lowercasedTerm) ||
+        p.brand.toLowerCase().includes(lowercasedTerm) ||
+        p.model.toLowerCase().includes(lowercasedTerm) ||
+        p.compatibility.toLowerCase().includes(lowercasedTerm) ||
+        p.id.toString().includes(lowercasedTerm)
+    );
+  }, [products, adminSearchTerm]);
+
   if (!isMounted) {
     return null;
   }
@@ -267,8 +283,8 @@ export default function AdminPage() {
       
       <Tabs defaultValue="products" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="settings"><Settings className="mr-2 h-4 w-4" />Configuración General</TabsTrigger>
           <TabsTrigger value="products"><Package className="mr-2 h-4 w-4" />Gestión de Productos</TabsTrigger>
+          <TabsTrigger value="settings"><Settings className="mr-2 h-4 w-4" />Configuración General</TabsTrigger>
         </TabsList>
 
         <TabsContent value="settings" className="mt-6">
@@ -395,6 +411,16 @@ export default function AdminPage() {
                 </Button>
             </div>
             
+            <div className="relative mb-6">
+              <Input
+                placeholder="Buscar por ID, nombre, marca, modelo..."
+                className="pl-10"
+                value={adminSearchTerm}
+                onChange={(e) => setAdminSearchTerm(e.target.value)}
+              />
+              <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+            </div>
+
             <div className="rounded-lg border">
                 <Table>
                 <TableHeader>
@@ -410,7 +436,7 @@ export default function AdminPage() {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {products.map((product) => (
+                    {filteredAdminProducts.map((product) => (
                     <TableRow key={product.id}>
                         <TableCell className="font-medium">{product.id}</TableCell>
                         <TableCell>{product.name}</TableCell>
@@ -420,7 +446,7 @@ export default function AdminPage() {
                         <TableCell className="text-right">{formatPrice(product.price)}</TableCell>
                         <TableCell className="text-center">
                         <Button variant="ghost" size="icon" onClick={() => handleToggleFeatured(product.id)}>
-                            <Star className={cn("h-5 w-5", product.isFeatured ? "fill-primary text-primary" : "text-muted-foreground")} />
+                            <Star className={cn("h-5 w-5", product.isFeatured ? "fill-muted-foreground text-muted-foreground" : "text-muted-foreground")} />
                             <span className="sr-only">Toggle Destacado</span>
                         </Button>
                         </TableCell>
@@ -585,3 +611,5 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title }: Pro
         </Dialog>
     );
 }
+
+    
