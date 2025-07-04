@@ -29,7 +29,7 @@ export function ProductCard({ product }: ProductCardProps) {
           </CardTitle>
           {product.isFeatured && (
               <div className="absolute top-3 right-3">
-                  <Star className="h-5 w-5 flex-shrink-0 fill-yellow-400 text-yellow-400" />
+                  <Star className="h-5 w-5 flex-shrink-0 fill-gray-400 text-gray-400" />
               </div>
           )}
       </CardHeader>
