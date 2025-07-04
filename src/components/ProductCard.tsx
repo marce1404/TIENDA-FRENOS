@@ -1,9 +1,8 @@
-
 'use client';
 
 import type { Product } from '@/lib/types';
 import { Button } from './ui/button';
-import { Card, CardContent, CardFooter, CardTitle } from './ui/card';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { useCart } from '@/hooks/use-cart';
 import { Star } from 'lucide-react';
 
@@ -23,23 +22,25 @@ export function ProductCard({ product }: ProductCardProps) {
   };
 
   return (
-    <Card className="flex h-full flex-col">
-      <CardContent className="flex flex-grow flex-col p-4">
-        <div className="mb-4 flex min-h-[40px] items-start justify-between gap-2">
-          <CardTitle className="text-base font-bold leading-tight">
-            {product.name}
+    <Card className="flex h-full flex-col overflow-hidden rounded-lg border bg-card text-card-foreground shadow-sm transition-all hover:shadow-md">
+      <CardHeader className="relative p-4">
+          <CardTitle className="text-base font-bold leading-tight pr-8">
+              {product.name}
           </CardTitle>
           {product.isFeatured && (
-            <Star className="h-5 w-5 flex-shrink-0 fill-primary text-primary" />
+              <div className="absolute top-3 right-3">
+                  <Star className="h-5 w-5 flex-shrink-0 fill-yellow-400 text-yellow-400" />
+              </div>
           )}
-        </div>
+      </CardHeader>
+      <CardContent className="flex flex-grow flex-col px-4 pb-4">
         <div className="flex-grow space-y-1 text-sm text-muted-foreground">
-          <p>Marca: {product.brand}</p>
-          <p>Modelo: {product.model}</p>
-          <p>Compatibilidad: {product.compatibility}</p>
+          <p><span className="font-semibold">Marca:</span> {product.brand}</p>
+          <p><span className="font-semibold">Modelo:</span> {product.model}</p>
+          <p><span className="font-semibold">Compatibilidad:</span> {product.compatibility}</p>
         </div>
       </CardContent>
-      <CardFooter className="flex items-center justify-between p-4 pt-0">
+      <CardFooter className="flex items-center justify-between px-4 pb-4 pt-0">
         <p className="text-lg font-semibold text-foreground">
           {formatPrice(product.price)}
         </p>
