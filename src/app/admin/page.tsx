@@ -61,7 +61,8 @@ export default function AdminPage() {
   const [contactName, setContactName] = useState('');
 
   // State for .env settings form
-  const [isSavingEnv, setIsSavingEnv] = useState(false);
+  const [isSavingUser, setIsSavingUser] = useState<Record<number, boolean>>({});
+  const [isSavingSmtp, setIsSavingSmtp] = useState(false);
   const [adminUsers, setAdminUsers] = useState(() => Array(3).fill(null).map(() => ({ username: '', password: '', repeatPassword: '' })));
   const [savedUsernames, setSavedUsernames] = useState<(string | undefined)[]>([]);
   const [initialSettingsLoaded, setInitialSettingsLoaded] = useState(false);
@@ -200,26 +201,65 @@ export default function AdminPage() {
     });
   };
 
-  const handleSaveEnv = async (e: React.FormEvent) => {
+  const handleSaveUser = async (e: React.FormEvent, index: number) => {
+      e.preventDefault();
+      const user = adminUsers[index];
+
+      if (user.password && user.password !== user.repeatPassword) {
+          toast({
+              variant: "destructive",
+              title: "Error de Contraseña",
+              description: `Las contraseñas para el usuario ${index + 1} no coinciden.`,
+          });
+          return;
+      }
+
+      setIsSavingUser(prev => ({ ...prev, [index]: true }));
+
+      const settings: any = {};
+      settings[`ADMIN_USER_${index + 1}_USERNAME`] = user.username;
+      // Solo envía la contraseña si se ha ingresado una nueva
+      if (user.password) {
+          settings[`ADMIN_USER_${index + 1}_PASSWORD`] = user.password;
+      }
+
+      const result = await saveEnvSettings(settings);
+
+      setIsSavingUser(prev => ({ ...prev, [index]: false }));
+
+      if (result.success) {
+          toast({
+              title: `¡Usuario ${index + 1} Guardado!`,
+              description: "Los cambios se han guardado correctamente.",
+          });
+          
+          setSavedUsernames(prev => {
+              const newNames = [...prev];
+              newNames[index] = user.username || undefined;
+              return newNames;
+          });
+          
+          // Limpiar solo los campos de contraseña del usuario guardado
+          setAdminUsers(currentUsers => {
+            const newUsers = [...currentUsers];
+            newUsers[index] = { ...newUsers[index], password: '', repeatPassword: '' };
+            return newUsers;
+          });
+
+      } else {
+          toast({
+              variant: "destructive",
+              title: "Error al Guardar",
+              description: result.error || "Ocurrió un problema al guardar la configuración.",
+          });
+      }
+  };
+  
+  const handleSaveSmtp = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    for (let i = 0; i < adminUsers.length; i++) {
-        const user = adminUsers[i];
-        if (user.password || user.repeatPassword) {
-            if (user.password !== user.repeatPassword) {
-                toast({
-                    variant: "destructive",
-                    title: "Error de Contraseña",
-                    description: `Las contraseñas para el usuario ${i + 1} no coinciden.`,
-                });
-                return;
-            }
-        }
-    }
+    setIsSavingSmtp(true);
     
-    setIsSavingEnv(true);
-
-    const settings: any = {
+    const settings = {
       SMTP_HOST: smtpHost,
       SMTP_PORT: smtpPort,
       SMTP_USER: smtpUser,
@@ -227,28 +267,18 @@ export default function AdminPage() {
       SMTP_RECIPIENTS: smtpRecipients,
       SMTP_SECURE: smtpSecure.toString(),
     };
-    adminUsers.forEach((user, index) => {
-        settings[`ADMIN_USER_${index + 1}_USERNAME`] = user.username;
-        if (user.password && user.password === user.repeatPassword) {
-            settings[`ADMIN_USER_${index + 1}_PASSWORD`] = user.password;
-        }
-    });
 
     const result = await saveEnvSettings(settings);
-    setIsSavingEnv(false);
+    setIsSavingSmtp(false);
+
     if (result.success) {
         toast({
-            title: "¡Configuración Guardada!",
-            description: "Tus cambios se han guardado y aplicado correctamente.",
+            title: "¡Configuración de Correo Guardada!",
+            description: "Tus cambios se han guardado y aplicado.",
         });
-        
-        const newSavedUsernames = adminUsers.map(u => u.username || undefined);
-        setSavedUsernames(newSavedUsernames);
-        
-        setAdminUsers(prev => prev.map(u => ({ ...u, password: '', repeatPassword: '' })));
         setSmtpPass('');
     } else {
-        toast({
+         toast({
             variant: "destructive",
             title: "Error al Guardar",
             description: result.error || "Ocurrió un problema al guardar la configuración.",
@@ -433,21 +463,19 @@ export default function AdminPage() {
               </Card>
             </TabsContent>
             <TabsContent value="email">
-                <Card className="mt-6">
-                  <form onSubmit={handleSaveEnv}>
-                    <CardHeader>
-                      <CardTitle>Gestión de Usuarios y Correo</CardTitle>
-                      <CardDescription>
-                          Gestiona los usuarios administradores y las credenciales para el envío de correos. Los campos vacíos no se actualizarán.
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
+                <div className="mt-6 space-y-6">
+                    <div>
+                      <CardHeader className="px-0">
+                        <CardTitle>Gestión de Usuarios Administradores</CardTitle>
+                        <CardDescription>
+                            Puedes configurar hasta 3 usuarios. Un campo de contraseña vacío significa que no se cambiará.
+                        </CardDescription>
+                      </CardHeader>
                       <div className="space-y-4">
-                          <h3 className="text-lg font-semibold">Usuarios Administradores</h3>
-                          <p className="text-sm text-muted-foreground">Puedes configurar hasta 3 usuarios. Deja los campos en blanco para no modificar un usuario existente o para mantenerlo inactivo.</p>
-                           <div className="space-y-4">
-                              {adminUsers.map((user, index) => (
-                                  <div key={index} className="p-4 border rounded-lg space-y-4">
+                          {adminUsers.map((user, index) => (
+                              <Card key={index}>
+                                <form onSubmit={(e) => handleSaveUser(e, index)}>
+                                  <CardContent className="p-6 space-y-4">
                                       <div>
                                           <Label htmlFor={`admin-username-${index}`}>
                                             Usuario {index + 1} {savedUsernames[index] ? `(${savedUsernames[index]})` : ''}
@@ -507,53 +535,83 @@ export default function AdminPage() {
                                               <p className="text-xs text-destructive">Las contraseñas no coinciden.</p>
                                           )}
                                       </div>
-                                  </div>
-                              ))}
-                          </div>
+                                  </CardContent>
+                                  <CardFooter>
+                                     <Button type="submit" disabled={isSavingUser[index] || !initialSettingsLoaded}>
+                                        {isSavingUser[index] ? (
+                                            <>
+                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                Guardando...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Save className="mr-2 h-4 w-4" />
+                                                Guardar Usuario {index + 1}
+                                            </>
+                                        )}
+                                      </Button>
+                                  </CardFooter>
+                                </form>
+                              </Card>
+                          ))}
                       </div>
-                      <div className="space-y-4 pt-4 border-t">
-                          <h3 className="text-lg font-semibold">Configuración de Correo (SMTP)</h3>
-                          <div className="space-y-2">
-                              <Label htmlFor="smtp-host">Host del Servidor (SMTP_HOST)</Label>
-                              <Input id="smtp-host" placeholder="smtp.example.com" value={smtpHost} onChange={(e) => setSmtpHost(e.target.value)}/>
-                          </div>
-                          <div className="space-y-2">
-                              <Label htmlFor="smtp-port">Puerto (SMTP_PORT)</Label>
-                              <Input id="smtp-port" placeholder="587" value={smtpPort} onChange={(e) => setSmtpPort(e.target.value)}/>
-                          </div>
-                          <div className="flex items-center space-x-2 mt-2">
-                              <Switch id="smtp-secure" checked={smtpSecure} onCheckedChange={setSmtpSecure} />
-                              <Label htmlFor="smtp-secure">Usar cifrado SSL/TLS (SMTP_SECURE)</Label>
-                          </div>
-                          <div className="space-y-2">
-                              <Label htmlFor="smtp-user">Usuario (SMTP_USER)</Label>
-                              <Input id="smtp-user" placeholder="user@example.com" value={smtpUser} onChange={(e) => setSmtpUser(e.target.value)}/>
-                          </div>
-                          <div className="space-y-2">
-                              <Label htmlFor="smtp-pass">Contraseña (SMTP_PASS)</Label>
-                              <Input id="smtp-pass" type="password" placeholder="Dejar en blanco para no cambiar" value={smtpPass} onChange={(e) => setSmtpPass(e.target.value)}/>
-                          </div>
-                          <div className="space-y-2">
-                              <Label htmlFor="smtp-recipients">Correos de Destino (SMTP_RECIPIENTS)</Label>
-                              <Input id="smtp-recipients" placeholder="correo1@example.com, correo2@example.com" value={smtpRecipients} onChange={(e) => setSmtpRecipients(e.target.value)}/>
-                              <p className="text-xs text-muted-foreground">
-                                  Importante: Esta es la lista de correos que recibirán los mensajes. Sepáralos por comas.
-                              </p>
-                          </div>
-                      </div>
-                    </CardContent>
-                    <CardFooter>
-                      <Button type="submit" disabled={isSavingEnv || !initialSettingsLoaded}>
-                        {isSavingEnv ? (
-                            <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Guardando...
-                            </>
-                        ) : 'Guardar Configuración'}
-                      </Button>
-                    </CardFooter>
-                  </form>
-                </Card>
+                    </div>
+                    
+                    <Card className="mt-6">
+                      <form onSubmit={handleSaveSmtp}>
+                        <CardHeader>
+                          <CardTitle>Configuración de Correo (SMTP)</CardTitle>
+                           <CardDescription>
+                              Gestiona las credenciales para el envío de correos.
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="smtp-host">Host del Servidor (SMTP_HOST)</Label>
+                                <Input id="smtp-host" placeholder="smtp.example.com" value={smtpHost} onChange={(e) => setSmtpHost(e.target.value)}/>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="smtp-port">Puerto (SMTP_PORT)</Label>
+                                <Input id="smtp-port" placeholder="587" value={smtpPort} onChange={(e) => setSmtpPort(e.target.value)}/>
+                            </div>
+                            <div className="flex items-center space-x-2 mt-2">
+                                <Switch id="smtp-secure" checked={smtpSecure} onCheckedChange={setSmtpSecure} />
+                                <Label htmlFor="smtp-secure">Usar cifrado SSL/TLS (SMTP_SECURE)</Label>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="smtp-user">Usuario (SMTP_USER)</Label>
+                                <Input id="smtp-user" placeholder="user@example.com" value={smtpUser} onChange={(e) => setSmtpUser(e.target.value)}/>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="smtp-pass">Contraseña (SMTP_PASS)</Label>
+                                <Input id="smtp-pass" type="password" placeholder="Dejar en blanco para no cambiar" value={smtpPass} onChange={(e) => setSmtpPass(e.target.value)}/>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="smtp-recipients">Correos de Destino (SMTP_RECIPIENTS)</Label>
+                                <Input id="smtp-recipients" placeholder="correo1@example.com, correo2@example.com" value={smtpRecipients} onChange={(e) => setSmtpRecipients(e.target.value)}/>
+                                <p className="text-xs text-muted-foreground">
+                                    Importante: Esta es la lista de correos que recibirán los mensajes. Sepáralos por comas.
+                                </p>
+                            </div>
+                        </CardContent>
+                        <CardFooter>
+                          <Button type="submit" disabled={isSavingSmtp || !initialSettingsLoaded}>
+                            {isSavingSmtp ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Guardando...
+                                </>
+                            ) : (
+                                <>
+                                    <Save className="mr-2 h-4 w-4" />
+                                    Guardar Configuración de Correo
+                                </>
+                            )}
+                          </Button>
+                        </CardFooter>
+                      </form>
+                    </Card>
+                </div>
             </TabsContent>
           </Tabs>
         </TabsContent>
