@@ -45,7 +45,7 @@ export default function HomePage() {
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-primary">REPUFRENOS.CL</h1>
         </div>
         <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8 drop-shadow-md">
- Discos y pastillas de freno de alto rendimiento para todas las marcas. Seguridad y confianza en cada kilómetro.
+          Ofrecemos productos de calidad a precios que se ajustan a tu bolsillo. Discos y pastillas de freno de alto rendimiento para todas las marcas, porque tu seguridad es nuestra prioridad.
         </p>
         <Link href="/productos">
           <Button size="lg" className="bg-gray-200 text-black">Ver Productos</Button>
