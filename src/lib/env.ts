@@ -11,9 +11,13 @@ export type SmtpConfig = {
     SMTP_SECURE?: string;
 };
 
+export type AdminUser = {
+    username: string;
+    password?: string;
+}
+
 export type AdminConfig = {
-    ADMIN_USERNAME?: string;
-    ADMIN_PASSWORD?: string;
+    users: AdminUser[];
 };
 
 type EnvConfig = SmtpConfig & AdminConfig;
@@ -58,5 +62,36 @@ export async function getEnvSettings(): Promise<EnvConfig> {
     const envFromFile = await readEnvFile();
     
     // Values from .env file override any existing process.env values.
-    return { ...process.env, ...envFromFile };
+    const combinedEnv = { ...process.env, ...envFromFile };
+
+    const users: AdminUser[] = [];
+    const maxUsers = 3;
+
+    for (let i = 1; i <= maxUsers; i++) {
+        const usernameKey = `ADMIN_USER_${i}_USERNAME`;
+        const passwordKey = `ADMIN_USER_${i}_PASSWORD`;
+        
+        let username = combinedEnv[usernameKey];
+        let password = combinedEnv[passwordKey];
+
+        // Migration for user 1 from old variables if new ones don't exist
+        if (i === 1 && !username && combinedEnv.ADMIN_USERNAME) {
+            username = combinedEnv.ADMIN_USERNAME;
+            password = combinedEnv.ADMIN_PASSWORD;
+        }
+
+        if (username) {
+            users.push({ username, password });
+        }
+    }
+
+    return { 
+        users,
+        SMTP_HOST: combinedEnv.SMTP_HOST,
+        SMTP_PORT: combinedEnv.SMTP_PORT,
+        SMTP_USER: combinedEnv.SMTP_USER,
+        SMTP_PASS: combinedEnv.SMTP_PASS,
+        SMTP_RECIPIENTS: combinedEnv.SMTP_RECIPIENTS,
+        SMTP_SECURE: combinedEnv.SMTP_SECURE,
+    };
 }

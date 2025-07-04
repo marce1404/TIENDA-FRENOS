@@ -11,11 +11,22 @@ export async function verifyCredentials(
     return false;
   }
 
-  const { ADMIN_USERNAME, ADMIN_PASSWORD } = await getEnvSettings();
+  const { users } = await getEnvSettings();
   
-  // Usa valores por defecto si las variables de entorno no existen.
-  const adminUsername = ADMIN_USERNAME || 'admin';
-  const adminPassword = ADMIN_PASSWORD || 'admin123';
+  // Usa valores por defecto si no hay usuarios configurados.
+  if (users.length === 0) {
+    return username === 'admin' && password === 'admin123';
+  }
 
-  return username === adminUsername && password === adminPassword;
+  const user = users.find(u => u.username === username);
+  if (!user) {
+    return false;
+  }
+  
+  // The password from env might be undefined if not set
+  if (!user.password) {
+    return false;
+  }
+
+  return password === user.password;
 }

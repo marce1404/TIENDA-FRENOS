@@ -35,7 +35,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Pencil, Trash2, PlusCircle, LogIn, LogOut, Star, Phone, Settings, Save, Package, Mail, Loader2, Search } from 'lucide-react';
+import { Pencil, Trash2, PlusCircle, LogIn, LogOut, Star, Phone, Settings, Save, Package, Mail, Loader2, Search, Users } from 'lucide-react';
 import { verifyCredentials } from '@/actions/auth';
 import { saveEnvSettings } from '@/actions/saveEnv';
 import { cn } from '@/lib/utils';
@@ -61,8 +61,7 @@ export default function AdminPage() {
 
   // State for .env settings form
   const [isSavingEnv, setIsSavingEnv] = useState(false);
-  const [adminUsernameForEnv, setAdminUsernameForEnv] = useState('');
-  const [adminPasswordForEnv, setAdminPasswordForEnv] = useState('');
+  const [adminUsers, setAdminUsers] = useState(() => Array(3).fill(null).map(() => ({ username: '', password: '' })));
   const [smtpHost, setSmtpHost] = useState('');
   const [smtpPort, setSmtpPort] = useState('');
   const [smtpUser, setSmtpUser] = useState('');
@@ -143,19 +142,31 @@ export default function AdminPage() {
     alert('Configuración de contacto actualizada.');
   };
 
+  const handleUserChange = (index: number, field: 'username' | 'password', value: string) => {
+    setAdminUsers(currentUsers => {
+      const newUsers = [...currentUsers];
+      newUsers[index] = { ...newUsers[index], [field]: value };
+      return newUsers;
+    });
+  };
+
   const handleSaveEnv = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSavingEnv(true);
-    const settings = {
-        ADMIN_USERNAME: adminUsernameForEnv,
-        ADMIN_PASSWORD: adminPasswordForEnv,
-        SMTP_HOST: smtpHost,
-        SMTP_PORT: smtpPort,
-        SMTP_USER: smtpUser,
-        SMTP_PASS: smtpPass,
-        SMTP_RECIPIENTS: smtpRecipients,
-        SMTP_SECURE: smtpSecure.toString(),
+
+    const settings: any = {
+      SMTP_HOST: smtpHost,
+      SMTP_PORT: smtpPort,
+      SMTP_USER: smtpUser,
+      SMTP_PASS: smtpPass,
+      SMTP_RECIPIENTS: smtpRecipients,
+      SMTP_SECURE: smtpSecure.toString(),
     };
+    adminUsers.forEach((user, index) => {
+        settings[`ADMIN_USER_${index + 1}_USERNAME`] = user.username;
+        settings[`ADMIN_USER_${index + 1}_PASSWORD`] = user.password;
+    });
+
     const result = await saveEnvSettings(settings);
     setIsSavingEnv(false);
     if (result.success) {
@@ -164,8 +175,7 @@ export default function AdminPage() {
             description: "Tus cambios se han guardado y aplicado correctamente.",
         });
         // Clear sensitive fields after saving
-        setAdminUsernameForEnv('');
-        setAdminPasswordForEnv('');
+        setAdminUsers(prev => prev.map(user => ({ username: user.username, password: '' })));
         setSmtpPass('');
     } else {
         toast({
@@ -305,7 +315,7 @@ export default function AdminPage() {
           <Tabs defaultValue="contact" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="contact"><Phone className="mr-2 h-4 w-4" />Contacto</TabsTrigger>
-              <TabsTrigger value="email"><Mail className="mr-2 h-4 w-4" />Correo</TabsTrigger>
+              <TabsTrigger value="email"><Users className="mr-2 h-4 w-4" />Usuarios y Correo</TabsTrigger>
             </TabsList>
             <TabsContent value="contact">
               <Card className="mt-6">
@@ -356,52 +366,56 @@ export default function AdminPage() {
                 <Card className="mt-6">
                   <form onSubmit={handleSaveEnv}>
                     <CardHeader>
-                      <CardTitle>Configuración de Correo y Seguridad</CardTitle>
+                      <CardTitle>Gestión de Usuarios y Correo</CardTitle>
                       <CardDescription>
-                          Introduce las credenciales para el envío de correos y la contraseña de administrador. Los campos vacíos no se actualizarán.
+                          Gestiona los usuarios administradores y las credenciales para el envío de correos. Los campos vacíos no se actualizarán.
                       </CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="space-y-2">
-                          <Label htmlFor="admin-username">Nuevo Nombre de Usuario (ADMIN_USERNAME)</Label>
-                          <Input id="admin-username" placeholder="Dejar en blanco para no cambiar" value={adminUsernameForEnv} onChange={(e) => setAdminUsernameForEnv(e.target.value)} />
-                           <p className="text-xs text-muted-foreground">
-                             Establece o cambia el nombre de usuario para acceder a este panel.
-                          </p>
+                    <CardContent className="space-y-6">
+                      <div className="space-y-4">
+                          <h3 className="text-lg font-semibold">Usuarios Administradores</h3>
+                          <p className="text-sm text-muted-foreground">Puedes configurar hasta 3 usuarios. Deja los campos en blanco para no modificar un usuario existente o para mantenerlo inactivo.</p>
+                          <div className="space-y-4">
+                              {adminUsers.map((user, index) => (
+                                  <div key={index} className="p-4 border rounded-lg space-y-2">
+                                      <Label htmlFor={`admin-username-${index}`}>Usuario {index + 1}</Label>
+                                      <Input id={`admin-username-${index}`} placeholder="Nombre de usuario" value={user.username} onChange={e => handleUserChange(index, 'username', e.target.value)} />
+                                      
+                                      <Label htmlFor={`admin-password-${index}`}>Contraseña Usuario {index + 1}</Label>
+                                      <Input id={`admin-password-${index}`} type="password" placeholder="Dejar en blanco para no cambiar" value={user.password} onChange={e => handleUserChange(index, 'password', e.target.value)} />
+                                  </div>
+                              ))}
+                          </div>
                       </div>
-                      <div className="space-y-2">
-                          <Label htmlFor="admin-password">Nueva Contraseña de Administrador (ADMIN_PASSWORD)</Label>
-                          <Input id="admin-password" type="password" placeholder="Dejar en blanco para no cambiar" value={adminPasswordForEnv} onChange={(e) => setAdminPasswordForEnv(e.target.value)} />
-                          <p className="text-xs text-muted-foreground">
-                             Establece o cambia la contraseña para acceder a este panel.
-                          </p>
-                      </div>
-                      <div className="space-y-2">
-                          <Label htmlFor="smtp-host">Host del Servidor (SMTP_HOST)</Label>
-                          <Input id="smtp-host" placeholder="smtp.example.com" value={smtpHost} onChange={(e) => setSmtpHost(e.target.value)}/>
-                      </div>
-                      <div className="space-y-2">
-                          <Label htmlFor="smtp-port">Puerto (SMTP_PORT)</Label>
-                          <Input id="smtp-port" placeholder="587" value={smtpPort} onChange={(e) => setSmtpPort(e.target.value)}/>
-                      </div>
-                       <div className="flex items-center space-x-2 mt-2">
-                          <Switch id="smtp-secure" checked={smtpSecure} onCheckedChange={setSmtpSecure} />
-                          <Label htmlFor="smtp-secure">Usar cifrado SSL/TLS (SMTP_SECURE)</Label>
-                      </div>
-                      <div className="space-y-2">
-                          <Label htmlFor="smtp-user">Usuario (SMTP_USER)</Label>
-                          <Input id="smtp-user" placeholder="user@example.com" value={smtpUser} onChange={(e) => setSmtpUser(e.target.value)}/>
-                      </div>
-                      <div className="space-y-2">
-                          <Label htmlFor="smtp-pass">Contraseña (SMTP_PASS)</Label>
-                          <Input id="smtp-pass" type="password" placeholder="Dejar en blanco para no cambiar" value={smtpPass} onChange={(e) => setSmtpPass(e.target.value)}/>
-                      </div>
-                       <div className="space-y-2">
-                          <Label htmlFor="smtp-recipients">Correos de Destino (SMTP_RECIPIENTS)</Label>
-                          <Input id="smtp-recipients" placeholder="correo1@example.com, correo2@example.com" value={smtpRecipients} onChange={(e) => setSmtpRecipients(e.target.value)}/>
-                           <p className="text-xs text-muted-foreground">
-                              Importante: Esta es la lista de correos que recibirán los mensajes. Sepáralos por comas.
-                          </p>
+                      <div className="space-y-4 pt-4 border-t">
+                          <h3 className="text-lg font-semibold">Configuración de Correo (SMTP)</h3>
+                          <div className="space-y-2">
+                              <Label htmlFor="smtp-host">Host del Servidor (SMTP_HOST)</Label>
+                              <Input id="smtp-host" placeholder="smtp.example.com" value={smtpHost} onChange={(e) => setSmtpHost(e.target.value)}/>
+                          </div>
+                          <div className="space-y-2">
+                              <Label htmlFor="smtp-port">Puerto (SMTP_PORT)</Label>
+                              <Input id="smtp-port" placeholder="587" value={smtpPort} onChange={(e) => setSmtpPort(e.target.value)}/>
+                          </div>
+                          <div className="flex items-center space-x-2 mt-2">
+                              <Switch id="smtp-secure" checked={smtpSecure} onCheckedChange={setSmtpSecure} />
+                              <Label htmlFor="smtp-secure">Usar cifrado SSL/TLS (SMTP_SECURE)</Label>
+                          </div>
+                          <div className="space-y-2">
+                              <Label htmlFor="smtp-user">Usuario (SMTP_USER)</Label>
+                              <Input id="smtp-user" placeholder="user@example.com" value={smtpUser} onChange={(e) => setSmtpUser(e.target.value)}/>
+                          </div>
+                          <div className="space-y-2">
+                              <Label htmlFor="smtp-pass">Contraseña (SMTP_PASS)</Label>
+                              <Input id="smtp-pass" type="password" placeholder="Dejar en blanco para no cambiar" value={smtpPass} onChange={(e) => setSmtpPass(e.target.value)}/>
+                          </div>
+                          <div className="space-y-2">
+                              <Label htmlFor="smtp-recipients">Correos de Destino (SMTP_RECIPIENTS)</Label>
+                              <Input id="smtp-recipients" placeholder="correo1@example.com, correo2@example.com" value={smtpRecipients} onChange={(e) => setSmtpRecipients(e.target.value)}/>
+                              <p className="text-xs text-muted-foreground">
+                                  Importante: Esta es la lista de correos que recibirán los mensajes. Sepáralos por comas.
+                              </p>
+                          </div>
                       </div>
                     </CardContent>
                     <CardFooter>

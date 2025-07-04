@@ -6,8 +6,12 @@ import path from 'path';
 import { z } from 'zod';
 
 const envSchema = z.object({
-  ADMIN_USERNAME: z.string().optional(),
-  ADMIN_PASSWORD: z.string().optional(),
+  ADMIN_USER_1_USERNAME: z.string().optional(),
+  ADMIN_USER_1_PASSWORD: z.string().optional(),
+  ADMIN_USER_2_USERNAME: z.string().optional(),
+  ADMIN_USER_2_PASSWORD: z.string().optional(),
+  ADMIN_USER_3_USERNAME: z.string().optional(),
+  ADMIN_USER_3_PASSWORD: z.string().optional(),
   SMTP_HOST: z.string().optional(),
   SMTP_PORT: z.string().optional(),
   SMTP_USER: z.string().optional(),
@@ -51,6 +55,12 @@ export async function saveEnvSettings(settings: EnvSettings) {
 
   try {
     const currentEnv = await readEnvFile(envPath);
+
+    // Remove old single-user keys for migration if user 1 is being set.
+    if (parsed.data.ADMIN_USER_1_USERNAME) {
+        delete currentEnv.ADMIN_USERNAME;
+        delete currentEnv.ADMIN_PASSWORD;
+    }
 
     // Merge new settings, only updating keys that have a non-empty value
     for (const [key, value] of Object.entries(parsed.data)) {
