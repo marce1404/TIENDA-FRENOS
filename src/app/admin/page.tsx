@@ -35,7 +35,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Pencil, Trash2, PlusCircle, LogIn, LogOut, Star, Phone, Settings, Save, Package, Mail, Loader2, Search, Users } from 'lucide-react';
+import { Pencil, Trash2, PlusCircle, LogIn, LogOut, Star, Phone, Settings, Save, Package, Mail, Loader2, Search, Users, Eye, EyeOff } from 'lucide-react';
 import { verifyCredentials } from '@/actions/auth';
 import { saveEnvSettings } from '@/actions/saveEnv';
 import { cn } from '@/lib/utils';
@@ -61,7 +61,9 @@ export default function AdminPage() {
 
   // State for .env settings form
   const [isSavingEnv, setIsSavingEnv] = useState(false);
-  const [adminUsers, setAdminUsers] = useState(() => Array(3).fill(null).map(() => ({ username: '', password: '' })));
+  const [adminUsers, setAdminUsers] = useState(() => Array(3).fill(null).map(() => ({ username: '', password: '', repeatPassword: '' })));
+  const [showPasswords, setShowPasswords] = useState([false, false, false]);
+  const [showRepeatPasswords, setShowRepeatPasswords] = useState([false, false, false]);
   const [smtpHost, setSmtpHost] = useState('');
   const [smtpPort, setSmtpPort] = useState('');
   const [smtpUser, setSmtpUser] = useState('');
@@ -142,7 +144,7 @@ export default function AdminPage() {
     alert('Configuración de contacto actualizada.');
   };
 
-  const handleUserChange = (index: number, field: 'username' | 'password', value: string) => {
+  const handleUserChange = (index: number, field: 'username' | 'password' | 'repeatPassword', value: string) => {
     setAdminUsers(currentUsers => {
       const newUsers = [...currentUsers];
       newUsers[index] = { ...newUsers[index], [field]: value };
@@ -152,6 +154,22 @@ export default function AdminPage() {
 
   const handleSaveEnv = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validation check for passwords
+    for (let i = 0; i < adminUsers.length; i++) {
+        const user = adminUsers[i];
+        if (user.password || user.repeatPassword) { // Only validate if a password is being entered
+            if (user.password !== user.repeatPassword) {
+                toast({
+                    variant: "destructive",
+                    title: "Error de Contraseña",
+                    description: `Las contraseñas para el usuario ${i + 1} no coinciden.`,
+                });
+                return; // Stop submission
+            }
+        }
+    }
+    
     setIsSavingEnv(true);
 
     const settings: any = {
@@ -164,7 +182,10 @@ export default function AdminPage() {
     };
     adminUsers.forEach((user, index) => {
         settings[`ADMIN_USER_${index + 1}_USERNAME`] = user.username;
-        settings[`ADMIN_USER_${index + 1}_PASSWORD`] = user.password;
+        // Only pass password if it's set and valid
+        if (user.password && user.password === user.repeatPassword) {
+            settings[`ADMIN_USER_${index + 1}_PASSWORD`] = user.password;
+        }
     });
 
     const result = await saveEnvSettings(settings);
@@ -175,7 +196,7 @@ export default function AdminPage() {
             description: "Tus cambios se han guardado y aplicado correctamente.",
         });
         // Clear sensitive fields after saving
-        setAdminUsers(prev => prev.map(user => ({ username: user.username, password: '' })));
+        setAdminUsers(prev => prev.map(u => ({ username: u.username, password: '', repeatPassword: '' })));
         setSmtpPass('');
     } else {
         toast({
@@ -375,14 +396,66 @@ export default function AdminPage() {
                       <div className="space-y-4">
                           <h3 className="text-lg font-semibold">Usuarios Administradores</h3>
                           <p className="text-sm text-muted-foreground">Puedes configurar hasta 3 usuarios. Deja los campos en blanco para no modificar un usuario existente o para mantenerlo inactivo.</p>
-                          <div className="space-y-4">
+                           <div className="space-y-4">
                               {adminUsers.map((user, index) => (
-                                  <div key={index} className="p-4 border rounded-lg space-y-2">
-                                      <Label htmlFor={`admin-username-${index}`}>Usuario {index + 1}</Label>
-                                      <Input id={`admin-username-${index}`} placeholder="Nombre de usuario" value={user.username} onChange={e => handleUserChange(index, 'username', e.target.value)} />
+                                  <div key={index} className="p-4 border rounded-lg space-y-4">
+                                      <div>
+                                          <Label htmlFor={`admin-username-${index}`}>Usuario {index + 1}</Label>
+                                          <Input id={`admin-username-${index}`} placeholder="Nombre de usuario" value={user.username} onChange={e => handleUserChange(index, 'username', e.target.value)} className="mt-1" />
+                                      </div>
                                       
-                                      <Label htmlFor={`admin-password-${index}`}>Contraseña Usuario {index + 1}</Label>
-                                      <Input id={`admin-password-${index}`} type="password" placeholder="Dejar en blanco para no cambiar" value={user.password} onChange={e => handleUserChange(index, 'password', e.target.value)} />
+                                      <div className="space-y-2">
+                                          <Label htmlFor={`admin-password-${index}`}>Nueva Contraseña Usuario {index + 1}</Label>
+                                          <div className="relative">
+                                              <Input
+                                                  id={`admin-password-${index}`}
+                                                  type={showPasswords[index] ? 'text' : 'password'}
+                                                  placeholder="Dejar en blanco para no cambiar"
+                                                  value={user.password}
+                                                  onChange={e => handleUserChange(index, 'password', e.target.value)}
+                                                  className="pr-10"
+                                              />
+                                              <Button
+                                                  type="button"
+                                                  variant="ghost"
+                                                  size="icon"
+                                                  className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 text-muted-foreground hover:bg-transparent"
+                                                  onClick={() => setShowPasswords(p => { const newP = [...p]; newP[index] = !newP[index]; return newP; })}
+                                              >
+                                                  {showPasswords[index] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                                  <span className="sr-only">Toggle password visibility</span>
+                                              </Button>
+                                          </div>
+                                      </div>
+                                      
+                                      <div className="space-y-2">
+                                          <Label htmlFor={`admin-repeat-password-${index}`}>Repetir Contraseña</Label>
+                                           <div className="relative">
+                                              <Input
+                                                  id={`admin-repeat-password-${index}`}
+                                                  type={showRepeatPasswords[index] ? 'text' : 'password'}
+                                                  placeholder="Repite la nueva contraseña"
+                                                  value={user.repeatPassword}
+                                                  onChange={e => handleUserChange(index, 'repeatPassword', e.target.value)}
+                                                  className="pr-10"
+                                                  disabled={!user.password}
+                                              />
+                                               <Button
+                                                  type="button"
+                                                  variant="ghost"
+                                                  size="icon"
+                                                  className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 text-muted-foreground hover:bg-transparent"
+                                                  onClick={() => setShowRepeatPasswords(p => { const newP = [...p]; newP[index] = !newP[index]; return newP; })}
+                                                  disabled={!user.password}
+                                                >
+                                                  {showRepeatPasswords[index] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                                  <span className="sr-only">Toggle password visibility</span>
+                                              </Button>
+                                          </div>
+                                          {user.password && user.repeatPassword && user.password !== user.repeatPassword && (
+                                              <p className="text-xs text-destructive">Las contraseñas no coinciden.</p>
+                                          )}
+                                      </div>
                                   </div>
                               ))}
                           </div>
@@ -643,5 +716,3 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title }: Pro
         </Dialog>
     );
 }
-
-    
