@@ -12,6 +12,7 @@ export type SmtpConfig = {
 };
 
 export type AdminConfig = {
+    ADMIN_USERNAME?: string;
     ADMIN_PASSWORD?: string;
 };
 

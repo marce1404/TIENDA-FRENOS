@@ -3,11 +3,19 @@
 
 import { getEnvSettings } from '@/lib/env';
 
-export async function verifyPassword(password: string): Promise<boolean> {
-  const { ADMIN_PASSWORD } = await getEnvSettings();
+export async function verifyCredentials(
+  username?: string,
+  password?: string
+): Promise<boolean> {
+  if (!username || !password) {
+    return false;
+  }
+
+  const { ADMIN_USERNAME, ADMIN_PASSWORD } = await getEnvSettings();
   
-  // Usa la contraseña del archivo .env si existe, si no, usa 'admin123' como respaldo.
+  // Usa valores por defecto si las variables de entorno no existen.
+  const adminUsername = ADMIN_USERNAME || 'admin';
   const adminPassword = ADMIN_PASSWORD || 'admin123';
 
-  return password === adminPassword;
+  return username === adminUsername && password === adminPassword;
 }

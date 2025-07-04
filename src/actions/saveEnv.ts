@@ -6,6 +6,7 @@ import path from 'path';
 import { z } from 'zod';
 
 const envSchema = z.object({
+  ADMIN_USERNAME: z.string().optional(),
   ADMIN_PASSWORD: z.string().optional(),
   SMTP_HOST: z.string().optional(),
   SMTP_PORT: z.string().optional(),

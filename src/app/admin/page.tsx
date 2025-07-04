@@ -36,7 +36,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Pencil, Trash2, PlusCircle, LogIn, LogOut, Star, Phone, Settings, Save, Package, Mail, Loader2, Search } from 'lucide-react';
-import { verifyPassword } from '@/actions/auth';
+import { verifyCredentials } from '@/actions/auth';
 import { saveEnvSettings } from '@/actions/saveEnv';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -47,6 +47,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
@@ -60,6 +61,7 @@ export default function AdminPage() {
 
   // State for .env settings form
   const [isSavingEnv, setIsSavingEnv] = useState(false);
+  const [adminUsernameForEnv, setAdminUsernameForEnv] = useState('');
   const [adminPasswordForEnv, setAdminPasswordForEnv] = useState('');
   const [smtpHost, setSmtpHost] = useState('');
   const [smtpPort, setSmtpPort] = useState('');
@@ -108,16 +110,16 @@ export default function AdminPage() {
     setError('');
 
     try {
-      const isValid = await verifyPassword(password);
+      const isValid = await verifyCredentials(username, password);
       if (isValid) {
         setIsAuthenticated(true);
         sessionStorage.setItem('isAdminAuthenticated', 'true');
         setError('');
       } else {
-        setError('Contraseña incorrecta.');
+        setError('Usuario o contraseña incorrectos.');
       }
     } catch (err) {
-      setError('Ocurrió un error al verificar la contraseña.');
+      setError('Ocurrió un error al verificar las credenciales.');
     } finally {
       setIsLoggingIn(false);
     }
@@ -126,6 +128,7 @@ export default function AdminPage() {
   const handleLogout = () => {
     sessionStorage.removeItem('isAdminAuthenticated');
     setIsAuthenticated(false);
+    setUsername('');
     setPassword('');
   };
 
@@ -144,6 +147,7 @@ export default function AdminPage() {
     e.preventDefault();
     setIsSavingEnv(true);
     const settings = {
+        ADMIN_USERNAME: adminUsernameForEnv,
         ADMIN_PASSWORD: adminPasswordForEnv,
         SMTP_HOST: smtpHost,
         SMTP_PORT: smtpPort,
@@ -159,7 +163,8 @@ export default function AdminPage() {
             title: "¡Configuración Guardada!",
             description: "Tus cambios se han guardado y aplicado correctamente.",
         });
-        // Clear password fields after saving
+        // Clear sensitive fields after saving
+        setAdminUsernameForEnv('');
         setAdminPasswordForEnv('');
         setSmtpPass('');
     } else {
@@ -241,8 +246,18 @@ export default function AdminPage() {
         <div className="w-full max-w-sm mx-auto">
           <form onSubmit={handleLogin} className="bg-card p-8 rounded-lg shadow-lg border border-border">
             <h1 className="text-2xl font-bold text-center mb-4">Acceso de Administrador</h1>
-            <p className="text-muted-foreground text-center mb-6">Ingresa la contraseña para continuar.</p>
+            <p className="text-muted-foreground text-center mb-6">Ingresa tus credenciales para continuar.</p>
             <div className="space-y-4">
+               <div className="space-y-2">
+                <Label htmlFor="username">Usuario</Label>
+                <Input
+                  id="username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="admin"
+                  required
+                />
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Contraseña</Label>
                 <Input
@@ -348,10 +363,17 @@ export default function AdminPage() {
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="space-y-2">
+                          <Label htmlFor="admin-username">Nuevo Nombre de Usuario (ADMIN_USERNAME)</Label>
+                          <Input id="admin-username" placeholder="Dejar en blanco para no cambiar" value={adminUsernameForEnv} onChange={(e) => setAdminUsernameForEnv(e.target.value)} />
+                           <p className="text-xs text-muted-foreground">
+                             Establece o cambia el nombre de usuario para acceder a este panel.
+                          </p>
+                      </div>
+                      <div className="space-y-2">
                           <Label htmlFor="admin-password">Nueva Contraseña de Administrador (ADMIN_PASSWORD)</Label>
                           <Input id="admin-password" type="password" placeholder="Dejar en blanco para no cambiar" value={adminPasswordForEnv} onChange={(e) => setAdminPasswordForEnv(e.target.value)} />
                           <p className="text-xs text-muted-foreground">
-                             Establece o cambia la contraseña para acceder a este panel. Déjalo en blanco para no modificarla.
+                             Establece o cambia la contraseña para acceder a este panel.
                           </p>
                       </div>
                       <div className="space-y-2">
