@@ -8,12 +8,20 @@ import { Search, ShoppingCart } from 'lucide-react';
 import type { Product } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowLeftIcon, ArrowRightIcon } from '@radix-ui/react-icons';
 import { useCart } from '@/hooks/use-cart';
 import { BrakePadIcon } from '@/components/icons/BrakePadIcon';
 import { BrakeDiscIcon } from '@/components/icons/BrakeDiscIcon';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Separator } from '@/components/ui/separator';
+
 
 export default function ProductosPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -23,6 +31,7 @@ export default function ProductosPage() {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [isMounted, setIsMounted] = useState(false);
   const { addToCart } = useCart();
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   useEffect(() => {
     setAllProducts(getProducts());
@@ -68,6 +77,13 @@ export default function ProductosPage() {
   }, [filteredProducts, currentPage, itemsPerPage]);
 
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('es-CL', {
+      style: 'currency',
+      currency: 'CLP',
+    }).format(price);
+  };
 
   const LoadingSkeleton = () => (
     <div className="flex flex-col gap-4">
@@ -122,8 +138,12 @@ export default function ProductosPage() {
                 {paginatedProducts.length > 0 ? (
                   <>
                     {paginatedProducts.map((product) => (
-                      <div key={product.id} className="rounded-lg border bg-card text-card-foreground shadow-sm p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-                        <Link href={`/productos/${product.id}`} className="flex flex-grow items-center gap-4">
+                      <div 
+                        key={product.id} 
+                        className="rounded-lg border bg-card text-card-foreground shadow-sm p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:bg-muted/50 transition-colors cursor-pointer"
+                        onClick={() => setSelectedProduct(product)}
+                      >
+                        <div className="flex flex-grow items-center gap-4">
                             <div className="flex-shrink-0 w-16 h-16 rounded-md bg-muted/20 flex items-center justify-center">
                                 {product.category === 'Pastillas' ? (
                                     <BrakePadIcon className="w-8 h-8 text-muted-foreground" />
@@ -134,16 +154,13 @@ export default function ProductosPage() {
                             <div className="flex-grow">
                                 <h2 className="text-lg font-semibold">{product.name}</h2>
                                 <p className="text-sm text-muted-foreground">{product.brand} | {product.model}</p>
-                                {product.compatibility && (
-                                <p className="text-xs text-muted-foreground mt-1">Compatibilidad: {product.compatibility}</p>
-                                )}
                             </div>
-                        </Link>
-                        <div className="flex flex-col items-start sm:items-end gap-2">
-                            <p className="text-lg font-bold">
-                                {new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(product.price)}
+                        </div>
+                        <div className="flex flex-col items-start sm:items-end gap-2 w-full sm:w-auto">
+                            <p className="text-lg font-bold text-right sm:text-left w-full sm:w-auto">
+                                {formatPrice(product.price)}
                             </p>
-                             <Button size="sm" onClick={(e) => { e.preventDefault(); addToCart(product); }}>
+                             <Button size="sm" className="w-full sm:w-auto" onClick={(e) => { e.stopPropagation(); addToCart(product); }}>
                                 <ShoppingCart className="mr-2 h-4 w-4"/>
                                 Añadir
                              </Button>
@@ -181,6 +198,54 @@ export default function ProductosPage() {
                 )}
             </div>
           </div>
+        )}
+
+        {selectedProduct && (
+          <Dialog open={!!selectedProduct} onOpenChange={(isOpen) => !isOpen && setSelectedProduct(null)}>
+            <DialogContent className="sm:max-w-3xl">
+              <DialogHeader>
+                <DialogTitle className="text-2xl">{selectedProduct.name}</DialogTitle>
+              </DialogHeader>
+              <div className="grid md:grid-cols-2 gap-8 py-4 items-start">
+                <div className="flex aspect-square items-center justify-center rounded-lg bg-card p-8 border">
+                    {selectedProduct.category === 'Pastillas' ? (
+                      <BrakePadIcon className="h-48 w-48 text-muted-foreground" />
+                    ) : (
+                      <BrakeDiscIcon className="h-48 w-48 text-muted-foreground" />
+                    )}
+                </div>
+                <div className="flex flex-col gap-4">
+                  <p className="text-3xl font-bold text-primary">{formatPrice(selectedProduct.price)}</p>
+                  <Separator />
+                  <div className="space-y-4 text-muted-foreground">
+                    <div className="grid grid-cols-2 gap-2">
+                      <span className="font-semibold text-foreground">Marca:</span>
+                      <span>{selectedProduct.brand}</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <span className="font-semibold text-foreground">Modelo:</span>
+                      <span>{selectedProduct.model}</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <span className="font-semibold text-foreground">Categoría:</span>
+                      <span>{selectedProduct.category}</span>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <h2 className="text-lg font-semibold text-foreground">Compatibilidad</h2>
+                    <p className="text-muted-foreground">{selectedProduct.compatibility}</p>
+                  </div>
+                </div>
+              </div>
+              <DialogFooter className="sm:justify-between gap-2 sm:gap-0">
+                  <Button type="button" variant="outline" onClick={() => setSelectedProduct(null)}>Cerrar</Button>
+                  <Button type="button" size="lg" onClick={() => { addToCart(selectedProduct); setSelectedProduct(null); }}>
+                      <ShoppingCart className="mr-2 h-5 w-5" />
+                      Añadir al Carrito
+                  </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         )}
       </div>
   );
