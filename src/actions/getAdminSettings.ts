@@ -1,3 +1,4 @@
+
 'use server';
 
 import { getEnvSettings } from '@/lib/env';
@@ -17,13 +18,10 @@ export interface AdminSettingsForForm {
 export async function getAdminSettingsForForm(): Promise<AdminSettingsForForm> {
     const settings = await getEnvSettings();
     
-    // Ensure we always have an array of 3 users for the form.
-    const formUsers = Array(3).fill({ username: undefined });
-    settings.users.forEach((user, index) => {
-        if (index < 3) {
-            formUsers[index] = { username: user.username };
-        }
-    });
+    // Ensure we always have an array of 3 users for the form, using their existing usernames.
+    const formUsers = Array.from({ length: 3 }, (_, index) => ({
+        username: settings.users[index]?.username,
+    }));
 
     return {
         users: formUsers,

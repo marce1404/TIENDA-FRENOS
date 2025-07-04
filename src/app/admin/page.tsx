@@ -114,16 +114,15 @@ export default function AdminPage() {
             try {
                 const settings = await getAdminSettingsForForm();
 
-                const loadedUsers = Array(3).fill(null).map(() => ({ username: '', password: '', repeatPassword: '' }));
-                const currentSavedUsernames: (string | undefined)[] = [];
-                settings.users.forEach((user, index) => {
-                    if (user.username) {
-                        loadedUsers[index].username = user.username;
-                        currentSavedUsernames[index] = user.username;
-                    }
-                });
-                setAdminUsers(loadedUsers);
-                setSavedUsernames(currentSavedUsernames);
+                const usernamesFromServer = settings.users.map(u => u.username);
+                setSavedUsernames(usernamesFromServer);
+
+                const formStateForUsers = settings.users.map(user => ({
+                    username: user.username || '',
+                    password: '',
+                    repeatPassword: ''
+                }));
+                setAdminUsers(formStateForUsers);
 
                 setSmtpHost(settings.smtp.host || '');
                 setSmtpPort(settings.smtp.port || '');
