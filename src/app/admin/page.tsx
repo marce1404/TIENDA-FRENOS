@@ -157,8 +157,7 @@ export default function AdminPage() {
     if (result.success) {
         toast({
             title: "¡Configuración Guardada!",
-            description: "Para que los cambios tomen efecto, por favor reinicia el servidor de la aplicación.",
-            duration: 9000
+            description: "Tus cambios se han guardado y aplicado correctamente.",
         });
         // Clear password fields after saving
         setAdminPasswordForEnv('');
@@ -382,9 +381,6 @@ export default function AdminPage() {
                               Importante: Esta es la lista de correos que recibirán los mensajes. Sepáralos por comas.
                           </p>
                       </div>
-                       <p className="mt-4 text-sm text-destructive">
-                          <span className="font-bold">Importante:</span> Después de guardar, debes reiniciar el servidor para que los cambios tomen efecto.
-                      </p>
                     </CardContent>
                     <CardFooter>
                       <Button type="submit" disabled={isSavingEnv}>

@@ -3,6 +3,7 @@
 
 import nodemailer from 'nodemailer';
 import { z } from 'zod';
+import { getEnvSettings } from '@/lib/env';
 
 const sendEmailSchema = z.object({
   name: z.string().min(1, { message: 'El nombre es requerido.' }),
@@ -25,7 +26,7 @@ export async function sendEmail(formData: {
   
   const { name, email, subject, message } = parsed.data;
 
-  const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_RECIPIENTS, SMTP_SECURE } = process.env;
+  const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_RECIPIENTS, SMTP_SECURE } = await getEnvSettings();
 
   if (!SMTP_HOST || !SMTP_PORT || !SMTP_USER || !SMTP_PASS || !SMTP_RECIPIENTS) {
     console.error('Las variables de entorno SMTP no están configuradas correctamente.');
