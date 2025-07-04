@@ -145,10 +145,8 @@ export default function ProductosPage() {
                         onClick={() => setSelectedProduct(product)}
                       >
                         <div className="flex flex-grow items-center gap-4">
-                            <div className="flex-shrink-0 w-16 h-16 rounded-md bg-muted/50 flex items-center justify-center border overflow-hidden">
-                                {product.imageUrl ? (
-                                    <Image src={product.imageUrl} alt={product.name} width={64} height={64} className="h-full w-full object-cover" />
-                                ) : product.category === 'Pastillas' ? (
+                            <div className="flex-shrink-0 w-16 h-16 rounded-md bg-muted/50 flex items-center justify-center border">
+                                {product.category === 'Pastillas' ? (
                                     <BrakePadIcon className="w-8 h-8 text-muted-foreground" />
                                 ) : (
                                     <BrakeDiscIcon className="w-8 h-8 text-muted-foreground" />
@@ -206,18 +204,6 @@ export default function ProductosPage() {
         {selectedProduct && (
           <Dialog open={!!selectedProduct} onOpenChange={(isOpen) => !isOpen && setSelectedProduct(null)}>
             <DialogContent className="sm:max-w-lg p-0">
-               {selectedProduct.imageUrl && (
-                <div className="relative">
-                  <Image
-                    src={selectedProduct.imageUrl}
-                    alt={selectedProduct.name}
-                    width={600}
-                    height={400}
-                    className="w-full h-auto rounded-t-lg object-cover"
-                    data-ai-hint={selectedProduct.category === 'Pastillas' ? 'brake pad' : 'brake disc'}
-                  />
-                </div>
-              )}
               <DialogHeader className="p-6 pb-0 text-left">
                 <DialogTitle className="text-2xl">{selectedProduct.name}</DialogTitle>
               </DialogHeader>

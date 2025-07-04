@@ -7,6 +7,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardTitle } from './ui/
 import { useCart } from '@/hooks/use-cart';
 import { Star } from 'lucide-react';
 import Image from 'next/image';
+import { BrakePadIcon } from './icons/BrakePadIcon';
+import { BrakeDiscIcon } from './icons/BrakeDiscIcon';
 
 interface ProductCardProps {
   product: Product;
@@ -22,19 +24,13 @@ export function ProductCard({ product }: ProductCardProps) {
     }).format(price);
   };
 
-  const dataAiHint = product.category === 'Pastillas' ? 'brake pad' : 'brake disc';
-
   return (
     <Card className="group flex flex-col overflow-hidden transition-transform duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10">
-      <div className="relative bg-muted overflow-hidden">
-        <Image
-          src={product.imageUrl || 'https://placehold.co/400x300.png'}
-          alt={product.name}
-          width={400}
-          height={300}
-          className="h-auto w-full object-cover transition-transform duration-300 group-hover:scale-105"
-          data-ai-hint={dataAiHint}
-        />
+      <div className="relative bg-muted overflow-hidden flex h-48 items-center justify-center">
+        {product.category === 'Pastillas' ? 
+            <BrakePadIcon className="h-24 w-24 text-muted-foreground" /> : 
+            <BrakeDiscIcon className="h-24 w-24 text-muted-foreground" />
+        }
         {product.isFeatured && (
           <div className="absolute top-2 right-2 z-10 rounded-full bg-background/70 p-1.5 backdrop-blur-sm">
             <Star className="h-4 w-4 fill-primary text-primary" />

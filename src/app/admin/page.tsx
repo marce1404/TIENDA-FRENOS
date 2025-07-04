@@ -777,14 +777,14 @@ interface ProductFormDialogProps {
 
 function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title }: ProductFormDialogProps) {
     const getInitialFormData = () => ({
-        name: '', brand: '', model: '', compatibility: '', price: 0, category: '', isFeatured: false, imageUrl: '',
+        name: '', brand: '', model: '', compatibility: '', price: 0, category: '', isFeatured: false,
     });
     
     const [formData, setFormData] = useState(getInitialFormData());
 
     useEffect(() => {
         if (isOpen) {
-            const initialData = product ? { ...product, imageUrl: product.imageUrl || '' } : getInitialFormData();
+            const initialData = product ? { ...product } : getInitialFormData();
             setFormData(initialData);
         }
     }, [isOpen, product]);
@@ -853,10 +853,6 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title }: Pro
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="price" className="text-right">Precio</Label>
                             <Input id="price" type="number" value={formData.price} onChange={handleChange} required className="col-span-3" />
-                        </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="imageUrl" className="text-right">URL de la Imagen</Label>
-                            <Input id="imageUrl" value={formData.imageUrl} onChange={handleChange} placeholder="https://example.com/image.png" className="col-span-3" />
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
                           <Label htmlFor="isFeatured" className="text-right">Destacado</Label>
