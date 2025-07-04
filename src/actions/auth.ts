@@ -14,11 +14,12 @@ export async function verifyCredentials(
   const { users } = await getEnvSettings();
   
   // Usa valores por defecto si no hay usuarios configurados.
-  if (users.length === 0) {
+  const configuredUsers = users.filter(u => u.username);
+  if (configuredUsers.length === 0) {
     return username === 'admin' && password === 'admin123';
   }
 
-  const user = users.find(u => u.username === username);
+  const user = configuredUsers.find(u => u.username === username);
   if (!user) {
     return false;
   }

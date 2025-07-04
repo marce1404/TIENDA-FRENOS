@@ -18,13 +18,9 @@ export interface AdminSettingsForForm {
 export async function getAdminSettingsForForm(): Promise<AdminSettingsForForm> {
     const settings = await getEnvSettings();
     
-    // Ensure we always have an array of 3 users for the form, using their existing usernames.
-    const formUsers = Array.from({ length: 3 }, (_, index) => ({
-        username: settings.users[index]?.username,
-    }));
-
+    // settings.users is now an array of 3 user objects, which matches the required structure.
     return {
-        users: formUsers,
+        users: settings.users,
         smtp: {
             host: settings.SMTP_HOST,
             port: settings.SMTP_PORT,

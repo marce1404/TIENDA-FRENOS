@@ -12,7 +12,7 @@ export type SmtpConfig = {
 };
 
 export type AdminUser = {
-    username: string;
+    username?: string;
     password?: string;
 }
 
@@ -75,14 +75,12 @@ export async function getEnvSettings(): Promise<EnvConfig> {
         let password = combinedEnv[passwordKey];
 
         // Migration for user 1 from old variables if new ones don't exist
-        if (i === 1 && !username && combinedEnv.ADMIN_USERNAME) {
+        if (i === 1 && username === undefined && combinedEnv.ADMIN_USERNAME) {
             username = combinedEnv.ADMIN_USERNAME;
             password = combinedEnv.ADMIN_PASSWORD;
         }
 
-        if (username) {
-            users.push({ username, password });
-        }
+        users.push({ username, password });
     }
 
     return { 
