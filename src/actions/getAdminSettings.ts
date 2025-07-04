@@ -2,6 +2,7 @@
 'use server';
 
 import { getEnvSettings } from '@/lib/env';
+import { unstable_noStore as noStore } from 'next/cache';
 
 export interface AdminSettingsForForm {
     users: { username: string | undefined }[];
@@ -16,6 +17,7 @@ export interface AdminSettingsForForm {
 
 
 export async function getAdminSettingsForForm(): Promise<AdminSettingsForForm> {
+    noStore();
     const settings = await getEnvSettings();
     
     // Explicitly map to the required structure to avoid any serialization issues with extra properties.
