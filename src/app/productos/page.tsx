@@ -202,35 +202,27 @@ export default function ProductosPage() {
 
         {selectedProduct && (
           <Dialog open={!!selectedProduct} onOpenChange={(isOpen) => !isOpen && setSelectedProduct(null)}>
-            <DialogContent className="sm:max-w-3xl">
+            <DialogContent className="sm:max-w-lg">
               <DialogHeader>
                 <DialogTitle className="text-2xl">{selectedProduct.name}</DialogTitle>
               </DialogHeader>
-              <div className="grid md:grid-cols-2 gap-8 py-4 items-start">
-                <div className="flex aspect-square items-center justify-center rounded-lg bg-card p-8 border">
-                    {selectedProduct.category === 'Pastillas' ? (
-                      <BrakePadIcon className="h-48 w-48 text-muted-foreground" />
-                    ) : (
-                      <BrakeDiscIcon className="h-48 w-48 text-muted-foreground" />
-                    )}
-                </div>
+              <div className="py-4">
                 <div className="flex flex-col gap-4">
                   <p className="text-3xl font-bold text-primary">{formatPrice(selectedProduct.price)}</p>
                   <Separator />
                   <div className="space-y-4 text-muted-foreground">
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-[auto,1fr] gap-x-4 gap-y-2">
                       <span className="font-semibold text-foreground">Marca:</span>
                       <span>{selectedProduct.brand}</span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
+
                       <span className="font-semibold text-foreground">Modelo:</span>
                       <span>{selectedProduct.model}</span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
+                    
                       <span className="font-semibold text-foreground">Categoría:</span>
                       <span>{selectedProduct.category}</span>
                     </div>
                   </div>
+                  <Separator />
                   <div className="space-y-2">
                     <h2 className="text-lg font-semibold text-foreground">Compatibilidad</h2>
                     <p className="text-muted-foreground">{selectedProduct.compatibility}</p>
