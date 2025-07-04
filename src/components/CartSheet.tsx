@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useCart } from '@/hooks/use-cart';
@@ -17,6 +18,7 @@ import { Separator } from './ui/separator';
 import { useEffect, useState } from 'react';
 import { BrakePadIcon } from './icons/BrakePadIcon';
 import { BrakeDiscIcon } from './icons/BrakeDiscIcon';
+import Image from 'next/image';
 
 const formatPrice = (price: number) => {
     return new Intl.NumberFormat('es-CL', {
@@ -78,8 +80,10 @@ export function CartSheet() {
               <div className="flex flex-col gap-4 py-4 pr-6">
                 {cartItems.map((item) => (
                   <div key={item.id} className="flex items-center gap-4">
-                    <div className="flex-shrink-0 w-16 h-16 rounded-md bg-muted/50 flex items-center justify-center">
-                      {item.category === 'Pastillas' ? (
+                    <div className="flex-shrink-0 w-16 h-16 rounded-md bg-muted/50 flex items-center justify-center overflow-hidden border">
+                      {item.imageUrl ? (
+                        <Image src={item.imageUrl} alt={item.name} width={64} height={64} className="h-full w-full object-cover" />
+                      ) : item.category === 'Pastillas' ? (
                         <BrakePadIcon className="w-8 h-8 text-muted-foreground" />
                       ) : (
                         <BrakeDiscIcon className="w-8 h-8 text-muted-foreground" />

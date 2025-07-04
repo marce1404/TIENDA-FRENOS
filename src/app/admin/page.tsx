@@ -353,27 +353,21 @@ export default function AdminPage() {
     });
   }, [products, adminSearchTerm]);
 
-  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
-
-  // This effect handles resetting the page when filters change
-  useEffect(() => {
-    if (currentPage > totalPages && totalPages > 0) {
-        setCurrentPage(totalPages);
-    }
-  }, [currentPage, totalPages]);
-
   const paginatedAdminProducts = useMemo(() => {
     const indexOfLastProduct = currentPage * productsPerPage;
     const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
     return filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
   }, [filteredProducts, currentPage, productsPerPage]);
 
+  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+
   useEffect(() => {
-    if (!isMounted) return;
-    if (currentPage > totalPages) {
-        setCurrentPage(totalPages > 0 ? totalPages : 1);
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(totalPages);
+    } else if (currentPage === 0 && totalPages > 0) {
+      setCurrentPage(1);
     }
-  }, [filteredProducts, currentPage, totalPages, productsPerPage, isMounted]);
+  }, [currentPage, totalPages]);
 
   if (!isMounted) {
     return null; // Or a loading spinner
@@ -659,7 +653,7 @@ export default function AdminPage() {
                 placeholder="Buscar por ID, nombre, marca, modelo..."
                 className="pl-10"
                 value={adminSearchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => setAdminSearchTerm(e.target.value)}
               />
               <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
             </div>
@@ -689,7 +683,7 @@ export default function AdminPage() {
                         <TableCell className="text-right">{formatPrice(product.price)}</TableCell>
                         <TableCell className="text-center">
                         <Button variant="ghost" size="icon" onClick={() => handleToggleFeatured(product.id)}>
-                            <Star className={cn("h-5 w-5", product.isFeatured ? "fill-muted-foreground text-muted-foreground" : "text-muted-foreground")} />
+                            <Star className={cn("h-5 w-5", product.isFeatured ? "fill-primary text-primary" : "text-muted-foreground")} />
                             <span className="sr-only">Toggle Destacado</span>
                         </Button>
                         </TableCell>
@@ -724,6 +718,7 @@ export default function AdminPage() {
                 </TableBody>
                 </Table>
             </div>
+            
             {totalPages > 1 && (
                 <div className="flex justify-center items-center gap-4 mt-8">
                     <Button
@@ -782,14 +777,14 @@ interface ProductFormDialogProps {
 
 function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title }: ProductFormDialogProps) {
     const getInitialFormData = () => ({
-        name: '', brand: '', model: '', compatibility: '', price: 0, category: '', isFeatured: false,
+        name: '', brand: '', model: '', compatibility: '', price: 0, category: '', isFeatured: false, imageUrl: '',
     });
     
     const [formData, setFormData] = useState(getInitialFormData());
 
     useEffect(() => {
         if (isOpen) {
-            const initialData = product ? { ...product } : getInitialFormData();
+            const initialData = product ? { ...product, imageUrl: product.imageUrl || '' } : getInitialFormData();
             setFormData(initialData);
         }
     }, [isOpen, product]);
@@ -858,6 +853,10 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title }: Pro
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="price" className="text-right">Precio</Label>
                             <Input id="price" type="number" value={formData.price} onChange={handleChange} required className="col-span-3" />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="imageUrl" className="text-right">URL de la Imagen</Label>
+                            <Input id="imageUrl" value={formData.imageUrl} onChange={handleChange} placeholder="https://example.com/image.png" className="col-span-3" />
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
                           <Label htmlFor="isFeatured" className="text-right">Destacado</Label>

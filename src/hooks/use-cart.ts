@@ -34,9 +34,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     if (savedCart) {
       try {
         const parsedCart = JSON.parse(savedCart);
-        // Add validation to ensure cart items don't have imageUrl
-        const validCart = parsedCart.filter((item: any) => !item.imageUrl);
-        setCartItems(validCart);
+        setCartItems(parsedCart);
       } catch (e) {
         setCartItems([]);
       }

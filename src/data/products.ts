@@ -10,6 +10,7 @@ export const products: Product[] = [
     price: 35000,
     category: 'Pastillas',
     isFeatured: true,
+    imageUrl: 'https://placehold.co/400x300.png',
   },
   {
     id: 2,
@@ -20,6 +21,7 @@ export const products: Product[] = [
     price: 89990,
     category: 'Pastillas',
     isFeatured: true,
+    imageUrl: 'https://placehold.co/400x300.png',
   },
   {
     id: 3,
@@ -30,6 +32,7 @@ export const products: Product[] = [
     price: 129990,
     category: 'Discos',
     isFeatured: true,
+    imageUrl: 'https://placehold.co/400x300.png',
   },
   {
     id: 4,
@@ -40,6 +43,7 @@ export const products: Product[] = [
     price: 95000,
     category: 'Discos',
     isFeatured: false,
+    imageUrl: 'https://placehold.co/400x300.png',
   },
   {
     id: 5,
@@ -50,6 +54,7 @@ export const products: Product[] = [
     price: 75000,
     category: 'Pastillas',
     isFeatured: false,
+    imageUrl: 'https://placehold.co/400x300.png',
   },
   {
     id: 6,
@@ -60,6 +65,7 @@ export const products: Product[] = [
     price: 65000,
     category: 'Discos',
     isFeatured: false,
+    imageUrl: 'https://placehold.co/400x300.png',
   },
   {
     id: 7,
@@ -70,6 +76,7 @@ export const products: Product[] = [
     price: 68000,
     category: 'Pastillas',
     isFeatured: false,
+    imageUrl: 'https://placehold.co/400x300.png',
   },
   {
     id: 8,
@@ -80,6 +87,7 @@ export const products: Product[] = [
     price: 55000,
     category: 'Discos',
     isFeatured: true,
+    imageUrl: 'https://placehold.co/400x300.png',
   },
   {
     id: 9,
@@ -90,6 +98,7 @@ export const products: Product[] = [
     price: 82000,
     category: 'Pastillas',
     isFeatured: false,
+    imageUrl: 'https://placehold.co/400x300.png',
   },
   {
     id: 10,
@@ -100,6 +109,7 @@ export const products: Product[] = [
     price: 78000,
     category: 'Discos',
     isFeatured: false,
+    imageUrl: 'https://placehold.co/400x300.png',
   },
   {
     id: 11,
@@ -110,6 +120,7 @@ export const products: Product[] = [
     price: 99000,
     category: 'Pastillas',
     isFeatured: false,
+    imageUrl: 'https://placehold.co/400x300.png',
   },
   {
     id: 12,
@@ -120,5 +131,6 @@ export const products: Product[] = [
     price: 115000,
     category: 'Discos',
     isFeatured: false,
+    imageUrl: 'https://placehold.co/400x300.png',
   },
 ];

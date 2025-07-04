@@ -1,3 +1,4 @@
+
 'use client';
 
 import { products as initialProducts } from '@/data/products';
@@ -21,9 +22,8 @@ export function getProducts(): Product[] {
     const productsFromStorage: Product[] = JSON.parse(savedProductsJSON);
 
     // Basic validation: Check if products in storage have a valid structure.
-    // This helps detect outdated data structures (e.g., ones with imageUrl).
     const hasValidStructure = productsFromStorage.every(p => 
-        'id' in p && 'name' in p && 'category' in p && typeof p.isFeatured === 'boolean' && !('imageUrl' in p)
+        'id' in p && 'name' in p && 'category' in p && typeof p.isFeatured === 'boolean'
     );
     
     // Check if there are any categories that are not 'Pastillas' or 'Discos'

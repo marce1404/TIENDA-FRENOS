@@ -21,6 +21,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
+import Image from 'next/image';
 
 
 export default function ProductosPage() {
@@ -144,8 +145,10 @@ export default function ProductosPage() {
                         onClick={() => setSelectedProduct(product)}
                       >
                         <div className="flex flex-grow items-center gap-4">
-                            <div className="flex-shrink-0 w-16 h-16 rounded-md bg-muted/20 flex items-center justify-center">
-                                {product.category === 'Pastillas' ? (
+                            <div className="flex-shrink-0 w-16 h-16 rounded-md bg-muted/50 flex items-center justify-center border overflow-hidden">
+                                {product.imageUrl ? (
+                                    <Image src={product.imageUrl} alt={product.name} width={64} height={64} className="h-full w-full object-cover" />
+                                ) : product.category === 'Pastillas' ? (
                                     <BrakePadIcon className="w-8 h-8 text-muted-foreground" />
                                 ) : (
                                     <BrakeDiscIcon className="w-8 h-8 text-muted-foreground" />
@@ -202,11 +205,23 @@ export default function ProductosPage() {
 
         {selectedProduct && (
           <Dialog open={!!selectedProduct} onOpenChange={(isOpen) => !isOpen && setSelectedProduct(null)}>
-            <DialogContent className="sm:max-w-lg">
-              <DialogHeader>
+            <DialogContent className="sm:max-w-lg p-0">
+               {selectedProduct.imageUrl && (
+                <div className="relative">
+                  <Image
+                    src={selectedProduct.imageUrl}
+                    alt={selectedProduct.name}
+                    width={600}
+                    height={400}
+                    className="w-full h-auto rounded-t-lg object-cover"
+                    data-ai-hint={selectedProduct.category === 'Pastillas' ? 'brake pad' : 'brake disc'}
+                  />
+                </div>
+              )}
+              <DialogHeader className="p-6 pb-0 text-left">
                 <DialogTitle className="text-2xl">{selectedProduct.name}</DialogTitle>
               </DialogHeader>
-              <div className="py-4">
+              <div className="py-4 px-6">
                 <div className="flex flex-col gap-4">
                   <p className="text-3xl font-bold text-primary">{formatPrice(selectedProduct.price)}</p>
                   <Separator />
@@ -229,7 +244,7 @@ export default function ProductosPage() {
                   </div>
                 </div>
               </div>
-              <DialogFooter className="sm:justify-between gap-2 sm:gap-0">
+              <DialogFooter className="sm:justify-between gap-2 sm:gap-0 p-6 pt-0">
                   <Button type="button" variant="outline" onClick={() => setSelectedProduct(null)}>Cerrar</Button>
                   <Button type="button" size="lg" onClick={() => { addToCart(selectedProduct); setSelectedProduct(null); }}>
                       <ShoppingCart className="mr-2 h-5 w-5" />
