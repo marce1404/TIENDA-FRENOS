@@ -18,9 +18,11 @@ export interface AdminSettingsForForm {
 export async function getAdminSettingsForForm(): Promise<AdminSettingsForForm> {
     const settings = await getEnvSettings();
     
-    // settings.users is now an array of 3 user objects, which matches the required structure.
+    // Explicitly map to the required structure to avoid any serialization issues with extra properties.
+    const usersForForm = settings.users.map(u => ({ username: u.username }));
+
     return {
-        users: settings.users,
+        users: usersForForm,
         smtp: {
             host: settings.SMTP_HOST,
             port: settings.SMTP_PORT,
