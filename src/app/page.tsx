@@ -4,12 +4,12 @@
 import { useState, useEffect } from 'react';
 import { ShieldCheck, Users, Truck, Medal } from 'lucide-react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { getProducts } from '@/lib/products';
 import { ProductCard } from '@/components/ProductCard';
 import type { Product } from '@/lib/types';
+import { BrakeDiscIcon } from '@/components/icons/BrakeDiscIcon';
 
 export default function HomePage() {
   const [isMounted, setIsMounted] = useState(false);
@@ -40,37 +40,23 @@ export default function HomePage() {
   ];
   return (
     <>
-      <section className="container mx-auto px-4 py-12 md:py-20">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
-          <div className="text-center md:text-left">
-            <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-primary">REPUFRENOS.CL</h1>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto md:mx-0 my-8 drop-shadow-md">
-              Encuentra la calidad que buscas al precio que necesitas. Ofrecemos una amplia gama de repuestos de frenos para ajustarnos a tu presupuesto sin comprometer tu seguridad.
-            </p>
-            <Link href="/productos">
-              <Button size="lg" className="bg-gray-200 text-black">Ver Productos</Button>
-            </Link>
-          </div>
-          <div className="flex justify-center">
-            <Image
-              src="https://placehold.co/600x400.png"
-              alt="Repuestos de frenos de alta calidad"
-              width={600}
-              height={400}
-              className="rounded-lg shadow-xl"
-              data-ai-hint="brake parts"
-              priority
-            />
-          </div>
+      <section className="container mx-auto px-4 py-12 md:py-20 text-center">
+        <div className="mb-8">
+          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-primary">REPUFRENOS.CL</h1>
         </div>
+        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8 drop-shadow-md">
+          Encuentra la calidad que buscas al precio que necesitas. Ofrecemos una amplia gama de repuestos de frenos para ajustarnos a tu presupuesto sin comprometer tu seguridad.
+        </p>
+        <Link href="/productos">
+          <Button size="lg" className="bg-gray-200 text-black">Ver Productos</Button>
+        </Link>
       </section>
-
       <section className="bg-card/50">
           <div className="container mx-auto px-4 py-16 md:py-24">
               <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center">Productos Destacados</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
                   {isMounted && featuredProducts.map((product) => (
-                      <ProductCard key={product.id} product={product} />
+                      <ProductCard key={product.id} product={product} showFavorite={false} />
                   ))}
               </div>
           </div>
