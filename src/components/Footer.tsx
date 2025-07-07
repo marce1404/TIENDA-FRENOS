@@ -10,7 +10,7 @@ export function Footer() {
       <div className="container mx-auto px-4 text-center text-muted-foreground text-sm">
         <div className="flex justify-center items-center gap-2 mb-2">
           <MapPin className="h-4 w-4" />
-          <span>av la palmilla #4780 Conchalí, Santiago</span>
+          <span>Av. La Palmilla #4780 Conchalí, Santiago</span>
         </div>
         <div className="flex justify-center items-center gap-4">
             <p>&copy; {currentYear} REPUFRENOS.CL. Todos los derechos reservados.</p>

@@ -108,7 +108,7 @@ export default function ContactoPage() {
              </div>
              <div className="flex items-center gap-4">
                 <MapPin className="h-6 w-6 text-primary" />
-                <span>av la palmilla #4780 Conchalí, Santiago</span>
+                <span>Av. La Palmilla #4780 Conchalí, Santiago</span>
              </div>
           </div>
         </div>
