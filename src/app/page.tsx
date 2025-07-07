@@ -55,8 +55,8 @@ export default function HomePage() {
     },
     {
       icon: <Truck className="h-10 w-10 text-primary" />,
-      title: 'Envío y Retiro en Local',
-      description: 'Recibe tus repuestos a domicilio o retíralos directamente en nuestra tienda.',
+      title: 'Opciones Flexibles de Entrega',
+      description: 'Recibe tus repuestos cómodamente en tu domicilio o acércate a retirarlos en nuestras tiendas ubicadas en Conchalí y Recoleta.',
     },
   ];
 
@@ -111,7 +111,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="bg-card/50"> {/* Corregido: removido backslash adicional */}
+      <section className="bg-card/50">
         <div className="container mx-auto px-4 py-16 md:py-24">
           <Card className="bg-card border-border shadow-lg">
               <CardContent className="p-8 md:p-12 flex flex-col md:flex-row items-center gap-8">
