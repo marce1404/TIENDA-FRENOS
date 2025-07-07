@@ -51,12 +51,12 @@ export default function HomePage() {
     {
       icon: <Users className="h-10 w-10 text-primary" />,
       title: 'Asesoramiento Experto',
-      description: 'Nuestro equipo está listo para ayudarte a encontrar el repuesto exacto para tu vehículo.',
+      description: 'Nuestro equipo de especialistas en frenos está listo para ayudarte a encontrar el componente exacto que tu vehículo necesita.',
     },
     {
       icon: <Truck className="h-10 w-10 text-primary" />,
       title: 'Opciones Flexibles de Entrega',
-      description: 'Recibe tus repuestos a domicilio o retíralos en nuestro local de Conchalí y en nuestros puntos de entrega en Conchalí y Recoleta.',
+      description: 'Recibe tus repuestos a domicilio, retíralos en nuestro local de Conchalí o en nuestros puntos de entrega tanto en Conchalí como en Recoleta.',
     },
   ];
 
@@ -74,6 +74,7 @@ export default function HomePage() {
       <section className="container mx-auto px-4 py-12 md:py-20 text-center">
         <div className="mb-8">
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-primary">REPUFRENOS.CL</h1>
+          <p className="text-2xl md:text-3xl font-semibold mt-2">Tus Especialistas en Sistemas de Frenos</p>
         </div>
         <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8 drop-shadow-md">
           Encuentra la calidad que buscas al precio que necesitas. Ofrecemos una amplia gama de repuestos de frenos para ajustarnos a tu presupuesto sin comprometer tu seguridad.
@@ -117,7 +118,7 @@ export default function HomePage() {
               <CardContent className="p-8 md:p-12 flex flex-col md:flex-row items-center gap-8">
                   <Medal className="h-16 w-16 text-primary flex-shrink-0" />
                   <div>
-                      <h3 className="text-2xl md:text-3xl font-bold mb-4">Más de 15 Años de Experiencia a tu Servicio</h3>
+                      <h3 className="text-2xl md:text-3xl font-bold mb-4">15 Años de Experiencia Dedicados a Frenos</h3>
                       <p className="text-muted-foreground">
                           Con más de una década y media en el mercado, hemos forjado una trayectoria basada en la confianza y el conocimiento profundo del sistema de frenos. Esta experiencia nos permite asesorarte con precisión y ofrecerte solo productos de la más alta calidad, garantizando tu seguridad en cada kilómetro.
                       </p>
