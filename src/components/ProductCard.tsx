@@ -22,7 +22,7 @@ export function ProductCard({ product }: ProductCardProps) {
   };
 
   return (
-    <Card className="flex h-full flex-col overflow-hidden rounded-lg border bg-card text-card-foreground shadow-sm transition-all hover:shadow-md">
+    <Card className="group flex h-full flex-col overflow-hidden rounded-lg border bg-card text-card-foreground shadow-sm transition-all group-hover:shadow-md group-hover:scale-105 group-hover:z-10">
       <CardHeader className="relative p-4">
           <CardTitle className="text-base font-bold leading-tight pr-8">
               {product.name}
