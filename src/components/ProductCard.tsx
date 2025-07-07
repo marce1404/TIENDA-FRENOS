@@ -40,13 +40,11 @@ export function ProductCard({ product }: ProductCardProps) {
           <p><span className="font-semibold">Compatibilidad:</span> {product.compatibility}</p>
         </div>
       </CardContent>
-      <CardFooter className="flex items-center justify-between px-4 pb-4 pt-0">
+      <CardFooter className="flex items-center justify-between px-4 pb-4 pt-0 pr-2">
         <p className="text-lg font-semibold text-foreground">
           {formatPrice(product.price)}
         </p>
-        <Button size="sm" onClick={() => addToCart(product)}>
-          Añadir
-        </Button>
+        <Button size="sm" onClick={() => addToCart(product)}>Añadir</Button>
       </CardFooter>
     </Card>
   );
