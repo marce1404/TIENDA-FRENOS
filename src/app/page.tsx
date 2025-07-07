@@ -56,7 +56,7 @@ export default function HomePage() {
     {
       icon: <Truck className="h-10 w-10 text-primary" />,
       title: 'Opciones Flexibles de Entrega',
-      description: 'Recibe tus repuestos cómodamente en tu domicilio o acércate a retirarlos en nuestras tiendas ubicadas en Conchalí y Recoleta.',
+      description: 'Recibe tus repuestos cómodamente en tu domicilio o acércate a retirarlos en nuestros puntos de entregas ubicados en Conchalí y Recoleta.',
     },
   ];
 
