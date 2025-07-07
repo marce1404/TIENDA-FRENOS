@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -118,7 +117,7 @@ export default function HomePage() {
               <CardContent className="p-8 md:p-12 flex flex-col md:flex-row items-center gap-8">
                   <Medal className="h-16 w-16 text-primary flex-shrink-0" />
                   <div>
-                      <h3 className="text-2xl md:text-3xl font-bold mb-4">15 Años de Experiencia Dedicados a Frenos</h3>
+                      <h3 className="text-2xl md:text-3xl font-bold mb-4">Más de 15 Años de Experiencia Dedicados a Frenos</h3>
                       <p className="text-muted-foreground">
                           Con más de una década y media en el mercado, hemos forjado una trayectoria basada en la confianza y el conocimiento profundo del sistema de frenos. Esta experiencia nos permite asesorarte con precisión y ofrecerte solo productos de la más alta calidad, garantizando tu seguridad en cada kilómetro.
                       </p>
