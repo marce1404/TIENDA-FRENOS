@@ -2,25 +2,46 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ShieldCheck, Users, Truck, Medal } from 'lucide-react';
+import { ShieldCheck, Users, Truck, Medal, ShoppingCart } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { getProducts } from '@/lib/products';
 import { ProductCard } from '@/components/ProductCard';
 import type { Product } from '@/lib/types';
-import { BrakeDiscIcon } from '@/components/icons/BrakeDiscIcon';
+// import { BrakeDiscIcon } from '@/components/icons/BrakeDiscIcon'; // No se usa directamente aquí
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Separator } from '@/components/ui/separator';
+import Image from 'next/image';
+import { useCart } from '@/hooks/use-cart';
+
+// Replicar la función formatPrice del archivo productos/page.tsx
+const formatPrice = (price: number) => {
+  return new Intl.NumberFormat('es-CL', {
+    style: 'currency',
+    currency: 'CLP',
+  }).format(price);
+};
+
 
 export default function HomePage() {
   const [isMounted, setIsMounted] = useState(false);
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const { addToCart } = useCart();
 
   useEffect(() => {
     const allProducts = getProducts();
     setFeaturedProducts(allProducts.filter((product) => product.isFeatured));
     setIsMounted(true);
   }, []);
-  
+
   const features = [
     {
       icon: <ShieldCheck className="h-10 w-10 text-primary" />,
@@ -38,6 +59,16 @@ export default function HomePage() {
       description: 'Recibe tus repuestos a domicilio o retíralos directamente en nuestra tienda.',
     },
   ];
+
+  const handleProductClick = (product: Product) => {
+    setSelectedProduct(product);
+  };
+
+  const handleAddToCartClick = (product: Product) => {
+    addToCart(product);
+    setSelectedProduct(null); // Cerrar el diálogo después de añadir al carrito
+  };
+
   return (
     <>
       <section className="container mx-auto px-4 py-12 md:py-20 text-center">
@@ -56,7 +87,12 @@ export default function HomePage() {
               <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center">Productos Destacados</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
                   {isMounted && featuredProducts.map((product) => (
-                      <ProductCard key={product.id} product={product} showFavorite={false} />
+                      <ProductCard
+                        key={product.id}
+                        product={product}
+                        showFavorite={false}
+                        onProductClick={handleProductClick}
+                      />
                   ))}
               </div>
           </div>
@@ -75,7 +111,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="bg-card/50">
+      <section className="bg-card/50"> {/* Corregido: removido backslash adicional */}
         <div className="container mx-auto px-4 py-16 md:py-24">
           <Card className="bg-card border-border shadow-lg">
               <CardContent className="p-8 md:p-12 flex flex-col md:flex-row items-center gap-8">
@@ -90,6 +126,47 @@ export default function HomePage() {
           </Card>
         </div>
       </section>
+
+      {/* Diálogo de Detalle del Producto */}
+      {selectedProduct && (
+        <Dialog open={!!selectedProduct} onOpenChange={(isOpen) => !isOpen && setSelectedProduct(null)}>
+          <DialogContent className="sm:max-w-lg p-0">
+            <DialogHeader className="p-6 pb-0 text-left">
+              <DialogTitle className="text-2xl">{selectedProduct.name}</DialogTitle>
+            </DialogHeader>
+            <div className="py-4 px-6">
+              <div className="flex flex-col gap-4">
+                <p className="text-3xl font-bold text-primary">{formatPrice(selectedProduct.price)}</p>
+                <Separator />
+                <div className="space-y-4 text-muted-foreground">
+                  <div className="grid grid-cols-[auto,1fr] gap-x-4 gap-y-2">
+                    <span className="font-semibold text-foreground">Marca:</span>
+                    <span>{selectedProduct.brand}</span>
+
+                    <span className="font-semibold text-foreground">Modelo:</span>
+                    <span>{selectedProduct.model}</span>
+
+                    <span className="font-semibold text-foreground">Categoría:</span>
+                    <span>{selectedProduct.category}</span>
+                  </div>
+                </div>
+                <Separator />
+                <div className="space-y-2">
+                  <h2 className="text-lg font-semibold text-foreground">Compatibilidad</h2>
+                  <p className="text-muted-foreground">{selectedProduct.compatibility}</p>
+                </div>
+              </div>
+            </div>
+            <DialogFooter className="sm:justify-between gap-2 sm:gap-0 p-6 pt-0">
+                <Button type="button" variant="outline" onClick={() => setSelectedProduct(null)}>Cerrar</Button>
+                <Button type="button" size="lg" onClick={() => handleAddToCartClick(selectedProduct)}>
+                    <ShoppingCart className="mr-2 h-5 w-5" />
+                    Añadir al Carrito
+                </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </>
   );
 }

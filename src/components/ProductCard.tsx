@@ -9,9 +9,10 @@ import { Star } from 'lucide-react';
 interface ProductCardProps {
   product: Product;
   showFavorite?: boolean;
+  onProductClick?: (product: Product) => void;
 }
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product, onProductClick }: ProductCardProps) {
   const { addToCart } = useCart();
 
   const formatPrice = (price: number) => {
@@ -22,7 +23,9 @@ export function ProductCard({ product }: ProductCardProps) {
   };
 
   return (
-    <Card className="group flex h-full flex-col overflow-hidden rounded-lg border bg-card text-card-foreground shadow-sm transition-all group-hover:shadow-md group-hover:scale-105 group-hover:z-10">
+    <Card
+      className="flex h-full flex-col overflow-hidden rounded-lg border bg-card text-card-foreground shadow-sm transition-all hover:shadow-lg hover:scale-105 cursor-pointer"
+      onClick={() => onProductClick && onProductClick(product)}>
       <CardHeader className="relative p-4">
           <CardTitle className="text-base font-bold leading-tight pr-8">
               {product.name}
@@ -44,7 +47,7 @@ export function ProductCard({ product }: ProductCardProps) {
         <p className="text-lg font-semibold text-foreground">
           {formatPrice(product.price)}
         </p>
-        <Button size="sm" onClick={() => addToCart(product)}>Añadir</Button>
+        <Button size="sm" onClick={(e) => { e.stopPropagation(); addToCart(product); }}>Añadir</Button>
       </CardFooter>
     </Card>
   );
