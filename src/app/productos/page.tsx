@@ -21,15 +21,6 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
-import Image from 'next/image';
-import type { Metadata } from 'next';
-
-// Esta metadata es específica para esta página.
-export const metadata: Metadata = {
-  title: 'Catálogo de Repuestos de Frenos',
-  description: 'Explora nuestro catálogo completo de pastillas y discos de freno. Encuentra las mejores marcas como Brembo, Wagner, Bosch y más. Calidad garantizada para tu vehículo.',
-};
-
 
 export default function ProductosPage() {
   const [searchTerm, setSearchTerm] = useState('');

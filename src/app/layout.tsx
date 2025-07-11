@@ -16,7 +16,8 @@ export const metadata: Metadata = {
     template: '%s | REPUFRENOS.CL',
     default: 'REPUFRENOS.CL - Especialistas en Sistemas de Frenos',
   },
-  description: 'REPUFRENOS.CL. Tienda especialista en repuestos de frenos de alta calidad. Asesoramiento experto y las mejores marcas para tu seguridad.',
+  description: 'REPUFRENOS.CL. Tienda especialista en repuestos de frenos de alta calidad. Asesoramiento experto y las mejores marcas para tu seguridad. Pastillas, discos y más.',
+  keywords: ['frenos', 'repuestos de frenos', 'pastillas de freno', 'discos de freno', 'balatas', 'Brembo', 'Bosch', 'Conchalí', 'Santiago'],
 };
 
 export default function RootLayout({
