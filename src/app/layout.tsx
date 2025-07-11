@@ -12,8 +12,11 @@ import { WhatsAppButton } from '@/components/WhatsAppButton';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
- title: 'REPUFRENOS.CL',
- description: 'REPUFRENOS.CL. Tienda especialista en repuestos de frenos de alta calidad.',
+  title: {
+    template: '%s | REPUFRENOS.CL',
+    default: 'REPUFRENOS.CL - Especialistas en Sistemas de Frenos',
+  },
+  description: 'REPUFRENOS.CL. Tienda especialista en repuestos de frenos de alta calidad. Asesoramiento experto y las mejores marcas para tu seguridad.',
 };
 
 export default function RootLayout({

@@ -9,6 +9,18 @@ import { Button } from '@/components/ui/button';
 import { Mail, MapPin, Loader2 } from 'lucide-react';
 import { sendEmail } from '@/actions/sendEmail';
 import { useToast } from "@/hooks/use-toast";
+import type { Metadata } from 'next';
+
+// Nota: Para que la metadata funcione en un componente de cliente,
+// necesitaríamos mover la lógica a un componente hijo y hacer de esta página
+// un componente de servidor que lo importe. Por ahora, Next.js usará
+// la metadata del layout superior si esta no se puede aplicar.
+// Sin embargo, lo dejamos aquí para futuras refactorizaciones.
+
+export const metadata: Metadata = {
+  title: 'Contacto y Ubicación',
+  description: 'Contáctanos para cualquier consulta sobre frenos. Encuéntranos en Av. La Palmilla #4780, Conchalí, Santiago. Llámanos o envíanos un mensaje.',
+};
 
 export default function ContactoPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -108,7 +120,7 @@ export default function ContactoPage() {
              </div>
              <div className="flex items-center gap-4">
                 <MapPin className="h-6 w-6 text-primary" />
-                <span>Av. La Palmilla #4780 Conchalí, Santiago</span>
+                <span>Av. La Palmilla #4780, Conchalí, Santiago</span>
              </div>
           </div>
         </div>
