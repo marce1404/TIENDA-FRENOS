@@ -299,16 +299,24 @@ export default function AdminPage() {
     }).format(price);
   };
 
-  const handleAddProduct = (newProductData: Omit<Product, 'id'>) => {
+  const handleAddProduct = (newProductData: Omit<Product, 'id'> & { id: number }) => {
     setProducts(prev => {
-      const newProduct = { ...newProductData, id: prev.length > 0 ? Math.max(...prev.map(p => p.id)) + 1 : 1 };
-      const updatedProducts = [...prev, newProduct];
+      const idExists = prev.some(p => p.id === newProductData.id);
+      if (idExists) {
+        toast({
+          variant: "destructive",
+          title: "Error de ID",
+          description: "Ya existe un producto con ese ID.",
+        });
+        return prev;
+      }
+      const updatedProducts = [...prev, newProductData];
       saveProducts(updatedProducts);
+      setIsAddDialogOpen(false);
       return updatedProducts;
     });
-    setIsAddDialogOpen(false);
   };
-
+  
   const handleUpdateProduct = (updatedProduct: Product) => {
     setProducts(prev => {
       const updatedProducts = prev.map(p => p.id === updatedProduct.id ? updatedProduct : p);
@@ -360,6 +368,11 @@ export default function AdminPage() {
   }, [filteredProducts, currentPage, productsPerPage]);
 
   const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+
+  const nextProductId = useMemo(() => {
+    if (products.length === 0) return 1;
+    return Math.max(...products.map(p => p.id)) + 1;
+  }, [products]);
 
   useEffect(() => {
     if (currentPage > totalPages && totalPages > 0) {
@@ -752,6 +765,7 @@ export default function AdminPage() {
         onOpenChange={setIsAddDialogOpen}
         onSave={handleAddProduct}
         title="Añadir Nuevo Producto"
+        nextProductId={nextProductId}
       />
 
       {productToEdit && (
@@ -773,11 +787,12 @@ interface ProductFormDialogProps {
     onSave: (product: any) => void;
     product?: Product | null;
     title: string;
+    nextProductId?: number;
 }
 
-function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title }: ProductFormDialogProps) {
+function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextProductId }: ProductFormDialogProps) {
     const getInitialFormData = () => ({
-        name: '', brand: '', model: '', compatibility: '', price: 0, category: '', isFeatured: false,
+        id: nextProductId || 0, name: '', brand: '', model: '', compatibility: '', price: 0, category: '', isFeatured: false,
     });
     
     const [formData, setFormData] = useState(getInitialFormData());
@@ -785,13 +800,16 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title }: Pro
     useEffect(() => {
         if (isOpen) {
             const initialData = product ? { ...product } : getInitialFormData();
+            if (!product && nextProductId) {
+                initialData.id = nextProductId;
+            }
             setFormData(initialData);
         }
-    }, [isOpen, product]);
+    }, [isOpen, product, nextProductId]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { id, value, type } = e.target;
-        setFormData(prev => ({ ...prev, [id]: type === 'number' ? parseFloat(value) || 0 : value }));
+        setFormData(prev => ({ ...prev, [id]: type === 'number' ? parseInt(value, 10) || 0 : value }));
     };
 
     const handleCategoryChange = (value: string) => {
@@ -806,8 +824,7 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title }: Pro
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        const dataToSave = product ? { ...formData, id: product.id } : formData;
-        onSave(dataToSave);
+        onSave(formData);
     };
 
     return (
@@ -818,6 +835,10 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title }: Pro
                         <DialogTitle>{title}</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="id" className="text-right">ID</Label>
+                            <Input id="id" type="number" value={formData.id} onChange={handleChange} required className="col-span-3" disabled={!!product} />
+                        </div>
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="name" className="text-right">Nombre</Label>
                             <Input id="name" value={formData.name} onChange={handleChange} required className="col-span-3" />
