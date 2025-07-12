@@ -145,10 +145,10 @@ export default function ProductosPage() {
                     {paginatedProducts.map((product) => (
                         <Card 
                           key={product.id} 
-                          className="flex items-center p-4 transition-all hover:shadow-md cursor-pointer"
+                          className="flex items-start p-4 transition-all hover:shadow-md cursor-pointer"
                           onClick={() => handleProductClick(product)}
                         >
-                          <div className="flex-shrink-0 w-16 h-16 rounded-md bg-muted/50 flex items-center justify-center border mr-4">
+                          <div className="flex-shrink-0 w-16 h-16 rounded-md bg-muted/50 flex items-center justify-center border mr-4 mt-1">
                             {product.category === 'Pastillas' ? (
                               <BrakePadIcon className="w-8 h-8 text-muted-foreground" />
                             ) : (
@@ -158,6 +158,9 @@ export default function ProductosPage() {
                           <div className="flex-1">
                             <p className="font-semibold">{product.name}</p>
                             <p className="text-sm text-muted-foreground">{product.brand} | {product.code}</p>
+                            <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                                <span className="font-medium">Compatibilidad:</span> {product.compatibility}
+                            </p>
                           </div>
                           <div className="flex flex-col items-end ml-4 gap-2">
                             <p className="text-lg font-bold">{formatPrice(product.price)}</p>
