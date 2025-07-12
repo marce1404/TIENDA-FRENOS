@@ -19,12 +19,14 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
-import { ProductCard } from '@/components/ProductCard';
+import { Card } from '@/components/ui/card';
+import { BrakePadIcon } from '@/components/icons/BrakePadIcon';
+import { BrakeDiscIcon } from '@/components/icons/BrakeDiscIcon';
 
 export default function ProductosPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 12;
+  const itemsPerPage = 10;
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [isMounted, setIsMounted] = useState(false);
@@ -89,9 +91,9 @@ export default function ProductosPage() {
   };
 
   const LoadingSkeleton = () => (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-      {Array.from({ length: itemsPerPage }).map((_, i) => (
-         <Skeleton key={i} className="h-64 w-full" />
+    <div className="space-y-4">
+      {Array.from({ length: 5 }).map((_, i) => (
+         <Skeleton key={i} className="h-24 w-full" />
       ))}
     </div>
   );
@@ -107,7 +109,7 @@ export default function ProductosPage() {
 
         <div className="relative mb-6 max-w-lg mx-auto">
           <Input
-            placeholder="Buscar por código, producto, marca..."
+            placeholder="Buscar por código, producto, marca, modelo o compatibilidad..."
             className="pl-10"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -133,17 +135,38 @@ export default function ProductosPage() {
               </TabsList>
           </Tabs>
         </div>
+        
+        <h2 className="text-2xl font-bold mb-4">Resultados de la Búsqueda</h2>
 
         {!isMounted ? <LoadingSkeleton /> : (
             paginatedProducts.length > 0 ? (
                 <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                <div className="space-y-4">
                     {paginatedProducts.map((product) => (
-                        <ProductCard
-                            key={product.id}
-                            product={product}
-                            onProductClick={handleProductClick}
-                        />
+                        <Card 
+                          key={product.id} 
+                          className="flex items-center p-4 transition-all hover:shadow-md cursor-pointer"
+                          onClick={() => handleProductClick(product)}
+                        >
+                          <div className="flex-shrink-0 w-16 h-16 rounded-md bg-muted/50 flex items-center justify-center border mr-4">
+                            {product.category === 'Pastillas' ? (
+                              <BrakePadIcon className="w-8 h-8 text-muted-foreground" />
+                            ) : (
+                              <BrakeDiscIcon className="w-8 h-8 text-muted-foreground" />
+                            )}
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-semibold">{product.name}</p>
+                            <p className="text-sm text-muted-foreground">{product.brand} | {product.code}</p>
+                          </div>
+                          <div className="flex flex-col items-end ml-4 gap-2">
+                            <p className="text-lg font-bold">{formatPrice(product.price)}</p>
+                            <Button size="sm" onClick={(e) => { e.stopPropagation(); addToCart(product); }}>
+                              <ShoppingCart className="mr-2 h-4 w-4" />
+                              Añadir
+                            </Button>
+                          </div>
+                        </Card>
                     ))}
                 </div>
                 {totalPages > 1 && (
