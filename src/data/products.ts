@@ -3,6 +3,7 @@ import type { Product } from '@/lib/types';
 export const products: Product[] = [
   {
     id: 1,
+    code: 'BAL-BP101',
     name: 'Pastilla Freno Delantera',
     brand: 'Baleno',
     model: 'BP-101',
@@ -13,6 +14,7 @@ export const products: Product[] = [
   },
   {
     id: 2,
+    code: 'BRE-P85020',
     name: 'Pastillas de Freno Cerámicas',
     brand: 'Brembo',
     model: 'P-85-020',
@@ -23,6 +25,7 @@ export const products: Product[] = [
   },
   {
     id: 3,
+    code: 'BRE-09788011',
     name: 'Disco de Freno Perforado Delantero',
     brand: 'Brembo',
     model: '09.7880.11',
@@ -33,6 +36,7 @@ export const products: Product[] = [
   },
   {
     id: 4,
+    code: 'TRW-DF4294',
     name: 'Disco de Freno Trasero Sólido',
     brand: 'TRW',
     model: 'DF4294',
@@ -43,6 +47,7 @@ export const products: Product[] = [
   },
   {
     id: 5,
+    code: 'WAG-QC1324',
     name: 'Pastillas de Freno Semi-Metálicas',
     brand: 'Wagner',
     model: 'QC1324',
@@ -53,6 +58,7 @@ export const products: Product[] = [
   },
   {
     id: 6,
+    code: 'BOS-BD1261',
     name: 'Disco de Freno Delantero Ventilado',
     brand: 'Bosch',
     model: 'BD1261',
@@ -63,6 +69,7 @@ export const products: Product[] = [
   },
   {
     id: 7,
+    code: 'AKE-ACT1118',
     name: 'Pastillas de Freno Traseras',
     brand: 'Akebono',
     model: 'ACT1118',
@@ -73,6 +80,7 @@ export const products: Product[] = [
   },
   {
     id: 8,
+    code: 'RAY-980502R',
     name: 'Disco de Freno Delantero',
     brand: 'Raybestos',
     model: '980502R',
@@ -83,6 +91,7 @@ export const products: Product[] = [
   },
   {
     id: 9,
+    code: 'CEN-10509240',
     name: 'Pastillas de Freno Bajo Polvo',
     brand: 'Centric',
     model: '105.09240',
@@ -93,6 +102,7 @@ export const products: Product[] = [
   },
   {
     id: 10,
+    code: 'ACD-18A2521',
     name: 'Disco de Freno con Recubrimiento',
     brand: 'ACDelco',
     model: '18A2521',
@@ -103,6 +113,7 @@ export const products: Product[] = [
   },
   {
     id: 11,
+    code: 'TEX-2358701',
     name: 'Pastillas de Freno Delanteras',
     brand: 'Textar',
     model: '2358701',
@@ -113,6 +124,7 @@ export const products: Product[] = [
   },
   {
     id: 12,
+    code: 'ZIM-150347720',
     name: 'Disco de Freno Trasero',
     brand: 'Zimmermann',
     model: '150.3477.20',

@@ -355,6 +355,7 @@ export default function AdminPage() {
         p.name.toLowerCase().includes(lowercasedTerm) ||
         p.brand.toLowerCase().includes(lowercasedTerm) ||
         p.model.toLowerCase().includes(lowercasedTerm) ||
+        (p.code && p.code.toLowerCase().includes(lowercasedTerm)) ||
         p.compatibility.toLowerCase().includes(lowercasedTerm) ||
         p.id.toString().includes(lowercasedTerm)
       );
@@ -663,7 +664,7 @@ export default function AdminPage() {
             
             <div className="relative mb-6">
               <Input
-                placeholder="Buscar por ID, nombre, marca, modelo..."
+                placeholder="Buscar por ID, código, nombre, marca..."
                 className="pl-10"
                 value={adminSearchTerm}
                 onChange={(e) => setAdminSearchTerm(e.target.value)}
@@ -676,6 +677,7 @@ export default function AdminPage() {
                 <TableHeader>
                     <TableRow>
                     <TableHead className="w-[80px]">ID</TableHead>
+                    <TableHead>Código</TableHead>
                     <TableHead>Nombre</TableHead>
                     <TableHead>Marca</TableHead>
                     <TableHead>Modelo</TableHead>
@@ -689,6 +691,7 @@ export default function AdminPage() {
                     {paginatedAdminProducts.map((product) => (
                     <TableRow key={product.id}>
                         <TableCell className="font-medium">{product.id}</TableCell>
+                        <TableCell>{product.code}</TableCell>
                         <TableCell>{product.name}</TableCell>
                         <TableCell>{product.brand}</TableCell>
                         <TableCell>{product.model}</TableCell>
@@ -792,7 +795,7 @@ interface ProductFormDialogProps {
 
 function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextProductId }: ProductFormDialogProps) {
     const getInitialFormData = () => ({
-        id: nextProductId || 0, name: '', brand: '', model: '', compatibility: '', price: 0, category: '', isFeatured: false,
+        id: nextProductId || 0, code: '', name: '', brand: '', model: '', compatibility: '', price: 0, category: '', isFeatured: false,
     });
     
     const [formData, setFormData] = useState(getInitialFormData());
@@ -838,6 +841,10 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="id" className="text-right">ID</Label>
                             <Input id="id" type="number" value={formData.id} onChange={handleChange} required className="col-span-3" disabled={!!product} />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="code" className="text-right">Código</Label>
+                            <Input id="code" value={formData.code} onChange={handleChange} required className="col-span-3" />
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="name" className="text-right">Nombre</Label>
