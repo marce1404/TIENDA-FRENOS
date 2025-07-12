@@ -11,8 +11,6 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { ArrowLeftIcon, ArrowRightIcon } from '@radix-ui/react-icons';
 import { useCart } from '@/hooks/use-cart';
-import { BrakePadIcon } from '@/components/icons/BrakePadIcon';
-import { BrakeDiscIcon } from '@/components/icons/BrakeDiscIcon';
 import {
   Dialog,
   DialogContent,
@@ -21,11 +19,12 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
+import { ProductCard } from '@/components/ProductCard';
 
 export default function ProductosPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 12;
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [isMounted, setIsMounted] = useState(false);
@@ -51,6 +50,7 @@ export default function ProductosPage() {
           p.name.toLowerCase().includes(lowercasedTerm) ||
           p.brand.toLowerCase().includes(lowercasedTerm) ||
           p.model.toLowerCase().includes(lowercasedTerm) ||
+          (p.code && p.code.toLowerCase().includes(lowercasedTerm)) ||
           p.compatibility.toLowerCase().includes(lowercasedTerm)
       );
     }
@@ -84,26 +84,30 @@ export default function ProductosPage() {
     }).format(price);
   };
 
+  const handleProductClick = (product: Product) => {
+    setSelectedProduct(product);
+  };
+
   const LoadingSkeleton = () => (
-    <div className="flex flex-col gap-4">
-      {Array.from({ length: 8 }).map((_, i) => (
-         <Skeleton key={i} className="h-24 w-full" />
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      {Array.from({ length: itemsPerPage }).map((_, i) => (
+         <Skeleton key={i} className="h-64 w-full" />
       ))}
     </div>
   );
 
    return (
       <div className="container mx-auto p-6">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold">Nuestros Productos</h1>
-          <p className="text-muted-foreground">
+        <div className="mb-6 text-center">
+          <h1 className="text-4xl font-bold">Nuestros Productos</h1>
+          <p className="mt-2 text-muted-foreground">
             Encuentra los mejores repuestos de frenos para tu vehículo.
           </p>
         </div>
 
-        <div className="relative mb-6">
+        <div className="relative mb-6 max-w-lg mx-auto">
           <Input
-            placeholder="Buscar por producto, marca, modelo o compatibilidad..."
+            placeholder="Buscar por código, producto, marca..."
             className="pl-10"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -131,72 +135,46 @@ export default function ProductosPage() {
         </div>
 
         {!isMounted ? <LoadingSkeleton /> : (
-          <div className="flex flex-col gap-12">
-            <div className="flex flex-col gap-4">
-                <h2 className="text-2xl font-bold border-b pb-2">Resultados de la Búsqueda</h2>
-                {paginatedProducts.length > 0 ? (
-                  <>
+            paginatedProducts.length > 0 ? (
+                <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                     {paginatedProducts.map((product) => (
-                      <div 
-                        key={product.id} 
-                        className="rounded-lg border bg-card text-card-foreground shadow-sm p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:bg-muted/50 transition-colors cursor-pointer"
-                        onClick={() => setSelectedProduct(product)}
-                      >
-                        <div className="flex flex-grow items-center gap-4">
-                            <div className="flex-shrink-0 w-16 h-16 rounded-md bg-muted/50 flex items-center justify-center border">
-                                {product.category === 'Pastillas' ? (
-                                    <BrakePadIcon className="w-8 h-8 text-muted-foreground" />
-                                ) : (
-                                    <BrakeDiscIcon className="w-8 h-8 text-muted-foreground" />
-                                )}
-                            </div>
-                            <div className="flex-grow">
-                                <h2 className="text-lg font-semibold">{product.name}</h2>
-                                <p className="text-sm text-muted-foreground">{product.brand} | {product.model}</p>
-                            </div>
-                        </div>
-                        <div className="flex flex-col items-start sm:items-end gap-2 w-full sm:w-auto">
-                            <p className="text-lg font-bold text-right sm:text-left w-full sm:w-auto">
-                                {formatPrice(product.price)}
-                            </p>
-                             <Button size="sm" className="w-full sm:w-auto" onClick={(e) => { e.stopPropagation(); addToCart(product); }}>
-                                <ShoppingCart className="mr-2 h-4 w-4"/>
-                                Añadir
-                             </Button>
-                        </div>
-                      </div>
+                        <ProductCard
+                            key={product.id}
+                            product={product}
+                            onProductClick={handleProductClick}
+                        />
                     ))}
-                     {totalPages > 1 && (
-                        <div className="flex justify-center items-center gap-4 mt-8">
-                            <Button
+                </div>
+                {totalPages > 1 && (
+                    <div className="flex justify-center items-center gap-4 mt-8">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                            disabled={currentPage === 1}
+                        >
+                            <ArrowLeftIcon className="h-4 w-4 mr-2" />
+                            Anterior
+                        </Button>
+                        <span className="text-muted-foreground">
+                            Página {currentPage} de {totalPages}
+                        </span>
+                        <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                                disabled={currentPage === 1}
-                            >
-                                <ArrowLeftIcon className="h-4 w-4 mr-2" />
-                                Anterior
-                            </Button>
-                            <span className="text-muted-foreground">
-                                Página {currentPage} de {totalPages}
-                            </span>
-                            <Button
-                                 variant="outline"
-                                 size="sm"
-                                 onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                                 disabled={currentPage === totalPages}
-                            >
-                                Siguiente
-                                 <ArrowRightIcon className="h-4 w-4 ml-2" />
-                            </Button>
-                        </div>
-                    )}
-                  </>
-                ) : (
-                   <p className="col-span-full text-center text-muted-foreground">No se encontraron productos que coincidan con tu búsqueda.</p>
+                                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                                disabled={currentPage === totalPages}
+                        >
+                            Siguiente
+                                <ArrowRightIcon className="h-4 w-4 ml-2" />
+                        </Button>
+                    </div>
                 )}
-            </div>
-          </div>
+                </>
+            ) : (
+                <p className="col-span-full text-center text-muted-foreground py-10">No se encontraron productos que coincidan con tu búsqueda.</p>
+            )
         )}
 
         {selectedProduct && (
@@ -204,6 +182,7 @@ export default function ProductosPage() {
             <DialogContent className="sm:max-w-lg p-0">
               <DialogHeader className="p-6 pb-0 text-left">
                 <DialogTitle className="text-2xl">{selectedProduct.name}</DialogTitle>
+                <p className="text-sm text-muted-foreground pt-1">{selectedProduct.code}</p>
               </DialogHeader>
               <div className="py-4 px-6">
                 <div className="flex flex-col gap-4">

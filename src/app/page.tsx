@@ -50,8 +50,8 @@ export default function HomePage() {
     },
     {
       icon: <Users className="h-10 w-10 text-primary" />,
-      title: 'Asesoramiento Experto',
-      description: 'Nuestro equipo de especialistas en frenos está listo para ayudarte a encontrar el componente exacto que tu vehículo necesita.',
+      title: 'Asesoramiento Experto en Frenos',
+      description: 'Nuestro equipo de especialistas está listo para ayudarte a encontrar el componente exacto que tu vehículo necesita.',
     },
     {
       icon: <Truck className="h-10 w-10 text-primary" />,
@@ -86,12 +86,11 @@ export default function HomePage() {
       <section className="bg-card/50">
           <div className="container mx-auto px-4 py-16 md:py-24">
               <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center">Productos Destacados</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                   {isMounted && featuredProducts.map((product) => (
                       <ProductCard
                         key={product.id}
                         product={product}
-                        showFavorite={false}
                         onProductClick={handleProductClick}
                       />
                   ))}
@@ -134,6 +133,7 @@ export default function HomePage() {
           <DialogContent className="sm:max-w-lg p-0">
             <DialogHeader className="p-6 pb-0 text-left">
               <DialogTitle className="text-2xl">{selectedProduct.name}</DialogTitle>
+              <p className="text-sm text-muted-foreground pt-1">{selectedProduct.code}</p>
             </DialogHeader>
             <div className="py-4 px-6">
               <div className="flex flex-col gap-4">
