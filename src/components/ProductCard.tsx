@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { Product } from '@/lib/types';
@@ -30,6 +31,7 @@ export function ProductCard({ product, onProductClick }: ProductCardProps) {
           <CardTitle className="text-base font-bold leading-tight pr-8">
               {product.name}
           </CardTitle>
+          <p className="text-xs text-muted-foreground -mt-1">{product.code}</p>
           {product.isFeatured && (
               <div className="absolute top-3 right-3">
                   <Star className="h-5 w-5 flex-shrink-0 fill-gray-400 text-gray-400" />
