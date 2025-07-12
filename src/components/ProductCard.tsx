@@ -34,7 +34,7 @@ export function ProductCard({ product, onProductClick }: ProductCardProps) {
           <p className="text-xs text-muted-foreground -mt-1">{product.code}</p>
           {product.isFeatured && (
               <div className="absolute top-3 right-3">
-                  <Star className="h-5 w-5 flex-shrink-0 fill-gray-400 text-gray-400" />
+                  <Star className="h-5 w-5 flex-shrink-0 fill-primary text-primary" />
               </div>
           )}
       </CardHeader>
