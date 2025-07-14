@@ -19,31 +19,29 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
-import { Card } from '@/components/ui/card';
-import { BrakePadIcon } from '@/components/icons/BrakePadIcon';
-import { BrakeDiscIcon } from '@/components/icons/BrakeDiscIcon';
+import { ProductCard } from '@/components/ProductCard';
 
 export default function ProductosPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 12;
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [allProducts, setAllProducts] = useState<Product[]>([]);
-  const [isMounted, setIsMounted] = useState(false);
   const { addToCart } = useCart();
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   useEffect(() => {
     setAllProducts(getProducts());
-    setIsMounted(true);
   }, []);
 
-  const categories = ['Pastillas', 'Discos'];
+  const categories = useMemo(() => {
+    if (allProducts.length === 0) return [];
+    const uniqueCategories = [...new Set(allProducts.map(p => p.category))];
+    return uniqueCategories.sort();
+  }, [allProducts]);
 
   const filteredProducts = useMemo(() => {
-    if (!isMounted) return [];
-    
-    let products: Product[] = [...allProducts];
+    let products = [...allProducts];
 
     if (searchTerm) {
       const lowercasedTerm = searchTerm.toLowerCase();
@@ -66,7 +64,7 @@ export default function ProductosPage() {
     products.sort((a, b) => a.name.localeCompare(b.name));
 
     return products;
-  }, [searchTerm, selectedCategory, allProducts, isMounted]);
+  }, [searchTerm, selectedCategory, allProducts]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -90,10 +88,15 @@ export default function ProductosPage() {
     setSelectedProduct(product);
   };
 
+  const handleAddToCartClick = (product: Product) => {
+    addToCart(product);
+    setSelectedProduct(null);
+  };
+
   const LoadingSkeleton = () => (
-    <div className="space-y-4">
-      {Array.from({ length: 5 }).map((_, i) => (
-         <Skeleton key={i} className="h-24 w-full" />
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      {Array.from({ length: itemsPerPage }).map((_, i) => (
+         <Skeleton key={i} className="h-64 w-full" />
       ))}
     </div>
   );
@@ -109,11 +112,10 @@ export default function ProductosPage() {
 
         <div className="relative mb-6 max-w-lg mx-auto">
           <Input
-            placeholder="Buscar por código, producto, marca, modelo o compatibilidad..."
+            placeholder="Buscar por código, producto, marca, modelo..."
             className="pl-10"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            disabled={!isMounted}
           />
           <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
         </div>
@@ -122,7 +124,7 @@ export default function ProductosPage() {
           <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="w-full sm:w-auto">
               <TabsList>
                   <TabsTrigger value="all">Todos</TabsTrigger>
-                  {isMounted ? categories.map((category) => (
+                  {categories.length > 0 ? categories.map((category) => (
                       <TabsTrigger key={category} value={category}>
                           {category}
                       </TabsTrigger>
@@ -136,40 +138,16 @@ export default function ProductosPage() {
           </Tabs>
         </div>
         
-        <h2 className="text-2xl font-bold mb-4">Resultados de la Búsqueda</h2>
-
-        {!isMounted ? <LoadingSkeleton /> : (
+        {allProducts.length === 0 ? <LoadingSkeleton /> : (
             paginatedProducts.length > 0 ? (
                 <>
-                <div className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     {paginatedProducts.map((product) => (
-                        <Card 
-                          key={product.id} 
-                          className="flex items-start p-4 transition-all hover:shadow-md cursor-pointer"
-                          onClick={() => handleProductClick(product)}
-                        >
-                          <div className="flex-shrink-0 w-16 h-16 rounded-md bg-muted/50 flex items-center justify-center border mr-4 mt-1">
-                            {product.category === 'Pastillas' ? (
-                              <BrakePadIcon className="w-8 h-8 text-muted-foreground" />
-                            ) : (
-                              <BrakeDiscIcon className="w-8 h-8 text-muted-foreground" />
-                            )}
-                          </div>
-                          <div className="flex-1">
-                            <p className="font-semibold">{product.name}</p>
-                            <p className="text-sm text-muted-foreground">{product.brand} | {product.code}</p>
-                            <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                                <span className="font-medium">Compatibilidad:</span> {product.compatibility}
-                            </p>
-                          </div>
-                          <div className="flex flex-col items-end ml-4 gap-2">
-                            <p className="text-lg font-bold">{formatPrice(product.price)}</p>
-                            <Button size="sm" onClick={(e) => { e.stopPropagation(); addToCart(product); }}>
-                              <ShoppingCart className="mr-2 h-4 w-4" />
-                              Añadir
-                            </Button>
-                          </div>
-                        </Card>
+                        <ProductCard
+                          key={product.id}
+                          product={product}
+                          onProductClick={handleProductClick}
+                        />
                     ))}
                 </div>
                 {totalPages > 1 && (
@@ -199,47 +177,49 @@ export default function ProductosPage() {
                 )}
                 </>
             ) : (
-                <p className="col-span-full text-center text-muted-foreground py-10">No se encontraron productos que coincidan con tu búsqueda.</p>
+                <div className="col-span-full text-center text-muted-foreground py-10">
+                    <p>No se encontraron productos que coincidan con tu búsqueda.</p>
+                </div>
             )
         )}
 
         {selectedProduct && (
           <Dialog open={!!selectedProduct} onOpenChange={(isOpen) => !isOpen && setSelectedProduct(null)}>
             <DialogContent className="sm:max-w-lg p-0">
-              <DialogHeader className="p-6 pb-0 text-left">
-                <DialogTitle className="text-2xl">{selectedProduct.name}</DialogTitle>
-                <p className="text-sm text-muted-foreground pt-1">{selectedProduct.code}</p>
-              </DialogHeader>
-              <div className="py-4 px-6">
-                <div className="flex flex-col gap-4">
-                  <p className="text-3xl font-bold text-primary">{formatPrice(selectedProduct.price)}</p>
-                  <Separator />
-                  <div className="space-y-4 text-muted-foreground">
-                    <div className="grid grid-cols-[auto,1fr] gap-x-4 gap-y-2">
-                      <span className="font-semibold text-foreground">Marca:</span>
-                      <span>{selectedProduct.brand}</span>
+                <DialogHeader className="p-6 pb-0 text-left">
+                  <DialogTitle className="text-2xl">{selectedProduct.name}</DialogTitle>
+                  <p className="text-sm text-muted-foreground pt-1">{selectedProduct.code}</p>
+                </DialogHeader>
+                <div className="py-4 px-6">
+                  <div className="flex flex-col gap-4">
+                    <p className="text-3xl font-bold text-primary">{formatPrice(selectedProduct.price)}</p>
+                    <Separator />
+                    <div className="space-y-4 text-muted-foreground">
+                      <div className="grid grid-cols-[auto,1fr] gap-x-4 gap-y-2">
+                        <span className="font-semibold text-foreground">Marca:</span>
+                        <span>{selectedProduct.brand}</span>
 
-                      <span className="font-semibold text-foreground">Modelo:</span>
-                      <span>{selectedProduct.model}</span>
-                    
-                      <span className="font-semibold text-foreground">Categoría:</span>
-                      <span>{selectedProduct.category}</span>
+                        <span className="font-semibold text-foreground">Modelo:</span>
+                        <span>{selectedProduct.model}</span>
+                      
+                        <span className="font-semibold text-foreground">Categoría:</span>
+                        <span>{selectedProduct.category}</span>
+                      </div>
+                    </div>
+                    <Separator />
+                    <div className="space-y-2">
+                      <h2 className="text-lg font-semibold text-foreground">Compatibilidad</h2>
+                      <p className="text-muted-foreground">{selectedProduct.compatibility}</p>
                     </div>
                   </div>
-                  <Separator />
-                  <div className="space-y-2">
-                    <h2 className="text-lg font-semibold text-foreground">Compatibilidad</h2>
-                    <p className="text-muted-foreground">{selectedProduct.compatibility}</p>
-                  </div>
                 </div>
-              </div>
-              <DialogFooter className="sm:justify-between gap-2 sm:gap-0 p-6 pt-0">
-                  <Button type="button" variant="outline" onClick={() => setSelectedProduct(null)}>Cerrar</Button>
-                  <Button type="button" size="lg" onClick={() => { addToCart(selectedProduct); setSelectedProduct(null); }}>
-                      <ShoppingCart className="mr-2 h-5 w-5" />
-                      Añadir al Carrito
-                  </Button>
-              </DialogFooter>
+                <DialogFooter className="sm:justify-between gap-2 sm:gap-0 p-6 pt-0">
+                    <Button type="button" variant="outline" onClick={() => setSelectedProduct(null)}>Cerrar</Button>
+                    <Button type="button" size="lg" onClick={() => handleAddToCartClick(selectedProduct)}>
+                        <ShoppingCart className="mr-2 h-5 w-5" />
+                        Añadir al Carrito
+                    </Button>
+                </DialogFooter>
             </DialogContent>
           </Dialog>
         )}
