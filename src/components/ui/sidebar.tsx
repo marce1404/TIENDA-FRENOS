@@ -309,7 +309,13 @@ const SidebarRail = React.forwardRef<
   HTMLButtonElement,
   React.ComponentProps<"button">
 >(({ className, ...props }, ref) => {
-  const { toggleSidebar } = useSidebar()!
+  const context = useSidebar()
+
+  if (!context) {
+    return null
+  }
+
+  const { toggleSidebar } = context
 
   return (
     <button
