@@ -107,6 +107,7 @@ export default function ProductosPage() {
         <TableHeader>
           <TableRow>
             <TableHead>Nombre</TableHead>
+            <TableHead>Código</TableHead>
             <TableHead>Marca</TableHead>
             <TableHead>Modelo</TableHead>
             <TableHead>Compatibilidad</TableHead>
@@ -118,6 +119,7 @@ export default function ProductosPage() {
           {Array.from({ length: itemsPerPage }).map((_, i) => (
             <TableRow key={i}>
               <TableCell><Skeleton className="h-5 w-48" /></TableCell>
+              <TableCell><Skeleton className="h-5 w-24" /></TableCell>
               <TableCell><Skeleton className="h-5 w-24" /></TableCell>
               <TableCell><Skeleton className="h-5 w-24" /></TableCell>
               <TableCell><Skeleton className="h-5 w-64" /></TableCell>
@@ -177,6 +179,7 @@ export default function ProductosPage() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Nombre</TableHead>
+                      <TableHead>Código</TableHead>
                       <TableHead>Marca</TableHead>
                       <TableHead>Modelo</TableHead>
                       <TableHead>Compatibilidad</TableHead>
@@ -191,12 +194,8 @@ export default function ProductosPage() {
                         onClick={() => handleProductClick(product)}
                         className="cursor-pointer"
                       >
-                        <TableCell className="font-medium">
-                          <div className="flex flex-col">
-                            <span>{product.name}</span>
-                            <span className="text-xs text-muted-foreground">{product.code}</span>
-                          </div>
-                        </TableCell>
+                        <TableCell className="font-medium">{product.name}</TableCell>
+                        <TableCell>{product.code}</TableCell>
                         <TableCell>{product.brand}</TableCell>
                         <TableCell>{product.model}</TableCell>
                         <TableCell>{product.compatibility}</TableCell>
@@ -278,7 +277,7 @@ export default function ProductosPage() {
                   <Separator />
                   <div className="grid grid-cols-[auto,1fr] gap-x-4 gap-y-2 text-sm">
                     <span className="font-semibold text-foreground">Código:</span>
-                    <span className="text-foreground font-mono text-base">{selectedProduct.code}</span>
+                    <span className="font-mono text-base text-foreground">{selectedProduct.code}</span>
                   
                     <span className="font-semibold text-foreground">Marca:</span>
                     <span className="text-muted-foreground">{selectedProduct.brand}</span>
