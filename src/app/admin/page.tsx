@@ -826,7 +826,6 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
         price: '' as number | '',
         category: '',
         isFeatured: false,
-        imageUrl: ''
     });
     
     const [formData, setFormData] = useState(getInitialFormData());
@@ -849,7 +848,6 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
                     price: '', // Set as empty string for new products
                     category: '',
                     isFeatured: false,
-                    imageUrl: ''
                 });
             }
         }
@@ -888,9 +886,14 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        
+        // Auto-generate image URL based on product code
+        const imageUrl = formData.code ? `/images/products/${formData.code}.png` : '';
+
         onSave({
             ...formData,
             price: Number(formData.price) || 0, // Ensure price is a number on save
+            imageUrl,
         });
     };
 
@@ -943,21 +946,17 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="price" className="text-right">Precio</Label>
-                            <Input id="price" type="text" value={formData.price} onChange={handleChange} required className="col-span-3" pattern="[0-9]*\.?[0-9]*" />
+                            <Input id="price" type="text" value={formData.price === 0 ? '0' : formData.price || ''} onChange={handleChange} required className="col-span-3" />
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="imageUrl" className="text-right">URL de la Imagen</Label>
-                            <Input id="imageUrl" value={formData.imageUrl || ''} onChange={handleChange} className="col-span-3" placeholder="https://placehold.co/400x400.png" />
-                        </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                          <Label htmlFor="isFeatured" className="text-right">Destacado</Label>
-                          <div className="col-span-3 flex items-center">
-                            <Switch
-                                id="isFeatured"
-                                checked={formData.isFeatured}
-                                onCheckedChange={handleFeaturedChange}
-                            />
-                          </div>
+                            <Label htmlFor="isFeatured" className="text-right">Destacado</Label>
+                            <div className="col-span-3 flex items-center">
+                                <Switch
+                                    id="isFeatured"
+                                    checked={formData.isFeatured}
+                                    onCheckedChange={handleFeaturedChange}
+                                />
+                            </div>
                         </div>
                     </div>
                     <DialogFooter>
