@@ -3,11 +3,8 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
-import { Header } from '@/components/Header';
-import { Footer } from '@/components/Footer';
-import { LiveChatWidget } from '@/components/LiveChatWidget';
 import { CartProvider } from '@/hooks/use-cart';
-import { WhatsAppButton } from '@/components/WhatsAppButton';
+import { AppLayout } from '@/components/layout/app-layout';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -29,13 +26,9 @@ export default function RootLayout({
     <html lang="es" className="dark">
       <body className={`${inter.className} antialiased`}>
         <CartProvider>
-          <div className="relative flex min-h-screen flex-col bg-background">
-            <Header />
-            <main className="flex-1">{children}</main>
-            <Footer />
-          </div>
-          <WhatsAppButton />
-          <LiveChatWidget />
+          <AppLayout>
+            {children}
+          </AppLayout>
           <Toaster />
         </CartProvider>
       </body>

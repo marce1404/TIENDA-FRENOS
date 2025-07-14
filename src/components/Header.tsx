@@ -2,7 +2,7 @@
 "use client";
 
 import Link from 'next/link';
-import { Logo } from './Logo';
+import { Logo } from './logo';
 import { CartSheet } from './CartSheet';
 import { Button } from './ui/button';
 import {
@@ -25,8 +25,8 @@ export function Header() {
     <header className="bg-background/80 backdrop-blur-md sticky top-0 z-50 border-b border-border">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 mr-6">
- <Logo className="h-8 w-8 text-primary" />
- <span className="font-bold text-lg hidden sm:inline-block">REPUFRENOS.CL</span>
+          <Logo className="h-8 w-8 text-primary" />
+          <span className="font-bold text-lg hidden sm:inline-block">REPUFRENOS.CL</span>
         </Link>
         
         {/* Desktop Navigation */}
@@ -53,7 +53,7 @@ export function Header() {
                 <SheetContent>
                   <Link href="/" className="flex items-center gap-2 mb-8">
                     <Logo className="h-8 w-8 text-primary" />
- <span className="font-bold text-lg">REPUFRENOS.CL</span>
+                    <span className="font-bold text-lg">REPUFRENOS.CL</span>
                   </Link>
                   <nav className="grid gap-4">
                     {navLinks.map((link) => (
