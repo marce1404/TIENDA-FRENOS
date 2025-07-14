@@ -34,7 +34,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Pencil, Trash2, PlusCircle, LogIn, LogOut, Star, Phone, Settings, Save, Package, Mail, Loader2, Search, Users, Eye, EyeOff } from 'lucide-react';
+import { Pencil, Trash2, PlusCircle, LogIn, LogOut, Star, Phone, Settings, Save, Package, Mail, Loader2, Search, Users, Eye, EyeOff, Upload } from 'lucide-react';
 import { ArrowLeftIcon, ArrowRightIcon } from '@radix-ui/react-icons';
 import { verifyCredentials } from '@/actions/auth';
 import { saveEnvSettings } from '@/actions/saveEnv';
@@ -45,6 +45,7 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { getAdminSettingsForForm } from '@/actions/getAdminSettings';
 import Image from 'next/image';
+import { uploadImage } from '@/actions/uploadImage';
 
 
 export default function AdminPage() {
@@ -816,6 +817,7 @@ interface ProductFormDialogProps {
 }
 
 function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextProductId }: ProductFormDialogProps) {
+    const { toast } = useToast();
     const getInitialFormData = () => ({
         id: nextProductId || 0,
         code: '',
@@ -826,17 +828,23 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
         price: '' as number | '',
         category: '',
         isFeatured: false,
+        imageUrl: '',
     });
     
     const [formData, setFormData] = useState(getInitialFormData());
+    const [imageFile, setImageFile] = useState<File | null>(null);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
         if (isOpen) {
             if (product) {
                 setFormData({
                     ...product,
-                    price: product.price // keep price as number for existing products
+                    price: product.price, // keep price as number
+                    imageUrl: product.imageUrl || ''
                 });
+                setImagePreview(product.imageUrl || null);
             } else {
                 setFormData({
                     id: nextProductId || 0,
@@ -848,8 +856,11 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
                     price: '', // Set as empty string for new products
                     category: '',
                     isFeatured: false,
+                    imageUrl: '',
                 });
+                setImagePreview(null);
             }
+            setImageFile(null); // Reset file on open
         }
     }, [isOpen, product, nextProductId]);
 
@@ -873,6 +884,18 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
             }));
         }
     };
+    
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setImageFile(file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
 
     const handleCategoryChange = (value: string) => {
         if (value) {
@@ -884,17 +907,47 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
         setFormData(prev => ({ ...prev, isFeatured: checked }));
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        
-        // Auto-generate image URL based on product code
-        const imageUrl = formData.code ? `/images/products/${formData.code}.png` : '';
+        setIsSaving(true);
+        let finalImageUrl = formData.imageUrl;
+    
+        if (imageFile) {
+            if (!formData.code) {
+                toast({
+                    variant: 'destructive',
+                    title: 'Error',
+                    description: 'El código del producto es obligatorio para subir una imagen.',
+                });
+                setIsSaving(false);
+                return;
+            }
+            
+            const imageFormData = new FormData();
+            imageFormData.append('file', imageFile);
+            imageFormData.append('productCode', formData.code);
+            
+            const result = await uploadImage(imageFormData);
+
+            if (result.success) {
+                finalImageUrl = result.url;
+            } else {
+                toast({
+                    variant: 'destructive',
+                    title: 'Error al Subir Imagen',
+                    description: result.error,
+                });
+                setIsSaving(false);
+                return;
+            }
+        }
 
         onSave({
             ...formData,
-            price: Number(formData.price) || 0, // Ensure price is a number on save
-            imageUrl,
+            price: Number(formData.price) || 0,
+            imageUrl: finalImageUrl,
         });
+        setIsSaving(false);
     };
 
     return (
@@ -948,6 +1001,25 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
                             <Label htmlFor="price" className="text-right">Precio</Label>
                             <Input id="price" type="text" value={formData.price === 0 ? '0' : formData.price || ''} onChange={handleChange} required className="col-span-3" />
                         </div>
+                        <div className="grid grid-cols-4 items-start gap-4">
+                            <Label htmlFor="image" className="text-right pt-2">Imagen</Label>
+                            <div className="col-span-3 flex items-center gap-4">
+                               {imagePreview ? (
+                                    <Image
+                                        src={imagePreview}
+                                        alt="Vista previa de la imagen"
+                                        width={64}
+                                        height={64}
+                                        className="rounded-md object-cover h-16 w-16"
+                                    />
+                                ) : (
+                                    <div className="h-16 w-16 bg-muted rounded-md flex items-center justify-center">
+                                        <Upload className="h-8 w-8 text-muted-foreground" />
+                                    </div>
+                                )}
+                                <Input id="image" type="file" onChange={handleImageChange} accept="image/png, image/jpeg, image/webp" className="col-span-3" />
+                            </div>
+                        </div>
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="isFeatured" className="text-right">Destacado</Label>
                             <div className="col-span-3 flex items-center">
@@ -961,7 +1033,10 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
                     </div>
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
-                        <Button type="submit">Guardar</Button>
+                        <Button type="submit" disabled={isSaving}>
+                            {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                            Guardar
+                        </Button>
                     </DialogFooter>
                 </form>
             </DialogContent>
