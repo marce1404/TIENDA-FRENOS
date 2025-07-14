@@ -76,8 +76,11 @@ export function FeaturedProductCard({ product, onProductClick }: FeaturedProduct
                 )}
             </div>
             <div className="text-sm text-muted-foreground space-y-1 text-left w-full">
-                <p>Marca: {product.brand}</p>
-                <p>Modelo: {product.model}</p>
+                <p><span className="font-medium">Marca:</span> {product.brand}</p>
+                <p><span className="font-medium">Modelo:</span> {product.model}</p>
+                <p className="truncate" title={product.compatibility}>
+                  <span className="font-medium">Compatible:</span> {product.compatibility}
+                </p>
             </div>
         </CardContent>
         <CardFooter className="p-4 pt-0 flex justify-between items-center">
