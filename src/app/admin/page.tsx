@@ -444,7 +444,7 @@ export default function AdminPage() {
           <Tabs defaultValue="contact" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="contact"><Phone className="mr-2 h-4 w-4" />Contacto</TabsTrigger>
-              <TabsTrigger value="email"><Users className="mr-2 h-4 w-4" />Usuarios y Correo</TabsTrigger>
+              <TabsTrigger value="email"><Mail className="mr-2 h-4 w-4" />Usuarios y Correo</TabsTrigger>
             </TabsList>
             <TabsContent value="contact">
               <Card className="mt-6">
