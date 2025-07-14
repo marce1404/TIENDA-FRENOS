@@ -10,7 +10,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/hooks/use-cart';
-import { useRouter } from 'next/navigation';
 import {
   Table,
   TableBody,
@@ -19,6 +18,14 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Separator } from '@/components/ui/separator';
 
 export default function ProductosPage() {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
@@ -27,8 +34,8 @@ export default function ProductosPage() {
   const itemsPerPage = 10;
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const { addToCart } = useCart();
-  const router = useRouter();
 
   useEffect(() => {
     // This effect runs only on the client-side
@@ -82,8 +89,13 @@ export default function ProductosPage() {
     }).format(price);
   };
   
-  const handleRowClick = (productId: number) => {
-    router.push(`/productos/${productId}`);
+  const handleProductClick = (product: Product) => {
+    setSelectedProduct(product);
+  };
+
+  const handleAddToCartClick = (product: Product) => {
+    addToCart(product);
+    setSelectedProduct(null); // Cerrar el diálogo después de añadir al carrito
   };
 
   const LoadingSkeleton = () => (
@@ -173,7 +185,7 @@ export default function ProductosPage() {
                     {paginatedProducts.map((product) => (
                       <TableRow 
                         key={product.id}
-                        onClick={() => handleRowClick(product.id)}
+                        onClick={() => handleProductClick(product)}
                         className="cursor-pointer"
                       >
                         <TableCell className="font-medium">
@@ -233,6 +245,43 @@ export default function ProductosPage() {
               <p>No se encontraron productos que coincidan con tu búsqueda.</p>
             </div>
           )
+        )}
+        
+        {/* Diálogo de Detalle del Producto */}
+        {selectedProduct && (
+          <Dialog open={!!selectedProduct} onOpenChange={(isOpen) => !isOpen && setSelectedProduct(null)}>
+            <DialogContent className="sm:max-w-lg">
+              <DialogHeader>
+                <DialogTitle className="text-2xl">{selectedProduct.name}</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <p className="text-3xl font-bold text-primary">{formatPrice(selectedProduct.price)}</p>
+                <Separator />
+                <div className="grid grid-cols-[auto,1fr] gap-x-4 gap-y-2 text-sm">
+                  <span className="font-semibold text-foreground">Marca:</span>
+                  <span className="text-muted-foreground">{selectedProduct.brand}</span>
+
+                  <span className="font-semibold text-foreground">Modelo:</span>
+                  <span className="text-muted-foreground">{selectedProduct.model}</span>
+
+                  <span className="font-semibold text-foreground">Categoría:</span>
+                  <span className="text-muted-foreground">{selectedProduct.category}</span>
+                </div>
+                <Separator />
+                <div>
+                  <h3 className="font-semibold text-foreground">Compatibilidad</h3>
+                  <p className="text-sm text-muted-foreground">{selectedProduct.compatibility}</p>
+                </div>
+              </div>
+              <DialogFooter className="sm:justify-between gap-2">
+                  <Button type="button" variant="outline" onClick={() => setSelectedProduct(null)}>Cerrar</Button>
+                  <Button type="button" onClick={() => handleAddToCartClick(selectedProduct)}>
+                      <ShoppingCart className="mr-2 h-4 w-4" />
+                      Añadir al Carrito
+                  </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         )}
       </div>
   );
