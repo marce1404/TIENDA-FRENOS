@@ -86,6 +86,7 @@ export default function AdminPage() {
   const allCategories = ['Pastillas', 'Discos'];
 
   useEffect(() => {
+    // Only run on the client
     setProducts(getProducts());
     const authStatus = sessionStorage.getItem('isAdminAuthenticated');
     if (authStatus === 'true') {
