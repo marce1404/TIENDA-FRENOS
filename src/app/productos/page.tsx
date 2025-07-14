@@ -29,7 +29,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import Image from 'next/image';
 import { useDefaultImages } from '@/hooks/use-default-images';
-import { ProductDialogContact } from '@/components/ProductDialogContact';
+import { WhatsAppIcon } from '@/components/icons/WhatsAppIcon';
 
 
 export default function ProductosPage() {
@@ -42,11 +42,26 @@ export default function ProductosPage() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const { addToCart } = useCart();
   const { defaultPastillaImage, defaultDiscoImage } = useDefaultImages();
+  const [whatsappNumber, setWhatsappNumber] = useState('56912345678');
 
   useEffect(() => {
     // This effect runs only on the client-side
     setAllProducts(getProducts());
     setIsLoading(false);
+
+    const getWhatsappNumber = () => {
+        let loadedNumber = '56912345678';
+        const savedInfo = localStorage.getItem('whatsappInfo');
+        if (savedInfo) {
+            try {
+                const { number } = JSON.parse(savedInfo);
+                if (number) loadedNumber = number;
+            } catch (e) {}
+        }
+        setWhatsappNumber(loadedNumber);
+    };
+
+    getWhatsappNumber();
   }, []);
   
   const categories = useMemo(() => {
@@ -109,6 +124,12 @@ export default function ProductosPage() {
     if (product.category === 'Pastillas') return defaultPastillaImage;
     if (product.category === 'Discos') return defaultDiscoImage;
     return null;
+  };
+  
+  const handleContactClick = (product: Product) => {
+    const message = `¡Hola! Tengo una duda sobre el producto "${product.name}" (código: ${product.code}).`;
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
   };
 
   const LoadingSkeleton = () => (
@@ -281,7 +302,6 @@ export default function ProductosPage() {
                             Sin imagen
                         </div>
                     )}
-                    <ProductDialogContact product={selectedProduct} />
                 </div>
                 <div className="flex flex-col space-y-4">
                   <p className="text-3xl font-bold text-primary">{formatPrice(selectedProduct.price)}</p>
@@ -306,12 +326,23 @@ export default function ProductosPage() {
                   </div>
                 </div>
               </div>
-              <DialogFooter className="sm:justify-between gap-2">
-                  <Button type="button" variant="outline" onClick={() => setSelectedProduct(null)}>Cerrar</Button>
-                  <Button type="button" onClick={() => handleAddToCartClick(selectedProduct)}>
-                      <ShoppingCart className="mr-2 h-4 w-4" />
-                      Añadir al Carrito
-                  </Button>
+              <DialogFooter className="sm:justify-between gap-4">
+                <div className="flex gap-2">
+                   <Button type="button" variant="outline" onClick={() => setSelectedProduct(null)}>Cerrar</Button>
+                   <Button 
+                      type="button"
+                      variant="outline"
+                      className="bg-green-500 hover:bg-green-600 text-white hover:text-white"
+                      onClick={() => handleContactClick(selectedProduct)}
+                    >
+                      <WhatsAppIcon className="h-5 w-5 mr-2" />
+                      Consultar por WhatsApp
+                   </Button>
+                </div>
+                <Button type="button" onClick={() => handleAddToCartClick(selectedProduct)}>
+                    <ShoppingCart className="mr-2 h-4 w-4" />
+                    Añadir al Carrito
+                </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
