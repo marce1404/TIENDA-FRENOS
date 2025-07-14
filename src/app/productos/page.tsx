@@ -4,22 +4,21 @@
 import { useState, useMemo, useEffect } from 'react';
 import { getProducts } from '@/lib/products';
 import { Input } from '@/components/ui/input';
-import { Search, ShoppingCart } from 'lucide-react';
+import { Search, ShoppingCart, ArrowLeft, ArrowRight } from 'lucide-react';
 import type { Product } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { ArrowLeftIcon, ArrowRightIcon } from '@radix-ui/react-icons';
 import { useCart } from '@/hooks/use-cart';
+import { useRouter } from 'next/navigation';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '@/components/ui/dialog';
-import { Separator } from '@/components/ui/separator';
-import { ProductCard } from '@/components/ProductCard';
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 export default function ProductosPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -28,7 +27,7 @@ export default function ProductosPage() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const { addToCart } = useCart();
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     setAllProducts(getProducts());
@@ -56,9 +55,7 @@ export default function ProductosPage() {
     }
 
     if (selectedCategory !== 'all') {
-      products = products.filter((p) =>
-        p.category === selectedCategory
-      );
+      products = products.filter((p) => p.category === selectedCategory);
     }
     
     products.sort((a, b) => a.name.localeCompare(b.name));
@@ -83,21 +80,35 @@ export default function ProductosPage() {
       currency: 'CLP',
     }).format(price);
   };
-
-  const handleProductClick = (product: Product) => {
-    setSelectedProduct(product);
-  };
-
-  const handleAddToCartClick = (product: Product) => {
-    addToCart(product);
-    setSelectedProduct(null);
+  
+  const handleRowClick = (productId: number) => {
+    router.push(`/productos/${productId}`);
   };
 
   const LoadingSkeleton = () => (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-      {Array.from({ length: itemsPerPage }).map((_, i) => (
-         <Skeleton key={i} className="h-64 w-full" />
-      ))}
+    <div className="rounded-lg border">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Nombre</TableHead>
+            <TableHead>Marca</TableHead>
+            <TableHead>Compatibilidad</TableHead>
+            <TableHead className="text-right">Precio</TableHead>
+            <TableHead className="w-[120px] text-center">Acción</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {Array.from({ length: itemsPerPage }).map((_, i) => (
+            <TableRow key={i}>
+              <TableCell><Skeleton className="h-5 w-48" /></TableCell>
+              <TableCell><Skeleton className="h-5 w-24" /></TableCell>
+              <TableCell><Skeleton className="h-5 w-64" /></TableCell>
+              <TableCell className="text-right"><Skeleton className="h-5 w-20 ml-auto" /></TableCell>
+              <TableCell className="text-center"><Skeleton className="h-9 w-24 mx-auto" /></TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   );
 
@@ -139,89 +150,82 @@ export default function ProductosPage() {
         </div>
         
         {allProducts.length === 0 ? <LoadingSkeleton /> : (
-            paginatedProducts.length > 0 ? (
-                <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          paginatedProducts.length > 0 ? (
+            <>
+              <div className="rounded-lg border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Nombre</TableHead>
+                      <TableHead>Marca</TableHead>
+                      <TableHead>Compatibilidad</TableHead>
+                      <TableHead className="text-right">Precio</TableHead>
+                      <TableHead className="w-[120px] text-center">Acción</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
                     {paginatedProducts.map((product) => (
-                        <ProductCard
-                          key={product.id}
-                          product={product}
-                          onProductClick={handleProductClick}
-                        />
+                      <TableRow 
+                        key={product.id}
+                        onClick={() => handleRowClick(product.id)}
+                        className="cursor-pointer"
+                      >
+                        <TableCell className="font-medium">
+                          <div className="flex flex-col">
+                            <span>{product.name}</span>
+                            <span className="text-xs text-muted-foreground">{product.code}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>{product.brand}</TableCell>
+                        <TableCell>{product.compatibility}</TableCell>
+                        <TableCell className="text-right">{formatPrice(product.price)}</TableCell>
+                        <TableCell className="text-center">
+                          <Button 
+                            size="sm" 
+                            onClick={(e) => { e.stopPropagation(); addToCart(product); }}
+                            aria-label={`Añadir ${product.name} al carrito`}
+                          >
+                            <ShoppingCart className="mr-2 h-4 w-4" />
+                            Añadir
+                          </Button>
+                        </TableCell>
+                      </TableRow>
                     ))}
+                  </TableBody>
+                </Table>
+              </div>
+              
+              {totalPages > 1 && (
+                <div className="flex justify-center items-center gap-4 mt-8">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Anterior
+                  </Button>
+                  <span className="text-muted-foreground">
+                    Página {currentPage} de {totalPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    Siguiente
+                    <ArrowRight className="h-4 w-4 ml-2" />
+                  </Button>
                 </div>
-                {totalPages > 1 && (
-                    <div className="flex justify-center items-center gap-4 mt-8">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                            disabled={currentPage === 1}
-                        >
-                            <ArrowLeftIcon className="h-4 w-4 mr-2" />
-                            Anterior
-                        </Button>
-                        <span className="text-muted-foreground">
-                            Página {currentPage} de {totalPages}
-                        </span>
-                        <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                                disabled={currentPage === totalPages}
-                        >
-                            Siguiente
-                                <ArrowRightIcon className="h-4 w-4 ml-2" />
-                        </Button>
-                    </div>
-                )}
-                </>
-            ) : (
-                <div className="col-span-full text-center text-muted-foreground py-10">
-                    <p>No se encontraron productos que coincidan con tu búsqueda.</p>
-                </div>
-            )
-        )}
-
-        {selectedProduct && (
-          <Dialog open={!!selectedProduct} onOpenChange={(isOpen) => !isOpen && setSelectedProduct(null)}>
-            <DialogContent className="sm:max-w-lg p-0">
-                <DialogHeader className="p-6 pb-0 text-left">
-                  <DialogTitle className="text-2xl">{selectedProduct.name}</DialogTitle>
-                  <p className="text-sm text-muted-foreground pt-1">{selectedProduct.code}</p>
-                </DialogHeader>
-                <div className="py-4 px-6">
-                  <div className="flex flex-col gap-4">
-                    <p className="text-3xl font-bold text-primary">{formatPrice(selectedProduct.price)}</p>
-                    <Separator />
-                    <div className="space-y-4 text-muted-foreground">
-                      <div className="grid grid-cols-[auto,1fr] gap-x-4 gap-y-2">
-                        <span className="font-semibold text-foreground">Marca:</span>
-                        <span>{selectedProduct.brand}</span>
-
-                        <span className="font-semibold text-foreground">Modelo:</span>
-                        <span>{selectedProduct.model}</span>
-                      
-                        <span className="font-semibold text-foreground">Categoría:</span>
-                        <span>{selectedProduct.category}</span>
-                      </div>
-                    </div>
-                    <Separator />
-                    <div className="space-y-2">
-                      <h2 className="text-lg font-semibold text-foreground">Compatibilidad</h2>
-                      <p className="text-muted-foreground">{selectedProduct.compatibility}</p>
-                    </div>
-                  </div>
-                </div>
-                <DialogFooter className="sm:justify-between gap-2 sm:gap-0 p-6 pt-0">
-                    <Button type="button" variant="outline" onClick={() => setSelectedProduct(null)}>Cerrar</Button>
-                    <Button type="button" size="lg" onClick={() => handleAddToCartClick(selectedProduct)}>
-                        <ShoppingCart className="mr-2 h-5 w-5" />
-                        Añadir al Carrito
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-          </Dialog>
+              )}
+            </>
+          ) : (
+            <div className="col-span-full text-center text-muted-foreground py-10">
+              <p>No se encontraron productos que coincidan con tu búsqueda.</p>
+            </div>
+          )
         )}
       </div>
   );
