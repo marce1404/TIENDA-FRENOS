@@ -127,38 +127,33 @@ export default function HomePage() {
       {/* Diálogo de Detalle del Producto */}
       {selectedProduct && (
         <Dialog open={!!selectedProduct} onOpenChange={(isOpen) => !isOpen && setSelectedProduct(null)}>
-          <DialogContent className="sm:max-w-lg p-0">
-            <DialogHeader className="p-6 pb-0 text-left">
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
               <DialogTitle className="text-2xl">{selectedProduct.name}</DialogTitle>
-              <p className="text-sm text-muted-foreground pt-1">{selectedProduct.code}</p>
             </DialogHeader>
-            <div className="py-4 px-6">
-              <div className="flex flex-col gap-4">
-                <p className="text-3xl font-bold text-primary">{formatPrice(selectedProduct.price)}</p>
-                <Separator />
-                <div className="space-y-4 text-muted-foreground">
-                  <div className="grid grid-cols-[auto,1fr] gap-x-4 gap-y-2">
-                    <span className="font-semibold text-foreground">Marca:</span>
-                    <span>{selectedProduct.brand}</span>
+            <div className="space-y-4">
+              <p className="text-3xl font-bold text-primary">{formatPrice(selectedProduct.price)}</p>
+              <Separator />
+              <div className="grid grid-cols-[auto,1fr] gap-x-4 gap-y-2 text-sm">
+                <span className="font-semibold text-foreground">Marca:</span>
+                <span className="text-muted-foreground">{selectedProduct.brand}</span>
 
-                    <span className="font-semibold text-foreground">Modelo:</span>
-                    <span>{selectedProduct.model}</span>
+                <span className="font-semibold text-foreground">Modelo:</span>
+                <span className="text-muted-foreground">{selectedProduct.model}</span>
 
-                    <span className="font-semibold text-foreground">Categoría:</span>
-                    <span>{selectedProduct.category}</span>
-                  </div>
-                </div>
-                <Separator />
-                <div className="space-y-2">
-                  <h2 className="text-lg font-semibold text-foreground">Compatibilidad</h2>
-                  <p className="text-muted-foreground">{selectedProduct.compatibility}</p>
-                </div>
+                <span className="font-semibold text-foreground">Categoría:</span>
+                <span className="text-muted-foreground">{selectedProduct.category}</span>
+              </div>
+              <Separator />
+              <div className="space-y-1">
+                <h3 className="font-semibold text-foreground">Compatibilidad</h3>
+                <p className="text-sm text-muted-foreground">{selectedProduct.compatibility}</p>
               </div>
             </div>
-            <DialogFooter className="sm:justify-between gap-2 sm:gap-0 p-6 pt-0">
+            <DialogFooter className="sm:justify-between gap-2">
                 <Button type="button" variant="outline" onClick={() => setSelectedProduct(null)}>Cerrar</Button>
-                <Button type="button" size="lg" onClick={() => handleAddToCartClick(selectedProduct)}>
-                    <ShoppingCart className="mr-2 h-5 w-5" />
+                <Button type="button" onClick={() => handleAddToCartClick(selectedProduct)}>
+                    <ShoppingCart className="mr-2 h-4 w-4" />
                     Añadir al Carrito
                 </Button>
             </DialogFooter>
