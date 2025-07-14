@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -82,8 +83,6 @@ export default function AdminPage() {
   // State for pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [productsPerPage] = useState(10);
-
-  const allCategories = ['Pastillas', 'Discos'];
 
   useEffect(() => {
     // Only run on the client
@@ -681,7 +680,7 @@ export default function AdminPage() {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {paginatedAdminProducts.map((product) => (
+                    {paginatedAdminProducts.length > 0 ? paginatedAdminProducts.map((product) => (
                     <TableRow key={product.id}>
                         <TableCell className="font-medium">{product.id}</TableCell>
                         <TableCell>{product.code}</TableCell>
@@ -723,7 +722,13 @@ export default function AdminPage() {
                         </AlertDialog>
                         </TableCell>
                     </TableRow>
-                    ))}
+                    )) : (
+                      <TableRow>
+                        <TableCell colSpan={9} className="h-24 text-center">
+                          {products.length === 0 ? "No hay productos para mostrar. Intenta añadirlos." : "No se encontraron productos con el término de búsqueda."}
+                        </TableCell>
+                      </TableRow>
+                    )}
                 </TableBody>
                 </Table>
             </div>

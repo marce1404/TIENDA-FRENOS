@@ -14,21 +14,18 @@ export function getProducts(): Product[] {
   try {
     const savedProductsJSON = localStorage.getItem('products');
     
-    // If no products in storage, initialize with default list
-    if (!savedProductsJSON) {
-       localStorage.setItem('products', JSON.stringify(initialProducts));
-       return initialProducts;
+    if (savedProductsJSON) {
+        const productsFromStorage = JSON.parse(savedProductsJSON);
+        // Ensure it's a non-empty array before returning
+        if (Array.isArray(productsFromStorage) && productsFromStorage.length > 0) {
+            return productsFromStorage;
+        }
     }
 
-    const productsFromStorage: Product[] = JSON.parse(savedProductsJSON);
-    
-    // If stored products are not a valid array or are empty, re-initialize
-    if (!Array.isArray(productsFromStorage) || productsFromStorage.length === 0) {
-       localStorage.setItem('products', JSON.stringify(initialProducts));
-       return initialProducts;
-    }
-    
-    return productsFromStorage;
+    // If localStorage is empty, invalid, or contains an empty array,
+    // initialize with default list, save it, and return it.
+    localStorage.setItem('products', JSON.stringify(initialProducts));
+    return initialProducts;
 
   } catch (e) {
     // If any other error occurs (e.g., parsing fails),
