@@ -44,6 +44,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { getAdminSettingsForForm } from '@/actions/getAdminSettings';
+import Image from 'next/image';
 
 
 export default function AdminPage() {
@@ -678,6 +679,7 @@ export default function AdminPage() {
                 <TableHeader>
                     <TableRow>
                     <TableHead className="w-[80px]">ID</TableHead>
+                    <TableHead className="w-[100px]">Imagen</TableHead>
                     <TableHead>Código</TableHead>
                     <TableHead>Nombre</TableHead>
                     <TableHead>Marca</TableHead>
@@ -692,6 +694,22 @@ export default function AdminPage() {
                     {paginatedAdminProducts.length > 0 ? paginatedAdminProducts.map((product) => (
                     <TableRow key={product.id}>
                         <TableCell className="font-medium">{product.id}</TableCell>
+                        <TableCell>
+                          {product.imageUrl ? (
+                            <Image
+                              src={product.imageUrl}
+                              alt={`Imagen de ${product.name}`}
+                              width={40}
+                              height={40}
+                              className="rounded-md object-cover"
+                              data-ai-hint={product.category === 'Pastillas' ? 'brake pad' : 'brake disc'}
+                            />
+                          ) : (
+                            <div className="w-10 h-10 bg-muted rounded-md flex items-center justify-center text-xs text-muted-foreground">
+                              Sin foto
+                            </div>
+                          )}
+                        </TableCell>
                         <TableCell>{product.code}</TableCell>
                         <TableCell>{product.name}</TableCell>
                         <TableCell>{product.brand}</TableCell>
@@ -733,7 +751,7 @@ export default function AdminPage() {
                     </TableRow>
                     )) : (
                       <TableRow>
-                        <TableCell colSpan={9} className="h-24 text-center">
+                        <TableCell colSpan={10} className="h-24 text-center">
                           {products.length === 0 ? "No hay productos para mostrar. Intenta añadirlos." : "No se encontraron productos con el término de búsqueda."}
                         </TableCell>
                       </TableRow>
@@ -802,7 +820,7 @@ interface ProductFormDialogProps {
 
 function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextProductId }: ProductFormDialogProps) {
     const getInitialFormData = () => ({
-        id: nextProductId || 0, code: '', name: '', brand: '', model: '', compatibility: '', price: 0, category: '', isFeatured: false,
+        id: nextProductId || 0, code: '', name: '', brand: '', model: '', compatibility: '', price: 0, category: '', isFeatured: false, imageUrl: ''
     });
     
     const [formData, setFormData] = useState(getInitialFormData());
@@ -819,7 +837,10 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { id, value, type } = e.target;
-        setFormData(prev => ({ ...prev, [id]: type === 'number' ? parseInt(value, 10) || 0 : value }));
+        setFormData(prev => ({
+            ...prev,
+            [id]: type === 'number' ? parseFloat(value) || 0 : value
+        }));
     };
 
     const handleCategoryChange = (value: string) => {
@@ -847,7 +868,7 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
                     <div className="space-y-4 py-4">
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="id" className="text-right">ID</Label>
-                            <Input id="id" type="number" value={formData.id} onChange={handleChange} required className="col-span-3" disabled={!!product} />
+                            <Input id="id" type="number" value={formData.id} onChange={handleChange} required className="col-span-3" disabled />
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="code" className="text-right">Código</Label>
@@ -888,6 +909,10 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="price" className="text-right">Precio</Label>
                             <Input id="price" type="number" value={formData.price} onChange={handleChange} required className="col-span-3" />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="imageUrl" className="text-right">URL de la Imagen</Label>
+                            <Input id="imageUrl" value={formData.imageUrl || ''} onChange={handleChange} className="col-span-3" placeholder="https://placehold.co/400x400.png" />
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
                           <Label htmlFor="isFeatured" className="text-right">Destacado</Label>
