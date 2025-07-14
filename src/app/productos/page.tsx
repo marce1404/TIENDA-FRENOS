@@ -21,14 +21,19 @@ import {
 } from '@/components/ui/table';
 
 export default function ProductosPage() {
-  const [allProducts, setAllProducts] = useState<Product[]>(() => getProducts());
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [isLoading, setIsLoading] = useState(false); // Can be removed if not needed for other async ops
+  const [isLoading, setIsLoading] = useState(true);
   const { addToCart } = useCart();
   const router = useRouter();
+
+  useEffect(() => {
+    setAllProducts(getProducts());
+    setIsLoading(false);
+  }, []);
   
   const categories = useMemo(() => {
     const uniqueCategories = [...new Set(allProducts.map(p => p.category))];

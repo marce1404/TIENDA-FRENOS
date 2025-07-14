@@ -52,7 +52,7 @@ export default function AdminPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const [products, setProducts] = useState<Product[]>(() => getProducts());
+  const [products, setProducts] = useState<Product[]>([]);
   const { toast } = useToast();
   
   // State for settings
@@ -85,6 +85,9 @@ export default function AdminPage() {
   const [productsPerPage] = useState(10);
 
   useEffect(() => {
+    // Load products on mount
+    setProducts(getProducts());
+
     // Only run on the client
     const authStatus = sessionStorage.getItem('isAdminAuthenticated');
     if (authStatus === 'true') {
