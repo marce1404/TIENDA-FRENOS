@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 const WhatsAppIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -57,13 +56,13 @@ export function WhatsAppButton() {
 
   return (
     <div className={cn("fixed bottom-6 left-6 z-50")}>
-      <Button
+      <button
         onClick={openWhatsApp}
-        className="h-14 w-14 rounded-full bg-green-500 text-white shadow-lg hover:bg-green-600"
+        className="h-14 w-14 rounded-full bg-green-500 text-white shadow-lg hover:bg-green-600 flex items-center justify-center"
         aria-label="Contactar por WhatsApp"
       >
         <WhatsAppIcon className="h-8 w-8" />
-      </Button>
+      </button>
     </div>
   );
 }

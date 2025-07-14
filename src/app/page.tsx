@@ -145,7 +145,7 @@ export default function HomePage() {
                 <span className="text-muted-foreground">{selectedProduct.category}</span>
               </div>
               <Separator />
-              <div className="space-y-1">
+              <div>
                 <h3 className="font-semibold text-foreground">Compatibilidad</h3>
                 <p className="text-sm text-muted-foreground">{selectedProduct.compatibility}</p>
               </div>

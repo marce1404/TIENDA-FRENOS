@@ -17,7 +17,6 @@ import { Separator } from './ui/separator';
 import { useEffect, useState } from 'react';
 import { BrakePadIcon } from './icons/BrakePadIcon';
 import { BrakeDiscIcon } from './icons/BrakeDiscIcon';
-import Image from 'next/image';
 
 const formatPrice = (price: number) => {
     return new Intl.NumberFormat('es-CL', {
