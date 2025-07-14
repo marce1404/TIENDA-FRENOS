@@ -278,7 +278,7 @@ export default function ProductosPage() {
                   <Separator />
                   <div className="grid grid-cols-[auto,1fr] gap-x-4 gap-y-2 text-sm">
                     <span className="font-semibold text-foreground">Código:</span>
-                    <span className="text-muted-foreground font-mono">{selectedProduct.code}</span>
+                    <span className="text-foreground font-mono text-base">{selectedProduct.code}</span>
                   
                     <span className="font-semibold text-foreground">Marca:</span>
                     <span className="text-muted-foreground">{selectedProduct.brand}</span>
