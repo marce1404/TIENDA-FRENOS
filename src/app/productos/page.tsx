@@ -31,6 +31,7 @@ export default function ProductosPage() {
   const router = useRouter();
 
   useEffect(() => {
+    // This effect runs only on the client-side
     setAllProducts(getProducts());
     setIsLoading(false);
   }, []);
@@ -92,6 +93,7 @@ export default function ProductosPage() {
           <TableRow>
             <TableHead>Nombre</TableHead>
             <TableHead>Marca</TableHead>
+            <TableHead>Modelo</TableHead>
             <TableHead>Compatibilidad</TableHead>
             <TableHead className="text-right">Precio</TableHead>
             <TableHead className="w-[120px] text-center">Acción</TableHead>
@@ -101,6 +103,7 @@ export default function ProductosPage() {
           {Array.from({ length: itemsPerPage }).map((_, i) => (
             <TableRow key={i}>
               <TableCell><Skeleton className="h-5 w-48" /></TableCell>
+              <TableCell><Skeleton className="h-5 w-24" /></TableCell>
               <TableCell><Skeleton className="h-5 w-24" /></TableCell>
               <TableCell><Skeleton className="h-5 w-64" /></TableCell>
               <TableCell className="text-right"><Skeleton className="h-5 w-20 ml-auto" /></TableCell>
@@ -160,6 +163,7 @@ export default function ProductosPage() {
                     <TableRow>
                       <TableHead>Nombre</TableHead>
                       <TableHead>Marca</TableHead>
+                      <TableHead>Modelo</TableHead>
                       <TableHead>Compatibilidad</TableHead>
                       <TableHead className="text-right">Precio</TableHead>
                       <TableHead className="w-[120px] text-center">Acción</TableHead>
@@ -179,6 +183,7 @@ export default function ProductosPage() {
                           </div>
                         </TableCell>
                         <TableCell>{product.brand}</TableCell>
+                        <TableCell>{product.model}</TableCell>
                         <TableCell>{product.compatibility}</TableCell>
                         <TableCell className="text-right">{formatPrice(product.price)}</TableCell>
                         <TableCell className="text-center">
