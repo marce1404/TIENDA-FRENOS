@@ -38,7 +38,7 @@ export function FeaturedProductCard({ product, onProductClick }: FeaturedProduct
             <Star className={cn("h-5 w-5 flex-shrink-0", product.isFeatured ? "fill-primary text-primary" : "text-muted-foreground")} />
         </CardHeader>
         <CardContent className="p-4 pt-0 text-sm text-muted-foreground flex-grow space-y-1">
-            <p className="font-mono text-xs">Código: {product.code}</p>
+            <p>Código: <span className="font-mono text-xs">{product.code}</span></p>
             <p>Marca: {product.brand}</p>
             <p>Modelo: {product.model}</p>
             <p>Compatibilidad: {product.compatibility}</p>
