@@ -56,9 +56,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       return [...prevItems, { ...product, quantity: 1 }];
     });
     toast({
-      title: "¡Producto añadido!",
-      description: `${product.name} se ha añadido al carrito.`,
-      duration: 2000, // Duration in milliseconds
+      title: "¡Añadido al Carrito!",
+      description: `${product.name} se ha añadido a tu cotización.`,
+      duration: 3000,
     });
   }, [toast]);
 

@@ -19,7 +19,6 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { useCart } from '@/hooks/use-cart';
 
-// Replicar la función formatPrice del archivo productos/page.tsx
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat('es-CL', {
     style: 'currency',
@@ -78,7 +77,7 @@ export default function HomePage() {
           Encuentra la calidad que buscas al precio que necesitas. Ofrecemos una amplia gama de repuestos de frenos para ajustarnos a tu presupuesto sin comprometer tu seguridad.
         </p>
         <Link href="/productos">
-          <Button size="lg" className="bg-gray-200 text-black">Ver Productos</Button>
+          <Button size="lg">Ver Productos</Button>
         </Link>
       </section>
       <section className="bg-card/50">
