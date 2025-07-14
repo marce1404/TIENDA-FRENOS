@@ -28,6 +28,7 @@ import {
 } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import Image from 'next/image';
+import { useDefaultImages } from '@/hooks/use-default-images';
 
 
 export default function ProductosPage() {
@@ -39,6 +40,7 @@ export default function ProductosPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const { addToCart } = useCart();
+  const { defaultPastillaImage, defaultDiscoImage } = useDefaultImages();
 
   useEffect(() => {
     // This effect runs only on the client-side
@@ -99,6 +101,13 @@ export default function ProductosPage() {
   const handleAddToCartClick = (product: Product) => {
     addToCart(product);
     setSelectedProduct(null); // Cerrar el diálogo después de añadir al carrito
+  };
+
+  const getProductImage = (product: Product) => {
+    if (product.imageUrl) return product.imageUrl;
+    if (product.category === 'Pastillas') return defaultPastillaImage;
+    if (product.category === 'Discos') return defaultDiscoImage;
+    return null;
   };
 
   const LoadingSkeleton = () => (
@@ -258,9 +267,9 @@ export default function ProductosPage() {
               </DialogHeader>
                <div className="grid md:grid-cols-2 gap-8 py-4">
                 <div className="relative aspect-square w-full bg-muted rounded-lg overflow-hidden">
-                    {selectedProduct.imageUrl ? (
+                    {getProductImage(selectedProduct) ? (
                         <Image
-                            src={selectedProduct.imageUrl}
+                            src={getProductImage(selectedProduct)!}
                             alt={`Imagen de ${selectedProduct.name}`}
                             fill
                             className="object-contain"

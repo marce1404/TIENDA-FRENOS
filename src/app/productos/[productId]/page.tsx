@@ -14,6 +14,8 @@ import { BrakeDiscIcon } from '@/components/icons/BrakeDiscIcon';
 import { useCart } from '@/hooks/use-cart';
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useDefaultImages } from '@/hooks/use-default-images';
+import Image from 'next/image';
 
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat('es-CL', {
@@ -26,6 +28,8 @@ export default function ProductDetailPage({ params }: { params: { productId: str
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const { addToCart } = useCart();
+  const { defaultPastillaImage, defaultDiscoImage } = useDefaultImages();
+
 
   useEffect(() => {
     const allProducts = getProducts();
@@ -38,6 +42,13 @@ export default function ProductDetailPage({ params }: { params: { productId: str
     setLoading(false);
   }, [params.productId]);
 
+  const getProductImage = (product: Product) => {
+    if (product.imageUrl) return product.imageUrl;
+    if (product.category === 'Pastillas') return defaultPastillaImage;
+    if (product.category === 'Discos') return defaultDiscoImage;
+    return null;
+  };
+
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-16">
@@ -48,7 +59,7 @@ export default function ProductDetailPage({ params }: { params: { productId: str
             <Skeleton className="h-4 w-1/4" />
           </CardHeader>
           <CardContent className="grid md:grid-cols-2 gap-8">
-            <Skeleton className="h-64 w-full" />
+            <Skeleton className="aspect-square w-full" />
             <div className="space-y-6">
               <Skeleton className="h-12 w-1/2" />
               <Skeleton className="h-24 w-full" />
@@ -65,6 +76,8 @@ export default function ProductDetailPage({ params }: { params: { productId: str
     return null;
   }
 
+  const productImage = getProductImage(product);
+
   return (
     <div className="container mx-auto px-4 py-12 md:py-16">
         <div className="mb-8">
@@ -80,12 +93,22 @@ export default function ProductDetailPage({ params }: { params: { productId: str
             </CardHeader>
             <CardContent className="p-6 pt-0">
                 <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
-                    <div className="flex items-center justify-center p-8 bg-muted rounded-lg border">
-                         {product.category === 'Pastillas' ? (
-                            <BrakePadIcon className="w-48 h-48 text-muted-foreground" />
-                        ) : (
-                            <BrakeDiscIcon className="w-48 h-48 text-muted-foreground" />
-                        )}
+                     <div className="relative aspect-square w-full bg-muted rounded-lg border overflow-hidden">
+                         {productImage ? (
+                             <Image
+                                 src={productImage}
+                                 alt={`Imagen de ${product.name}`}
+                                 fill
+                                 className="object-contain"
+                                 data-ai-hint={product.category === 'Pastillas' ? 'brake pad' : 'brake disc'}
+                             />
+                         ) : (
+                             product.category === 'Pastillas' ? (
+                                <BrakePadIcon className="w-48 h-48 text-muted-foreground m-auto" />
+                            ) : (
+                                <BrakeDiscIcon className="w-48 h-48 text-muted-foreground m-auto" />
+                            )
+                         )}
                     </div>
                     <div className="flex flex-col space-y-6">
                         <div>

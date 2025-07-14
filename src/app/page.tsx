@@ -20,6 +20,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { useCart } from '@/hooks/use-cart';
 import Image from 'next/image';
+import { useDefaultImages } from '@/hooks/use-default-images';
 
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat('es-CL', {
@@ -34,6 +35,7 @@ export default function HomePage() {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const { addToCart } = useCart();
+  const { defaultPastillaImage, defaultDiscoImage } = useDefaultImages();
 
   useEffect(() => {
     const allProducts = getProducts();
@@ -66,6 +68,13 @@ export default function HomePage() {
   const handleAddToCartClick = (product: Product) => {
     addToCart(product);
     setSelectedProduct(null); // Cerrar el diálogo después de añadir al carrito
+  };
+
+  const getProductImage = (product: Product) => {
+    if (product.imageUrl) return product.imageUrl;
+    if (product.category === 'Pastillas') return defaultPastillaImage;
+    if (product.category === 'Discos') return defaultDiscoImage;
+    return null;
   };
 
   return (
@@ -135,9 +144,9 @@ export default function HomePage() {
             </DialogHeader>
             <div className="grid md:grid-cols-2 gap-8 py-4">
                 <div className="relative aspect-square w-full bg-muted rounded-lg overflow-hidden">
-                    {selectedProduct.imageUrl ? (
+                    {getProductImage(selectedProduct) ? (
                         <Image
-                            src={selectedProduct.imageUrl}
+                            src={getProductImage(selectedProduct)!}
                             alt={`Imagen de ${selectedProduct.name}`}
                             fill
                             className="object-contain"
@@ -154,7 +163,7 @@ export default function HomePage() {
                   <Separator />
                   <div className="grid grid-cols-[auto,1fr] gap-x-4 gap-y-2 text-sm">
                     <span className="font-semibold text-foreground">Código:</span>
-                    <span className="text-foreground font-mono text-base">{selectedProduct.code}</span>
+                    <span className="font-mono text-base text-foreground">{selectedProduct.code}</span>
 
                     <span className="font-semibold text-foreground">Marca:</span>
                     <span className="text-muted-foreground">{selectedProduct.brand}</span>
