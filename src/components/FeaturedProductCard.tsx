@@ -1,14 +1,12 @@
 
 'use client';
 
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ShoppingCart } from 'lucide-react';
+import { Star } from 'lucide-react';
 import type { Product } from '@/lib/types';
-import { BrakePadIcon } from './icons/BrakePadIcon';
-import { BrakeDiscIcon } from './icons/BrakeDiscIcon';
 import { useCart } from '@/hooks/use-cart';
-import Link from 'next/link';
+import { cn } from '@/lib/utils';
 
 interface FeaturedProductCardProps {
   product: Product;
@@ -35,27 +33,21 @@ export function FeaturedProductCard({ product, onProductClick }: FeaturedProduct
         className="flex flex-col overflow-hidden h-full cursor-pointer transition-all hover:shadow-lg hover:-translate-y-1"
         onClick={() => onProductClick(product)}
     >
-      <div className="flex-shrink-0 bg-muted/50 p-4 flex items-center justify-center">
-        {product.category === 'Pastillas' ? (
-          <BrakePadIcon className="h-24 w-24 text-muted-foreground" />
-        ) : (
-          <BrakeDiscIcon className="h-24 w-24 text-muted-foreground" />
-        )}
-      </div>
-      <CardContent className="p-4 flex flex-col flex-grow">
-        <h3 className="font-semibold text-base leading-tight truncate flex-grow">{product.name}</h3>
-        <p className="text-sm text-muted-foreground mt-1">{product.brand}</p>
-        <p className="text-lg font-bold text-primary mt-2">{formatPrice(product.price)}</p>
-        <div className="mt-4 flex flex-col sm:flex-row gap-2">
-            <Button size="sm" className="flex-1" asChild>
-                <Link href={`/productos/${product.id}`} onClick={(e) => e.stopPropagation()}>Ver Detalle</Link>
-            </Button>
-             <Button size="sm" variant="secondary" onClick={handleAddToCart}>
-                <ShoppingCart className="mr-2 h-4 w-4" />
+        <CardHeader className="flex-row items-start justify-between p-4">
+            <CardTitle className="text-base font-bold leading-tight">{product.name}</CardTitle>
+            <Star className={cn("h-5 w-5 flex-shrink-0", product.isFeatured ? "fill-primary text-primary" : "text-muted-foreground")} />
+        </CardHeader>
+        <CardContent className="p-4 pt-0 text-sm text-muted-foreground flex-grow">
+            <p>Marca: {product.brand}</p>
+            <p>Modelo: {product.model}</p>
+            <p>Compatibilidad: {product.compatibility}</p>
+        </CardContent>
+        <CardFooter className="p-4 pt-0 flex justify-between items-center">
+            <span className="font-bold text-foreground text-lg">{formatPrice(product.price)}</span>
+            <Button size="sm" onClick={handleAddToCart}>
                 Añadir
             </Button>
-        </div>
-      </CardContent>
+        </CardFooter>
     </Card>
   );
 }
