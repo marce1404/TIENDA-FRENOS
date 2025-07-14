@@ -13,7 +13,7 @@ export function Footer() {
           <span>Av. La Palmilla #4780 Conchalí, Santiago</span>
         </div>
         <div className="flex justify-center items-center gap-4">
-            <p>&copy; {currentYear} REPUFRENOS.CL. Todos los derechos reservados. | v1.1</p>
+            <p>&copy; {currentYear} REPUFRENOS.CL. Todos los derechos reservados. | v1.2</p>
             <Link href="/admin" className="text-muted-foreground hover:text-primary transition-colors" title="Acceso de Administrador">
                 <UserCog className="h-4 w-4" />
                 <span className="sr-only">Admin</span>
