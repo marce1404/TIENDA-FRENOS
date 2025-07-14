@@ -52,7 +52,7 @@ export default function AdminPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<Product[]>(() => getProducts());
   const { toast } = useToast();
   
   // State for settings
@@ -111,8 +111,6 @@ export default function AdminPage() {
   useEffect(() => {
     const loadAdminData = async () => {
         if (isAuthenticated) {
-            setProducts(getProducts());
-
             if (!initialSettingsLoaded) {
                 try {
                     const settings = await getAdminSettingsForForm();

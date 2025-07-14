@@ -21,26 +21,19 @@ import {
 } from '@/components/ui/table';
 
 export default function ProductosPage() {
-  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [allProducts, setAllProducts] = useState<Product[]>(() => getProducts());
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false); // Can be removed if not needed for other async ops
   const { addToCart } = useCart();
   const router = useRouter();
-
-  useEffect(() => {
-    // Carga segura de productos en el lado del cliente
-    setAllProducts(getProducts());
-    setIsLoading(false);
-  }, []);
-
+  
   const categories = useMemo(() => {
-    if (isLoading) return [];
     const uniqueCategories = [...new Set(allProducts.map(p => p.category))];
     return uniqueCategories.sort();
-  }, [allProducts, isLoading]);
+  }, [allProducts]);
 
   const filteredProducts = useMemo(() => {
     let products = allProducts;
@@ -65,7 +58,7 @@ export default function ProductosPage() {
   }, [searchTerm, selectedCategory, allProducts]);
 
   useEffect(() => {
-    // Resetea a la primera página cuando cambian los filtros
+    // Reset to the first page when filters change
     setCurrentPage(1);
   }, [searchTerm, selectedCategory]);
 
