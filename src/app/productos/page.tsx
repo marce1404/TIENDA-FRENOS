@@ -26,6 +26,8 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
+import Image from 'next/image';
+
 
 export default function ProductosPage() {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
@@ -255,6 +257,17 @@ export default function ProductosPage() {
                 <DialogTitle className="text-2xl">{selectedProduct.name}</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
+                {selectedProduct.imageUrl && (
+                    <div className="relative aspect-square w-full">
+                        <Image
+                            src={selectedProduct.imageUrl}
+                            alt={`Imagen de ${selectedProduct.name}`}
+                            fill
+                            className="rounded-md object-contain"
+                            data-ai-hint={selectedProduct.category === 'Pastillas' ? 'brake pad' : 'brake disc'}
+                        />
+                    </div>
+                )}
                 <p className="text-3xl font-bold text-primary">{formatPrice(selectedProduct.price)}</p>
                 <Separator />
                 <div className="grid grid-cols-[auto,1fr] gap-x-4 gap-y-2 text-sm">
