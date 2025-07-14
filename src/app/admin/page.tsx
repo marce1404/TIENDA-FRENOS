@@ -163,8 +163,7 @@ export default function AdminPage() {
       if (isValid) {
         setIsAuthenticated(true);
         sessionStorage.setItem('isAdminAuthenticated', 'true');
-        setInitialSettingsLoaded(false); // Force reload of settings on new login
-        setError('');
+        setInitialSettingsLoaded(false);
       } else {
         setError('Usuario o contraseña incorrectos.');
       }
@@ -408,10 +407,15 @@ export default function AdminPage() {
                   required
                 />
               </div>
-              {error && <p className="text-sm text-destructive">{error}</p>}
+              {error && <p className="text-sm text-destructive mt-2">{error}</p>}
             </div>
             <Button type="submit" className="w-full mt-6" disabled={isLoggingIn}>
-              {isLoggingIn ? 'Verificando...' : (
+              {isLoggingIn ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Verificando...
+                </>
+              ) : (
                 <>
                   <LogIn className="mr-2 h-4 w-4" />
                   Ingresar
