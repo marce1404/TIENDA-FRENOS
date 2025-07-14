@@ -258,12 +258,12 @@ export default function ProductosPage() {
               </DialogHeader>
               <div className="space-y-4">
                 {selectedProduct.imageUrl && (
-                    <div className="relative aspect-square w-full">
+                    <div className="relative aspect-square w-full bg-muted rounded-lg overflow-hidden">
                         <Image
                             src={selectedProduct.imageUrl}
                             alt={`Imagen de ${selectedProduct.name}`}
                             fill
-                            className="rounded-md object-contain"
+                            className="object-contain"
                             data-ai-hint={selectedProduct.category === 'Pastillas' ? 'brake pad' : 'brake disc'}
                         />
                     </div>
