@@ -20,13 +20,18 @@ export function getProducts(): Product[] {
 
   try {
     const productsFromStorage: Product[] = JSON.parse(savedProductsJSON);
+    
+    // If the parsed data is not an array, it's invalid.
+    if (!Array.isArray(productsFromStorage)) {
+       throw new Error("Stored products is not an array");
+    }
 
     // Basic validation: Check if products in storage have a valid structure.
     const hasValidStructure = productsFromStorage.every(p => 
+        typeof p === 'object' && p !== null &&
         'id' in p && 'name' in p && 'category' in p && typeof p.isFeatured === 'boolean'
     );
     
-    // Check if there are any categories that are not 'Pastillas' or 'Discos'
     const allowedCategories = new Set(['Pastillas', 'Discos']);
     const hasInvalidCategories = productsFromStorage.some(p => !allowedCategories.has(p.category));
 
@@ -40,6 +45,7 @@ export function getProducts(): Product[] {
 
   } catch (e) {
     console.error('Error parsing products from localStorage, falling back to initial data.', e);
+    // If parsing fails, it means the data is corrupt. Reset to initial products.
     localStorage.setItem('products', JSON.stringify(initialProducts));
     return initialProducts;
   }

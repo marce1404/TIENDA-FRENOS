@@ -2,7 +2,6 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { products as initialProducts } from '@/data/products';
 import type { Product } from '@/lib/types';
 import { getProducts, saveProducts } from '@/lib/products';
 import {
@@ -54,7 +53,6 @@ export default function AdminPage() {
   const [error, setError] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
-  const [isMounted, setIsMounted] = useState(false);
   const { toast } = useToast();
   
   // State for settings
@@ -110,8 +108,6 @@ export default function AdminPage() {
         setContactName('Ventas');
         setWhatsappNumber(savedNumber);
     }
-
-    setIsMounted(true);
   }, []);
 
   useEffect(() => {
@@ -382,10 +378,6 @@ export default function AdminPage() {
       setCurrentPage(1);
     }
   }, [currentPage, totalPages]);
-
-  if (!isMounted) {
-    return null; // Or a loading spinner
-  }
 
   if (!isAuthenticated) {
     return (
