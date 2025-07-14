@@ -4,10 +4,10 @@
 import { products as initialProducts } from '@/data/products';
 import type { Product } from '@/lib/types';
 
-// This function should only be called on the client-side.
+// This function can be called on both server and client.
 export function getProducts(): Product[] {
+  // If we're on the server, there's no localStorage. Return the initial list.
   if (typeof window === 'undefined') {
-    // During server-side rendering, always return the initial list.
     return initialProducts;
   }
   
@@ -31,7 +31,11 @@ export function getProducts(): Product[] {
     // If any other error occurs (e.g., parsing fails),
     // fall back to the initial product list and re-initialize localStorage.
     console.error('Error reading products from localStorage, falling back to initial data.', e);
-    localStorage.setItem('products', JSON.stringify(initialProducts));
+    try {
+        localStorage.setItem('products', JSON.stringify(initialProducts));
+    } catch (saveError) {
+        console.error('Failed to save initial products to localStorage.', saveError);
+    }
     return initialProducts;
   }
 }
@@ -39,7 +43,12 @@ export function getProducts(): Product[] {
 // This function should only be called on the client-side.
 export function saveProducts(products: Product[]): void {
   if (typeof window === 'undefined') {
+    console.warn('saveProducts was called on the server. Data will not be persisted.');
     return;
   }
-  localStorage.setItem('products', JSON.stringify(products));
+  try {
+    localStorage.setItem('products', JSON.stringify(products));
+  } catch(e) {
+    console.error('Failed to save products to localStorage.', e);
+  }
 }

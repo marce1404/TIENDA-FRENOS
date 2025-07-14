@@ -25,12 +25,13 @@ export default function ProductosPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [allProducts, setAllProducts] = useState<Product[]>(() => getProducts());
   const { addToCart } = useCart();
   const router = useRouter();
 
   useEffect(() => {
-    setAllProducts(getProducts());
+    // This effect can be used for any additional client-side logic needed after initial load.
+    // For now, getProducts is called during initialization.
   }, []);
 
   const categories = useMemo(() => {

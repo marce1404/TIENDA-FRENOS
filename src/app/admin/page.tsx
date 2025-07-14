@@ -86,10 +86,11 @@ export default function AdminPage() {
 
   useEffect(() => {
     // Only run on the client
-    setProducts(getProducts());
     const authStatus = sessionStorage.getItem('isAdminAuthenticated');
     if (authStatus === 'true') {
         setIsAuthenticated(true);
+    } else {
+        setProducts(getProducts());
     }
     // Load contact info
     const savedInfo = localStorage.getItem('whatsappInfo');
@@ -110,47 +111,51 @@ export default function AdminPage() {
   }, []);
 
   useEffect(() => {
-    const loadInitialSettings = async () => {
-        if (isAuthenticated && !initialSettingsLoaded) {
-            try {
-                const settings = await getAdminSettingsForForm();
+    const loadAdminData = async () => {
+        if (isAuthenticated) {
+            setProducts(getProducts());
 
-                const serverUsers = settings.users || [];
-                const usernamesFromServer: (string | undefined)[] = [];
-                const formStateForUsers: { username: string; password: string; repeatPassword: string; }[] = [];
+            if (!initialSettingsLoaded) {
+                try {
+                    const settings = await getAdminSettingsForForm();
 
-                for (let i = 0; i < 3; i++) {
-                    const user = serverUsers[i];
-                    usernamesFromServer.push(user?.username);
-                    formStateForUsers.push({
-                        username: user?.username || '',
-                        password: '',
-                        repeatPassword: ''
+                    const serverUsers = settings.users || [];
+                    const usernamesFromServer: (string | undefined)[] = [];
+                    const formStateForUsers: { username: string; password: string; repeatPassword: string; }[] = [];
+
+                    for (let i = 0; i < 3; i++) {
+                        const user = serverUsers[i];
+                        usernamesFromServer.push(user?.username);
+                        formStateForUsers.push({
+                            username: user?.username || '',
+                            password: '',
+                            repeatPassword: ''
+                        });
+                    }
+                    
+                    setSavedUsernames(usernamesFromServer);
+                    setAdminUsers(formStateForUsers);
+
+                    setSmtpHost(settings.smtp.host || '');
+                    setSmtpPort(settings.smtp.port || '');
+                    setSmtpUser(settings.smtp.user || '');
+                    setSmtpRecipients(settings.smtp.recipients || '');
+                    setSmtpSecure(settings.smtp.secure || false);
+
+                    setInitialSettingsLoaded(true);
+                } catch (error) {
+                    console.error("Failed to load admin settings", error);
+                    toast({
+                        variant: "destructive",
+                        title: "Error",
+                        description: "No se pudieron cargar las configuraciones del administrador.",
                     });
                 }
-                
-                setSavedUsernames(usernamesFromServer);
-                setAdminUsers(formStateForUsers);
-
-                setSmtpHost(settings.smtp.host || '');
-                setSmtpPort(settings.smtp.port || '');
-                setSmtpUser(settings.smtp.user || '');
-                setSmtpRecipients(settings.smtp.recipients || '');
-                setSmtpSecure(settings.smtp.secure || false);
-
-                setInitialSettingsLoaded(true);
-            } catch (error) {
-                console.error("Failed to load admin settings", error);
-                toast({
-                    variant: "destructive",
-                    title: "Error",
-                    description: "No se pudieron cargar las configuraciones del administrador.",
-                });
             }
         }
     };
     
-    loadInitialSettings();
+    loadAdminData();
   }, [isAuthenticated, initialSettingsLoaded, toast]);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -163,7 +168,7 @@ export default function AdminPage() {
       if (isValid) {
         setIsAuthenticated(true);
         sessionStorage.setItem('isAdminAuthenticated', 'true');
-        setInitialSettingsLoaded(false);
+        setInitialSettingsLoaded(false); // Force reload of settings
       } else {
         setError('Usuario o contraseña incorrectos.');
       }
@@ -180,6 +185,7 @@ export default function AdminPage() {
     setUsername('');
     setPassword('');
     setInitialSettingsLoaded(false); // Reset for next login
+    setError('');
   };
 
   const handleSaveWhatsapp = (e: React.FormEvent) => {
