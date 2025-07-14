@@ -155,7 +155,7 @@ export default function ProductosPage() {
         </div>
         
         {isLoading ? <LoadingSkeleton /> : (
-          paginatedProducts.length > 0 ? (
+          filteredProducts.length > 0 ? (
             <>
               <div className="rounded-lg border">
                 <Table>
