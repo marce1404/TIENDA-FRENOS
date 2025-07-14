@@ -86,16 +86,13 @@ export default function AdminPage() {
   const [productsPerPage] = useState(10);
 
   useEffect(() => {
-    // Load products on mount
     setProducts(getProducts());
 
-    // Only run on the client
     const authStatus = sessionStorage.getItem('isAdminAuthenticated');
     if (authStatus === 'true') {
         setIsAuthenticated(true);
     }
     
-    // Load contact info
     const savedInfo = localStorage.getItem('whatsappInfo');
     if (savedInfo) {
         try {
@@ -820,27 +817,63 @@ interface ProductFormDialogProps {
 
 function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextProductId }: ProductFormDialogProps) {
     const getInitialFormData = () => ({
-        id: nextProductId || 0, code: '', name: '', brand: '', model: '', compatibility: '', price: 0, category: '', isFeatured: false, imageUrl: ''
+        id: nextProductId || 0,
+        code: '',
+        name: '',
+        brand: '',
+        model: '',
+        compatibility: '',
+        price: '' as number | '',
+        category: '',
+        isFeatured: false,
+        imageUrl: ''
     });
     
     const [formData, setFormData] = useState(getInitialFormData());
 
     useEffect(() => {
         if (isOpen) {
-            const initialData = product ? { ...product } : getInitialFormData();
-            if (!product && nextProductId) {
-                initialData.id = nextProductId;
+            if (product) {
+                setFormData({
+                    ...product,
+                    price: product.price // keep price as number for existing products
+                });
+            } else {
+                setFormData({
+                    id: nextProductId || 0,
+                    code: '',
+                    name: '',
+                    brand: '',
+                    model: '',
+                    compatibility: '',
+                    price: '', // Set as empty string for new products
+                    category: '',
+                    isFeatured: false,
+                    imageUrl: ''
+                });
             }
-            setFormData(initialData);
         }
     }, [isOpen, product, nextProductId]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { id, value, type } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [id]: type === 'number' ? parseFloat(value) || 0 : value
-        }));
+        const { id, value } = e.target;
+        
+        if (id === 'price') {
+             // Allow empty string, otherwise convert to number
+            const numericValue = value === '' ? '' : parseFloat(value);
+            // Prevent NaN if user types non-numeric characters
+            if (value === '' || !isNaN(numericValue as number)) {
+                 setFormData(prev => ({
+                    ...prev,
+                    [id]: numericValue,
+                }));
+            }
+        } else {
+            setFormData(prev => ({
+                ...prev,
+                [id]: value
+            }));
+        }
     };
 
     const handleCategoryChange = (value: string) => {
@@ -855,7 +888,10 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onSave(formData);
+        onSave({
+            ...formData,
+            price: Number(formData.price) || 0, // Ensure price is a number on save
+        });
     };
 
     return (
@@ -891,7 +927,6 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
                             <Select
                                 value={formData.category}
                                 onValueChange={handleCategoryChange}
-                                required
                             >
                                 <SelectTrigger id="category" className="col-span-3">
                                     <SelectValue placeholder="Selecciona una categoría" />
@@ -908,7 +943,7 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="price" className="text-right">Precio</Label>
-                            <Input id="price" type="number" value={formData.price} onChange={handleChange} required className="col-span-3" />
+                            <Input id="price" type="text" value={formData.price} onChange={handleChange} required className="col-span-3" pattern="[0-9]*\.?[0-9]*" />
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="imageUrl" className="text-right">URL de la Imagen</Label>
