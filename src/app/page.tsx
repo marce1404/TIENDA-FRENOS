@@ -132,7 +132,6 @@ export default function HomePage() {
           <DialogContent className="sm:max-w-3xl">
             <DialogHeader>
               <DialogTitle className="text-2xl">{selectedProduct.name}</DialogTitle>
-              <DialogDescription>{selectedProduct.code}</DialogDescription>
             </DialogHeader>
             <div className="grid md:grid-cols-2 gap-8 py-4">
                 <div className="relative aspect-square w-full bg-muted rounded-lg overflow-hidden">
@@ -154,6 +153,9 @@ export default function HomePage() {
                   <p className="text-3xl font-bold text-primary">{formatPrice(selectedProduct.price)}</p>
                   <Separator />
                   <div className="grid grid-cols-[auto,1fr] gap-x-4 gap-y-2 text-sm">
+                    <span className="font-semibold text-foreground">Código:</span>
+                    <span className="text-muted-foreground font-mono">{selectedProduct.code}</span>
+
                     <span className="font-semibold text-foreground">Marca:</span>
                     <span className="text-muted-foreground">{selectedProduct.brand}</span>
 
