@@ -7,9 +7,8 @@ import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { getProducts } from '@/lib/products';
-import { ProductCard } from '@/components/ProductCard';
+import { FeaturedProductCard } from '@/components/FeaturedProductCard';
 import type { Product } from '@/lib/types';
-// import { BrakeDiscIcon } from '@/components/icons/BrakeDiscIcon'; // No se usa directamente aquí
 import {
   Dialog,
   DialogContent,
@@ -18,7 +17,6 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
-import Image from 'next/image';
 import { useCart } from '@/hooks/use-cart';
 
 // Replicar la función formatPrice del archivo productos/page.tsx
@@ -88,7 +86,7 @@ export default function HomePage() {
               <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center">Productos Destacados</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                   {isMounted && featuredProducts.map((product) => (
-                      <ProductCard
+                      <FeaturedProductCard
                         key={product.id}
                         product={product}
                         onProductClick={handleProductClick}
