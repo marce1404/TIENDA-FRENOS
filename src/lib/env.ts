@@ -67,23 +67,30 @@ export async function getEnvSettings(): Promise<EnvConfig> {
     const users: AdminUser[] = [];
     const maxUsers = 3;
 
+    // First, try to load multi-user settings
+    let multiUserConfigFound = false;
     for (let i = 1; i <= maxUsers; i++) {
-        const usernameKey = `ADMIN_USER_${i}_USERNAME`;
-        const passwordKey = `ADMIN_USER_${i}_PASSWORD`;
+        const username = combinedEnv[`ADMIN_USER_${i}_USERNAME`];
+        const password = combinedEnv[`ADMIN_USER_${i}_PASSWORD`];
         
-        let username = combinedEnv[usernameKey];
-        let password = combinedEnv[passwordKey];
-
-        // Migration for user 1 from old variables if new ones don't exist or are empty.
-        // This makes sure the old admin user shows up until the settings are saved for the first time.
-        if (i === 1 && !username && combinedEnv.ADMIN_USERNAME) {
-            username = combinedEnv.ADMIN_USERNAME;
-            password = combinedEnv.ADMIN_PASSWORD;
+        if (username) {
+            multiUserConfigFound = true;
+            users.push({ username, password });
+        } else {
+            // Add a placeholder for the form
+            users.push({});
         }
-
-        users.push({ username, password });
     }
 
+    // Fallback to legacy single user if no multi-user config is found.
+    // This is treated as a single user at index 0.
+    if (!multiUserConfigFound && combinedEnv.ADMIN_USERNAME) {
+        users[0] = {
+            username: combinedEnv.ADMIN_USERNAME,
+            password: combinedEnv.ADMIN_PASSWORD,
+        };
+    }
+    
     return { 
         users,
         SMTP_HOST: combinedEnv.SMTP_HOST,
