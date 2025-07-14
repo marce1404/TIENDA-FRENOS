@@ -34,7 +34,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Pencil, Trash2, PlusCircle, LogIn, LogOut, Star, Phone, Settings, Save, Package, Mail, Loader2, Search, Users, Eye, EyeOff, Upload } from 'lucide-react';
+import { Pencil, Trash2, PlusCircle, LogIn, LogOut, Star, Phone, Settings, Save, Package, Mail, Loader2, Search, Users, Eye, EyeOff, Upload, Image as ImageIcon } from 'lucide-react';
 import { ArrowLeftIcon, ArrowRightIcon } from '@radix-ui/react-icons';
 import { verifyCredentials } from '@/actions/auth';
 import { saveEnvSettings } from '@/actions/saveEnv';
@@ -46,6 +46,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { getAdminSettingsForForm } from '@/actions/getAdminSettings';
 import Image from 'next/image';
 import { uploadImage } from '@/actions/uploadImage';
+import { uploadDefaultImage } from '@/actions/uploadDefaultImage';
 
 
 export default function AdminPage() {
@@ -75,6 +76,15 @@ export default function AdminPage() {
   const [smtpPass, setSmtpPass] = useState('');
   const [smtpRecipients, setSmtpRecipients] = useState('');
   const [smtpSecure, setSmtpSecure] = useState(false);
+
+  // State for default images
+  const [defaultPastillaImageFile, setDefaultPastillaImageFile] = useState<File | null>(null);
+  const [defaultPastillaImagePreview, setDefaultPastillaImagePreview] = useState<string | null>(null);
+  const [isSavingPastillaImage, setIsSavingPastillaImage] = useState(false);
+
+  const [defaultDiscoImageFile, setDefaultDiscoImageFile] = useState<File | null>(null);
+  const [defaultDiscoImagePreview, setDefaultDiscoImagePreview] = useState<string | null>(null);
+  const [isSavingDiscoImage, setIsSavingDiscoImage] = useState(false);
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -108,6 +118,14 @@ export default function AdminPage() {
         setContactName('Ventas');
         setWhatsappNumber('56912345678');
     }
+    
+    // Load default image previews
+    const pastillaUrl = localStorage.getItem('defaultPastillaImageUrl');
+    if (pastillaUrl) setDefaultPastillaImagePreview(pastillaUrl);
+
+    const discoUrl = localStorage.getItem('defaultDiscoImageUrl');
+    if (discoUrl) setDefaultDiscoImagePreview(discoUrl);
+
   }, []);
 
   useEffect(() => {
@@ -344,6 +362,62 @@ export default function AdminPage() {
     });
   };
   
+  const handleDefaultImageChange = (
+    e: React.ChangeEvent<HTMLInputElement>, 
+    setter: React.Dispatch<React.SetStateAction<File | null>>, 
+    previewSetter: React.Dispatch<React.SetStateAction<string | null>>
+  ) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setter(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        previewSetter(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSaveDefaultImage = async (
+    e: React.FormEvent,
+    file: File | null,
+    type: 'pastilla' | 'disco',
+    savingSetter: React.Dispatch<React.SetStateAction<boolean>>,
+    storageKey: string
+  ) => {
+    e.preventDefault();
+    if (!file) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Por favor, selecciona un archivo para subir.',
+      });
+      return;
+    }
+
+    savingSetter(true);
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('type', type);
+
+    const result = await uploadDefaultImage(formData);
+
+    if (result.success) {
+      localStorage.setItem(storageKey, result.url);
+      toast({
+        title: '¡Imagen Guardada!',
+        description: `La imagen por defecto para ${type}s se ha actualizado.`,
+      });
+    } else {
+      toast({
+        variant: 'destructive',
+        title: 'Error al Subir',
+        description: result.error,
+      });
+    }
+    savingSetter(false);
+  };
+
   const filteredProducts = useMemo(() => {
     return products.filter(p => {
       if (!adminSearchTerm) {
@@ -450,9 +524,10 @@ export default function AdminPage() {
 
         <TabsContent value="settings" className="mt-6">
           <Tabs defaultValue="contact" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="contact"><Phone className="mr-2 h-4 w-4" />Contacto</TabsTrigger>
               <TabsTrigger value="email"><Mail className="mr-2 h-4 w-4" />Usuarios y Correo</TabsTrigger>
+              <TabsTrigger value="images"><ImageIcon className="mr-2 h-4 w-4" />Imágenes por Defecto</TabsTrigger>
             </TabsList>
             <TabsContent value="contact">
               <Card className="mt-6">
@@ -649,6 +724,85 @@ export default function AdminPage() {
                       </form>
                     </Card>
                 </div>
+            </TabsContent>
+            <TabsContent value="images">
+              <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card>
+                  <form onSubmit={(e) => handleSaveDefaultImage(e, defaultPastillaImageFile, 'pastilla', setIsSavingPastillaImage, 'defaultPastillaImageUrl')}>
+                    <CardHeader>
+                      <CardTitle>Imagen por Defecto para Pastillas</CardTitle>
+                      <CardDescription>
+                        Esta imagen se usará si un producto de la categoría "Pastillas" no tiene su propia imagen.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="default-pastilla-image">Subir nueva imagen</Label>
+                        <Input
+                          id="default-pastilla-image"
+                          type="file"
+                          accept="image/png, image/jpeg, image/webp"
+                          onChange={(e) => handleDefaultImageChange(e, setDefaultPastillaImageFile, setDefaultPastillaImagePreview)}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Vista previa actual</Label>
+                        <div className="h-32 w-full bg-muted rounded-md flex items-center justify-center border">
+                          {defaultPastillaImagePreview ? (
+                            <Image src={defaultPastillaImagePreview} alt="Vista previa de imagen para pastillas" width={128} height={128} className="object-contain h-32 w-32" />
+                          ) : (
+                            <span className="text-sm text-muted-foreground">No hay imagen guardada</span>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                    <CardFooter>
+                      <Button type="submit" disabled={isSavingPastillaImage}>
+                        {isSavingPastillaImage ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                        Guardar Imagen
+                      </Button>
+                    </CardFooter>
+                  </form>
+                </Card>
+
+                <Card>
+                  <form onSubmit={(e) => handleSaveDefaultImage(e, defaultDiscoImageFile, 'disco', setIsSavingDiscoImage, 'defaultDiscoImageUrl')}>
+                    <CardHeader>
+                      <CardTitle>Imagen por Defecto para Discos</CardTitle>
+                       <CardDescription>
+                        Esta imagen se usará si un producto de la categoría "Discos" no tiene su propia imagen.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="default-disco-image">Subir nueva imagen</Label>
+                        <Input
+                          id="default-disco-image"
+                          type="file"
+                          accept="image/png, image/jpeg, image/webp"
+                          onChange={(e) => handleDefaultImageChange(e, setDefaultDiscoImageFile, setDefaultDiscoImagePreview)}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Vista previa actual</Label>
+                        <div className="h-32 w-full bg-muted rounded-md flex items-center justify-center border">
+                          {defaultDiscoImagePreview ? (
+                             <Image src={defaultDiscoImagePreview} alt="Vista previa de imagen para discos" width={128} height={128} className="object-contain h-32 w-32" />
+                          ) : (
+                            <span className="text-sm text-muted-foreground">No hay imagen guardada</span>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                    <CardFooter>
+                      <Button type="submit" disabled={isSavingDiscoImage}>
+                         {isSavingDiscoImage ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                        Guardar Imagen
+                      </Button>
+                    </CardFooter>
+                  </form>
+                </Card>
+              </div>
             </TabsContent>
           </Tabs>
         </TabsContent>
