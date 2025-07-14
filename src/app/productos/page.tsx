@@ -23,7 +23,7 @@ import {
 export default function ProductosPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 12;
+  const itemsPerPage = 10;
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [allProducts, setAllProducts] = useState<Product[]>(() => getProducts());
   const { addToCart } = useCart();
