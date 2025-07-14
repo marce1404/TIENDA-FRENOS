@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import { useCart } from '@/hooks/use-cart';
+import Image from 'next/image';
 
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat('es-CL', {
@@ -127,28 +128,41 @@ export default function HomePage() {
       {/* Diálogo de Detalle del Producto */}
       {selectedProduct && (
         <Dialog open={!!selectedProduct} onOpenChange={(isOpen) => !isOpen && setSelectedProduct(null)}>
-          <DialogContent className="sm:max-w-lg">
+          <DialogContent className="sm:max-w-3xl">
             <DialogHeader>
               <DialogTitle className="text-2xl">{selectedProduct.name}</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
-              <p className="text-3xl font-bold text-primary">{formatPrice(selectedProduct.price)}</p>
-              <Separator />
-              <div className="grid grid-cols-[auto,1fr] gap-x-4 gap-y-2 text-sm">
-                <span className="font-semibold text-foreground">Marca:</span>
-                <span className="text-muted-foreground">{selectedProduct.brand}</span>
+            <div className="grid md:grid-cols-2 gap-8 py-4">
+                {selectedProduct.imageUrl && (
+                    <div className="relative aspect-square w-full bg-muted rounded-lg overflow-hidden">
+                        <Image
+                            src={selectedProduct.imageUrl}
+                            alt={`Imagen de ${selectedProduct.name}`}
+                            fill
+                            className="object-contain"
+                            data-ai-hint={selectedProduct.category === 'Pastillas' ? 'brake pad' : 'brake disc'}
+                        />
+                    </div>
+                )}
+                <div className="flex flex-col space-y-4">
+                  <p className="text-3xl font-bold text-primary">{formatPrice(selectedProduct.price)}</p>
+                  <Separator />
+                  <div className="grid grid-cols-[auto,1fr] gap-x-4 gap-y-2 text-sm">
+                    <span className="font-semibold text-foreground">Marca:</span>
+                    <span className="text-muted-foreground">{selectedProduct.brand}</span>
 
-                <span className="font-semibold text-foreground">Modelo:</span>
-                <span className="text-muted-foreground">{selectedProduct.model}</span>
+                    <span className="font-semibold text-foreground">Modelo:</span>
+                    <span className="text-muted-foreground">{selectedProduct.model}</span>
 
-                <span className="font-semibold text-foreground">Categoría:</span>
-                <span className="text-muted-foreground">{selectedProduct.category}</span>
-              </div>
-              <Separator />
-              <div>
-                <h3 className="font-semibold text-foreground">Compatibilidad</h3>
-                <p className="text-sm text-muted-foreground">{selectedProduct.compatibility}</p>
-              </div>
+                    <span className="font-semibold text-foreground">Categoría:</span>
+                    <span className="text-muted-foreground">{selectedProduct.category}</span>
+                  </div>
+                  <Separator />
+                  <div>
+                    <h3 className="font-semibold text-foreground">Compatibilidad</h3>
+                    <p className="text-sm text-muted-foreground">{selectedProduct.compatibility}</p>
+                  </div>
+                </div>
             </div>
             <DialogFooter className="sm:justify-between gap-2">
                 <Button type="button" variant="outline" onClick={() => setSelectedProduct(null)}>Cerrar</Button>
