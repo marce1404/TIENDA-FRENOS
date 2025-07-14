@@ -31,19 +31,19 @@ export default function ProductosPage() {
   const router = useRouter();
 
   useEffect(() => {
-    // Carga los productos de forma segura en el lado del cliente
+    // Carga segura de productos en el lado del cliente
     setAllProducts(getProducts());
     setIsLoading(false);
   }, []);
 
   const categories = useMemo(() => {
-    if (allProducts.length === 0) return [];
+    if (isLoading) return [];
     const uniqueCategories = [...new Set(allProducts.map(p => p.category))];
     return uniqueCategories.sort();
-  }, [allProducts]);
+  }, [allProducts, isLoading]);
 
   const filteredProducts = useMemo(() => {
-    let products = [...allProducts];
+    let products = allProducts;
 
     if (searchTerm) {
       const lowercasedTerm = searchTerm.toLowerCase();
@@ -61,9 +61,7 @@ export default function ProductosPage() {
       products = products.filter((p) => p.category === selectedCategory);
     }
     
-    products.sort((a, b) => a.name.localeCompare(b.name));
-
-    return products;
+    return products.sort((a, b) => a.name.localeCompare(b.name));
   }, [searchTerm, selectedCategory, allProducts]);
 
   useEffect(() => {
@@ -131,6 +129,7 @@ export default function ProductosPage() {
             className="pl-10"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            disabled={isLoading}
           />
           <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
         </div>
@@ -138,7 +137,7 @@ export default function ProductosPage() {
         <div className="mb-8 flex justify-center">
           <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="w-full sm:w-auto">
               <TabsList>
-                  <TabsTrigger value="all">Todos</TabsTrigger>
+                  <TabsTrigger value="all" disabled={isLoading}>Todos</TabsTrigger>
                   {isLoading ? (
                     <>
                       <Skeleton className="h-10 w-20 rounded-md" />

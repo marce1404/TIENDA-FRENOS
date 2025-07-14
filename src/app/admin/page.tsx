@@ -89,9 +89,8 @@ export default function AdminPage() {
     const authStatus = sessionStorage.getItem('isAdminAuthenticated');
     if (authStatus === 'true') {
         setIsAuthenticated(true);
-    } else {
-        setProducts(getProducts());
     }
+    
     // Load contact info
     const savedInfo = localStorage.getItem('whatsappInfo');
     if (savedInfo) {
@@ -104,9 +103,8 @@ export default function AdminPage() {
             setWhatsappNumber('56912345678');
         }
     } else {
-        const savedNumber = localStorage.getItem('whatsappNumber') || '56912345678';
         setContactName('Ventas');
-        setWhatsappNumber(savedNumber);
+        setWhatsappNumber('56912345678');
     }
   }, []);
 
