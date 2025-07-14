@@ -16,20 +16,36 @@ export function WhatsAppButton() {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    let loadedNumber = '56912345678'; // Default number
-    const savedInfo = localStorage.getItem('whatsappInfo');
-    if (savedInfo) {
-      try {
-        const { number } = JSON.parse(savedInfo);
-        if (number) {
-            loadedNumber = number;
+    const getWhatsappNumber = () => {
+        let loadedNumber = '56912345678'; // Default number
+        const savedInfo = localStorage.getItem('whatsappInfo');
+        if (savedInfo) {
+          try {
+            const { number } = JSON.parse(savedInfo);
+            if (number) {
+                loadedNumber = number;
+            }
+          } catch (e) {
+            // use default if parsing fails
+          }
         }
-      } catch (e) {
-        // use default if parsing fails
-      }
-    }
-    setWhatsappNumber(loadedNumber);
+        setWhatsappNumber(loadedNumber);
+    };
+    
+    getWhatsappNumber();
     setIsMounted(true);
+
+    const handleStorageChange = (e: StorageEvent) => {
+        if (e.key === 'whatsappInfo') {
+            getWhatsappNumber();
+        }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+        window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
   const openWhatsApp = () => {

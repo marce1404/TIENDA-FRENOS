@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useCart } from '@/hooks/use-cart';
@@ -32,20 +31,37 @@ export function CartSheet() {
   const [whatsappNumber, setWhatsappNumber] = useState('56912345678');
   
   useEffect(() => {
-    let loadedNumber = '56912345678'; // Default value
-    const savedInfo = localStorage.getItem('whatsappInfo');
-    if (savedInfo) {
-      try {
-        const { number } = JSON.parse(savedInfo);
-        if (number) {
-          loadedNumber = number;
+    const getWhatsappNumber = () => {
+        let loadedNumber = '56912345678'; // Default value
+        const savedInfo = localStorage.getItem('whatsappInfo');
+        if (savedInfo) {
+            try {
+                const { number } = JSON.parse(savedInfo);
+                if (number) {
+                    loadedNumber = number;
+                }
+            } catch (e) {
+                // use default if parsing fails
+            }
         }
-      } catch (e) {
-        // use default
-      }
-    }
-    setWhatsappNumber(loadedNumber);
-  }, []); // Empty dependency array means this effect runs once on mount
+        setWhatsappNumber(loadedNumber);
+    };
+
+    getWhatsappNumber(); // Initial load
+
+    // Listen for changes in localStorage
+    const handleStorageChange = (e: StorageEvent) => {
+        if (e.key === 'whatsappInfo') {
+            getWhatsappNumber();
+        }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+        window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
 
   const handleCheckout = () => {
     const messageLines = cartItems.map(item => 

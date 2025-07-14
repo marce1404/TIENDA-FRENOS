@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -164,6 +163,7 @@ export default function AdminPage() {
       if (isValid) {
         setIsAuthenticated(true);
         sessionStorage.setItem('isAdminAuthenticated', 'true');
+        setInitialSettingsLoaded(false); // Force reload of settings on new login
         setError('');
       } else {
         setError('Usuario o contraseña incorrectos.');
