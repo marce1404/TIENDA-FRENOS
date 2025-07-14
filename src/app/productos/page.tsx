@@ -21,17 +21,19 @@ import {
 } from '@/components/ui/table';
 
 export default function ProductosPage() {
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [allProducts, setAllProducts] = useState<Product[]>(() => getProducts());
+  const [isLoading, setIsLoading] = useState(true);
   const { addToCart } = useCart();
   const router = useRouter();
 
   useEffect(() => {
-    // This effect can be used for any additional client-side logic needed after initial load.
-    // For now, getProducts is called during initialization.
+    // Carga los productos de forma segura en el lado del cliente
+    setAllProducts(getProducts());
+    setIsLoading(false);
   }, []);
 
   const categories = useMemo(() => {
@@ -65,6 +67,7 @@ export default function ProductosPage() {
   }, [searchTerm, selectedCategory, allProducts]);
 
   useEffect(() => {
+    // Resetea a la primera página cuando cambian los filtros
     setCurrentPage(1);
   }, [searchTerm, selectedCategory]);
 
@@ -136,21 +139,22 @@ export default function ProductosPage() {
           <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="w-full sm:w-auto">
               <TabsList>
                   <TabsTrigger value="all">Todos</TabsTrigger>
-                  {categories.length > 0 ? categories.map((category) => (
-                      <TabsTrigger key={category} value={category}>
-                          {category}
-                      </TabsTrigger>
-                  )) : (
+                  {isLoading ? (
                     <>
                       <Skeleton className="h-10 w-20 rounded-md" />
                       <Skeleton className="h-10 w-20 rounded-md" />
                     </>
-                  )}
+                  ) : (
+                    categories.map((category) => (
+                      <TabsTrigger key={category} value={category}>
+                          {category}
+                      </TabsTrigger>
+                  )))}
               </TabsList>
           </Tabs>
         </div>
         
-        {allProducts.length === 0 ? <LoadingSkeleton /> : (
+        {isLoading ? <LoadingSkeleton /> : (
           paginatedProducts.length > 0 ? (
             <>
               <div className="rounded-lg border">
