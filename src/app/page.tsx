@@ -204,7 +204,7 @@ export default function HomePage() {
                 </div>
             </div>
             <DialogFooter className="sm:justify-between gap-4">
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                  <Button type="button" variant="outline" onClick={() => setSelectedProduct(null)}>Cerrar</Button>
                  <Button 
                     type="button"
@@ -213,7 +213,7 @@ export default function HomePage() {
                     onClick={() => handleContactClick(selectedProduct)}
                   >
                     <WhatsAppIcon className="h-5 w-5 mr-2" />
-                    Consultar por WhatsApp
+                    Si tienes dudas, ¡Contáctanos!
                  </Button>
               </div>
               <Button type="button" onClick={() => handleAddToCartClick(selectedProduct)}>
