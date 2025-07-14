@@ -29,6 +29,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import Image from 'next/image';
 import { useDefaultImages } from '@/hooks/use-default-images';
+import { ProductDialogContact } from '@/components/ProductDialogContact';
 
 
 export default function ProductosPage() {
@@ -280,6 +281,7 @@ export default function ProductosPage() {
                             Sin imagen
                         </div>
                     )}
+                    <ProductDialogContact product={selectedProduct} />
                 </div>
                 <div className="flex flex-col space-y-4">
                   <p className="text-3xl font-bold text-primary">{formatPrice(selectedProduct.price)}</p>

@@ -21,6 +21,7 @@ import { Separator } from '@/components/ui/separator';
 import { useCart } from '@/hooks/use-cart';
 import Image from 'next/image';
 import { useDefaultImages } from '@/hooks/use-default-images';
+import { ProductDialogContact } from '@/components/ProductDialogContact';
 
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat('es-CL', {
@@ -157,6 +158,7 @@ export default function HomePage() {
                             Sin imagen
                         </div>
                     )}
+                    <ProductDialogContact product={selectedProduct} />
                 </div>
                 <div className="flex flex-col space-y-4">
                   <p className="text-3xl font-bold text-primary">{formatPrice(selectedProduct.price)}</p>
