@@ -14,7 +14,7 @@ export async function verifyCredentials(
   const { users } = await getEnvSettings();
   
   // Filter out any empty user objects that might be placeholders
-  const configuredUsers = users.filter(u => u.username);
+  const configuredUsers = users.filter(u => u.username && u.password);
 
   // If no users are configured in the .env file, use hardcoded defaults.
   if (configuredUsers.length === 0) {
@@ -29,11 +29,6 @@ export async function verifyCredentials(
     return false;
   }
   
-  // If the user exists but has no password set, deny access.
-  if (!user.password) {
-    return false;
-  }
-
   // Finally, compare the provided password with the configured one.
   return password === user.password;
 }

@@ -68,7 +68,6 @@ export async function getEnvSettings(): Promise<AdminConfig & SmtpConfig> {
 
     const users: AdminUser[] = [];
     const maxUsers = 3;
-    let multiUserConfigFound = false;
 
     // Load multi-user settings
     for (let i = 1; i <= maxUsers; i++) {
@@ -78,15 +77,17 @@ export async function getEnvSettings(): Promise<AdminConfig & SmtpConfig> {
         const username = combinedEnv[usernameKey];
         const password = combinedEnv[passwordKey];
 
+        // Add user only if username is present.
         if (username) {
-            multiUserConfigFound = true;
             users.push({ username, password });
         } else {
-            users.push({}); // Placeholder for form state
+            // Push an empty object as a placeholder for the admin form.
+            users.push({});
         }
     }
     
-    // If no multi-user config was found at all, check for legacy single user.
+    // Check for legacy single user ONLY if no multi-user config was found.
+    const multiUserConfigFound = users.some(u => u.username);
     if (!multiUserConfigFound && combinedEnv.ADMIN_USERNAME) {
         users[0] = {
             username: combinedEnv.ADMIN_USERNAME,
