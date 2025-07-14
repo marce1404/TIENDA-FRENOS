@@ -23,13 +23,13 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import Image from 'next/image';
 import { useDefaultImages } from '@/hooks/use-default-images';
 import { WhatsAppIcon } from '@/components/icons/WhatsAppIcon';
+import { Badge } from '@/components/ui/badge';
 
 
 export default function ProductosPage() {
@@ -212,7 +212,6 @@ export default function ProductosPage() {
                       <TableHead>Nombre</TableHead>
                       <TableHead>Código</TableHead>
                       <TableHead>Marca</TableHead>
-                      <TableHead>Modelo</TableHead>
                       <TableHead>Compatibilidad</TableHead>
                       <TableHead className="text-right">Precio</TableHead>
                       <TableHead className="w-[120px] text-center">Acción</TableHead>
@@ -228,9 +227,17 @@ export default function ProductosPage() {
                         <TableCell className="font-medium">{product.name}</TableCell>
                         <TableCell>{product.code}</TableCell>
                         <TableCell>{product.brand}</TableCell>
-                        <TableCell>{product.model}</TableCell>
                         <TableCell>{product.compatibility}</TableCell>
-                        <TableCell className="text-right">{formatPrice(product.price)}</TableCell>
+                        <TableCell className="text-right">
+                          {product.isOnSale && typeof product.salePrice === 'number' ? (
+                            <div className="flex flex-col items-end">
+                              <span className="line-through text-muted-foreground text-xs">{formatPrice(product.price)}</span>
+                              <span className="text-primary font-bold">{formatPrice(product.salePrice)}</span>
+                            </div>
+                          ) : (
+                            formatPrice(product.price)
+                          )}
+                        </TableCell>
                         <TableCell className="text-center">
                           <Button 
                             size="sm" 
@@ -286,6 +293,7 @@ export default function ProductosPage() {
             <DialogContent className="sm:max-w-3xl">
               <DialogHeader>
                 <DialogTitle className="text-2xl">{selectedProduct.name}</DialogTitle>
+                {selectedProduct.isOnSale && <Badge variant="destructive" className="absolute top-4 right-16">OFERTA</Badge>}
               </DialogHeader>
                <div className="grid md:grid-cols-2 gap-8 py-4">
                 <div className="relative aspect-square w-full bg-muted rounded-lg overflow-hidden">
@@ -304,7 +312,16 @@ export default function ProductosPage() {
                     )}
                 </div>
                 <div className="flex flex-col space-y-4">
-                  <p className="text-3xl font-bold text-primary">{formatPrice(selectedProduct.price)}</p>
+                  <div>
+                    {selectedProduct.isOnSale && typeof selectedProduct.salePrice === 'number' ? (
+                      <div className="flex items-baseline gap-2">
+                        <p className="text-3xl font-bold text-primary">{formatPrice(selectedProduct.salePrice)}</p>
+                        <p className="text-xl font-medium text-muted-foreground line-through">{formatPrice(selectedProduct.price)}</p>
+                      </div>
+                    ) : (
+                      <p className="text-3xl font-bold text-primary">{formatPrice(selectedProduct.price)}</p>
+                    )}
+                  </div>
                   <Separator />
                   <div className="grid grid-cols-[auto,1fr] gap-x-4 gap-y-2 text-sm">
                     <span className="font-semibold text-foreground">Código:</span>

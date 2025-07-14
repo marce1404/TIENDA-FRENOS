@@ -11,6 +11,8 @@ export const products: Product[] = [
     price: 35000,
     category: 'Pastillas',
     isFeatured: true,
+    isOnSale: true,
+    salePrice: 29990,
   },
   {
     id: 2,
@@ -55,6 +57,8 @@ export const products: Product[] = [
     price: 75000,
     category: 'Pastillas',
     isFeatured: false,
+    isOnSale: true,
+    salePrice: 64990,
   },
   {
     id: 6,
@@ -132,5 +136,7 @@ export const products: Product[] = [
     price: 115000,
     category: 'Discos',
     isFeatured: false,
+    isOnSale: true,
+    salePrice: 99990,
   },
 ];

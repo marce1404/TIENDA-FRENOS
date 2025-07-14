@@ -10,6 +10,8 @@ export interface Product {
   category: string;
   isFeatured: boolean;
   imageUrl?: string;
+  isOnSale?: boolean;
+  salePrice?: number;
 }
 
 export interface CartItem extends Product {

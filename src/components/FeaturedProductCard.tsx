@@ -11,6 +11,7 @@ import Image from 'next/image';
 import { useDefaultImages } from '@/hooks/use-default-images';
 import { BrakePadIcon } from './icons/BrakePadIcon';
 import { BrakeDiscIcon } from './icons/BrakeDiscIcon';
+import { Badge } from '@/components/ui/badge';
 
 interface FeaturedProductCardProps {
   product: Product;
@@ -44,13 +45,14 @@ export function FeaturedProductCard({ product, onProductClick }: FeaturedProduct
 
   return (
     <Card 
-        className="flex flex-col overflow-hidden h-full cursor-pointer transition-all hover:shadow-lg hover:-translate-y-1"
+        className="flex flex-col overflow-hidden h-full cursor-pointer transition-all hover:shadow-lg hover:-translate-y-1 relative"
         onClick={() => onProductClick(product)}
     >
+        {product.isOnSale && <Badge variant="destructive" className="absolute top-2 right-2">OFERTA</Badge>}
         <CardHeader className="flex-col items-start p-4">
             <div className="flex flex-row items-start justify-between w-full">
-              <CardTitle className="text-base font-bold leading-tight">{product.name}</CardTitle>
-              <Star className={cn("h-5 w-5 flex-shrink-0", product.isFeatured ? "fill-primary text-primary" : "text-muted-foreground")} />
+              <CardTitle className="text-base font-bold leading-tight pr-6">{product.name}</CardTitle>
+              {product.isFeatured && <Star className={cn("h-5 w-5 flex-shrink-0", "fill-primary text-primary")} />}
             </div>
             <div className="text-sm text-muted-foreground flex items-center gap-1">
                 <span>Código:</span> 
@@ -84,7 +86,14 @@ export function FeaturedProductCard({ product, onProductClick }: FeaturedProduct
             </div>
         </CardContent>
         <CardFooter className="p-4 pt-0 flex justify-between items-center">
-            <span className="font-bold text-foreground text-lg">{formatPrice(product.price)}</span>
+            {product.isOnSale && typeof product.salePrice === 'number' ? (
+              <div className="flex flex-col items-start">
+                <span className="text-xs text-muted-foreground line-through">{formatPrice(product.price)}</span>
+                <span className="font-bold text-primary text-lg">{formatPrice(product.salePrice)}</span>
+              </div>
+            ) : (
+              <span className="font-bold text-foreground text-lg">{formatPrice(product.price)}</span>
+            )}
             <Button size="sm" onClick={handleAddToCart}>
                 Añadir
             </Button>

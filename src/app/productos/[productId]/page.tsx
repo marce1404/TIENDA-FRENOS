@@ -112,7 +112,14 @@ export default function ProductDetailPage({ params }: { params: { productId: str
                     </div>
                     <div className="flex flex-col space-y-6">
                         <div>
-                             <p className="text-4xl font-extrabold text-primary mb-4">{formatPrice(product.price)}</p>
+                            {product.isOnSale && typeof product.salePrice === 'number' ? (
+                              <div className="flex items-baseline gap-4 mb-4">
+                                <p className="text-4xl font-extrabold text-primary">{formatPrice(product.salePrice)}</p>
+                                <p className="text-2xl font-medium text-muted-foreground line-through">{formatPrice(product.price)}</p>
+                              </div>
+                            ) : (
+                              <p className="text-4xl font-extrabold text-primary mb-4">{formatPrice(product.price)}</p>
+                            )}
                              <Separator />
                         </div>
                         <div className="space-y-4 text-muted-foreground">

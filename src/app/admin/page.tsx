@@ -34,7 +34,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Pencil, Trash2, PlusCircle, LogIn, LogOut, Star, Phone, Settings, Save, Package, Mail, Loader2, Search, Users, Eye, EyeOff, Upload, Image as ImageIcon } from 'lucide-react';
+import { Pencil, Trash2, PlusCircle, LogIn, LogOut, Star, Phone, Settings, Save, Package, Mail, Loader2, Search, Users, Eye, EyeOff, Upload, Image as ImageIcon, Percent } from 'lucide-react';
 import { ArrowLeftIcon, ArrowRightIcon } from '@radix-ui/react-icons';
 import { verifyCredentials } from '@/actions/auth';
 import { saveEnvSettings } from '@/actions/saveEnv';
@@ -47,6 +47,7 @@ import { getAdminSettingsForForm } from '@/actions/getAdminSettings';
 import Image from 'next/image';
 import { uploadImage } from '@/actions/uploadImage';
 import { uploadDefaultImage } from '@/actions/uploadDefaultImage';
+import { Badge } from '@/components/ui/badge';
 
 
 export default function AdminPage() {
@@ -316,7 +317,7 @@ export default function AdminPage() {
     }).format(price);
   };
 
-  const handleAddProduct = (newProductData: Omit<Product, 'id'> & { id: number }) => {
+  const handleAddProduct = (newProductData: Product) => {
     setProducts(prev => {
       const idExists = prev.some(p => p.id === newProductData.id);
       if (idExists) {
@@ -356,6 +357,16 @@ export default function AdminPage() {
     setProducts(prevProducts => {
       const updatedProducts = prevProducts.map(p =>
         p.id === productId ? { ...p, isFeatured: !p.isFeatured } : p
+      );
+      saveProducts(updatedProducts);
+      return updatedProducts;
+    });
+  };
+
+  const handleToggleOnSale = (productId: number) => {
+    setProducts(prevProducts => {
+      const updatedProducts = prevProducts.map(p =>
+        p.id === productId ? { ...p, isOnSale: !p.isOnSale, salePrice: p.isOnSale ? undefined : p.salePrice || p.price } : p
       );
       saveProducts(updatedProducts);
       return updatedProducts;
@@ -835,9 +846,9 @@ export default function AdminPage() {
                     <TableHead>Código</TableHead>
                     <TableHead>Nombre</TableHead>
                     <TableHead>Marca</TableHead>
-                    <TableHead>Modelo</TableHead>
                     <TableHead>Compatibilidad</TableHead>
                     <TableHead className="text-right">Precio</TableHead>
+                    <TableHead className="text-center">Oferta</TableHead>
                     <TableHead className="text-center">Destacado</TableHead>
                     <TableHead className="w-[120px] text-center">Acciones</TableHead>
                     </TableRow>
@@ -865,14 +876,28 @@ export default function AdminPage() {
                         <TableCell>{product.code}</TableCell>
                         <TableCell>{product.name}</TableCell>
                         <TableCell>{product.brand}</TableCell>
-                        <TableCell>{product.model}</TableCell>
                         <TableCell>{product.compatibility}</TableCell>
-                        <TableCell className="text-right">{formatPrice(product.price)}</TableCell>
+                        <TableCell className="text-right">
+                          {product.isOnSale && typeof product.salePrice === 'number' ? (
+                              <div className='flex flex-col items-end'>
+                                <span className="line-through text-muted-foreground text-xs">{formatPrice(product.price)}</span>
+                                <span className="text-primary font-bold">{formatPrice(product.salePrice)}</span>
+                              </div>
+                            ) : (
+                              formatPrice(product.price)
+                            )}
+                        </TableCell>
                         <TableCell className="text-center">
-                        <Button variant="ghost" size="icon" onClick={() => handleToggleFeatured(product.id)}>
-                            <Star className={cn("h-5 w-5", product.isFeatured ? "fill-primary text-primary" : "text-muted-foreground")} />
-                            <span className="sr-only">Toggle Destacado</span>
-                        </Button>
+                          <Button variant="ghost" size="icon" onClick={() => handleToggleOnSale(product.id)}>
+                            <Percent className={cn("h-5 w-5", product.isOnSale ? "fill-destructive text-destructive" : "text-muted-foreground")} />
+                            <span className="sr-only">Toggle Oferta</span>
+                          </Button>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Button variant="ghost" size="icon" onClick={() => handleToggleFeatured(product.id)}>
+                              <Star className={cn("h-5 w-5", product.isFeatured ? "fill-primary text-primary" : "text-muted-foreground")} />
+                              <span className="sr-only">Toggle Destacado</span>
+                          </Button>
                         </TableCell>
                         <TableCell className="flex justify-center gap-2">
                         <Button variant="outline" size="icon" onClick={() => { setProductToEdit(product); setIsEditDialogOpen(true); }}>
@@ -964,7 +989,7 @@ export default function AdminPage() {
 interface ProductFormDialogProps {
     isOpen: boolean;
     onOpenChange: (isOpen: boolean) => void;
-    onSave: (product: any) => void;
+    onSave: (product: Product) => void;
     product?: Product | null;
     title: string;
     nextProductId?: number;
@@ -983,6 +1008,8 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
         category: '',
         isFeatured: false,
         imageUrl: '',
+        isOnSale: false,
+        salePrice: '' as number | '',
     });
     
     const [formData, setFormData] = useState(getInitialFormData());
@@ -995,23 +1022,14 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
             if (product) {
                 setFormData({
                     ...product,
-                    price: product.price, // keep price as number
-                    imageUrl: product.imageUrl || ''
+                    price: product.price,
+                    imageUrl: product.imageUrl || '',
+                    isOnSale: product.isOnSale || false,
+                    salePrice: product.salePrice || '',
                 });
                 setImagePreview(product.imageUrl || null);
             } else {
-                setFormData({
-                    id: nextProductId || 0,
-                    code: '',
-                    name: '',
-                    brand: '',
-                    model: '',
-                    compatibility: '',
-                    price: '', // Set as empty string for new products
-                    category: '',
-                    isFeatured: false,
-                    imageUrl: '',
-                });
+                setFormData(getInitialFormData());
                 setImagePreview(null);
             }
             setImageFile(null); // Reset file on open
@@ -1021,7 +1039,7 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { id, value } = e.target;
         
-        if (id === 'price') {
+        if (id === 'price' || id === 'salePrice') {
              // Allow empty string, otherwise convert to number
             const numericValue = value === '' ? '' : parseFloat(value);
             // Prevent NaN if user types non-numeric characters
@@ -1057,8 +1075,8 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
         }
     };
     
-    const handleFeaturedChange = (checked: boolean) => {
-        setFormData(prev => ({ ...prev, isFeatured: checked }));
+    const handleSwitchChange = (id: 'isFeatured' | 'isOnSale', checked: boolean) => {
+        setFormData(prev => ({ ...prev, [id]: checked }));
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -1099,6 +1117,7 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
         onSave({
             ...formData,
             price: Number(formData.price) || 0,
+            salePrice: formData.isOnSale ? (Number(formData.salePrice) || 0) : undefined,
             imageUrl: finalImageUrl,
         });
         setIsSaving(false);
@@ -1175,15 +1194,32 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
                             </div>
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="isFeatured" className="text-right">Destacado</Label>
-                            <div className="col-span-3 flex items-center">
-                                <Switch
-                                    id="isFeatured"
-                                    checked={formData.isFeatured}
-                                    onCheckedChange={handleFeaturedChange}
-                                />
+                            <Label className="text-right">Estado</Label>
+                            <div className="col-span-3 flex items-center gap-6">
+                                <div className="flex items-center gap-2">
+                                  <Switch
+                                      id="isFeatured"
+                                      checked={formData.isFeatured}
+                                      onCheckedChange={(c) => handleSwitchChange('isFeatured', c)}
+                                  />
+                                  <Label htmlFor="isFeatured">Destacado</Label>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Switch
+                                      id="isOnSale"
+                                      checked={formData.isOnSale}
+                                      onCheckedChange={(c) => handleSwitchChange('isOnSale', c)}
+                                  />
+                                  <Label htmlFor="isOnSale">En Oferta</Label>
+                                </div>
                             </div>
                         </div>
+                        {formData.isOnSale && (
+                           <div className="grid grid-cols-4 items-center gap-4">
+                              <Label htmlFor="salePrice" className="text-right">Precio de Oferta</Label>
+                              <Input id="salePrice" type="text" value={formData.salePrice === 0 ? '0' : formData.salePrice || ''} onChange={handleChange} required={formData.isOnSale} className="col-span-3" />
+                          </div>
+                        )}
                     </div>
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
