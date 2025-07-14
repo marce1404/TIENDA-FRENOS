@@ -39,7 +39,7 @@ export function ProductDialogContact({ product }: ProductDialogContactProps) {
 
   return (
     <div className="absolute bottom-4 right-4 z-10">
-      <Button onClick={handleContactClick} size="sm" variant="secondary" className="shadow-lg">
+      <Button onClick={handleContactClick} size="sm" className="shadow-lg bg-green-500 hover:bg-green-600 text-white">
         <WhatsAppIcon className="h-5 w-5 mr-2" />
         Si tienes dudas, contáctanos
       </Button>
