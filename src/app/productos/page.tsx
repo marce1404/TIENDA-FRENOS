@@ -23,6 +23,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
@@ -255,10 +256,11 @@ export default function ProductosPage() {
             <DialogContent className="sm:max-w-3xl">
               <DialogHeader>
                 <DialogTitle className="text-2xl">{selectedProduct.name}</DialogTitle>
+                <DialogDescription>{selectedProduct.code}</DialogDescription>
               </DialogHeader>
                <div className="grid md:grid-cols-2 gap-8 py-4">
-                {selectedProduct.imageUrl && (
-                    <div className="relative aspect-square w-full bg-muted rounded-lg overflow-hidden">
+                <div className="relative aspect-square w-full bg-muted rounded-lg overflow-hidden">
+                    {selectedProduct.imageUrl ? (
                         <Image
                             src={selectedProduct.imageUrl}
                             alt={`Imagen de ${selectedProduct.name}`}
@@ -266,8 +268,12 @@ export default function ProductosPage() {
                             className="object-contain"
                             data-ai-hint={selectedProduct.category === 'Pastillas' ? 'brake pad' : 'brake disc'}
                         />
-                    </div>
-                )}
+                    ) : (
+                        <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">
+                            Sin imagen
+                        </div>
+                    )}
+                </div>
                 <div className="flex flex-col space-y-4">
                   <p className="text-3xl font-bold text-primary">{formatPrice(selectedProduct.price)}</p>
                   <Separator />
