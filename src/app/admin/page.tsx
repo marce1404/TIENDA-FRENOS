@@ -120,7 +120,7 @@ export default function AdminPage() {
         setWhatsappNumber('56912345678');
     }
     
-    // Load default image previews
+    // Load default image previews from localStorage
     const pastillaUrl = localStorage.getItem('defaultPastillaImageUrl');
     if (pastillaUrl) setDefaultPastillaImagePreview(pastillaUrl);
 
@@ -394,7 +394,8 @@ export default function AdminPage() {
     file: File | null,
     type: 'pastilla' | 'disco',
     savingSetter: React.Dispatch<React.SetStateAction<boolean>>,
-    storageKey: string
+    storageKey: string,
+    previewSetter: React.Dispatch<React.SetStateAction<string | null>>
   ) => {
     e.preventDefault();
     if (!file) {
@@ -414,7 +415,9 @@ export default function AdminPage() {
     const result = await uploadDefaultImage(formData);
 
     if (result.success) {
+      // The result.url is now a Data URL, save it to localStorage
       localStorage.setItem(storageKey, result.url);
+      previewSetter(result.url); // Update the preview with the new Data URL
       toast({
         title: '¡Imagen Guardada!',
         description: `La imagen por defecto para ${type}s se ha actualizado.`,
@@ -739,7 +742,7 @@ export default function AdminPage() {
             <TabsContent value="images">
               <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Card>
-                  <form onSubmit={(e) => handleSaveDefaultImage(e, defaultPastillaImageFile, 'pastilla', setIsSavingPastillaImage, 'defaultPastillaImageUrl')}>
+                  <form onSubmit={(e) => handleSaveDefaultImage(e, defaultPastillaImageFile, 'pastilla', setIsSavingPastillaImage, 'defaultPastillaImageUrl', setDefaultPastillaImagePreview)}>
                     <CardHeader>
                       <CardTitle>Imagen por Defecto para Pastillas</CardTitle>
                       <CardDescription>
@@ -777,7 +780,7 @@ export default function AdminPage() {
                 </Card>
 
                 <Card>
-                  <form onSubmit={(e) => handleSaveDefaultImage(e, defaultDiscoImageFile, 'disco', setIsSavingDiscoImage, 'defaultDiscoImageUrl')}>
+                  <form onSubmit={(e) => handleSaveDefaultImage(e, defaultDiscoImageFile, 'disco', setIsSavingDiscoImage, 'defaultDiscoImageUrl', setDefaultDiscoImagePreview)}>
                     <CardHeader>
                       <CardTitle>Imagen por Defecto para Discos</CardTitle>
                        <CardDescription>

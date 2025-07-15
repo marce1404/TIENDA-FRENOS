@@ -1,8 +1,6 @@
 
 'use server';
 
-import fs from 'fs/promises';
-import path from 'path';
 import { z } from 'zod';
 
 const uploadSchema = z.object({
@@ -20,33 +18,27 @@ export async function uploadDefaultImage(formData: FormData): Promise<{ success:
     return { success: false, error: 'Invalid input.' };
   }
 
-  const { file: validFile, type: validType } = validatedFields.data;
+  const { file: validFile } = validatedFields.data;
 
   if (validFile.size === 0) {
     return { success: false, error: 'Please select a file.' };
   }
 
+  // Vercel has a read-only filesystem. We can't write files.
+  // Instead, we convert the image to a base64 Data URL and store it in localStorage on the client.
   try {
     const buffer = Buffer.from(await validFile.arrayBuffer());
-    
-    // Use a fixed filename based on the type
-    const extension = path.extname(validFile.name) || '.png';
-    const filename = `default_${validType}${extension}`;
-    
-    const publicDir = path.join(process.cwd(), 'public', 'images', 'defaults');
-    const uploadPath = path.join(publicDir, filename);
+    const mimeType = validFile.type || 'image/png';
+    const dataUrl = `data:${mimeType};base64,${buffer.toString('base64')}`;
 
-    // Ensure the directory exists
-    await fs.mkdir(publicDir, { recursive: true });
+    // The data URL can be very long. Check if it exceeds a reasonable limit (e.g., 4MB)
+    if (dataUrl.length > 4 * 1024 * 1024) {
+      return { success: false, error: 'Image is too large. Please use an image under 4MB.' };
+    }
 
-    // Write the file, overwriting if it exists
-    await fs.writeFile(uploadPath, buffer);
-
-    // Use a cache-busting query parameter to ensure the browser fetches the new image
-    const publicUrl = `/images/defaults/${filename}?v=${new Date().getTime()}`;
-    return { success: true, url: publicUrl };
+    return { success: true, url: dataUrl };
   } catch (error) {
-    console.error('Error uploading default image:', error);
-    return { success: false, error: 'Failed to upload image.' };
+    console.error('Error converting default image to Data URL:', error);
+    return { success: false, error: 'Failed to process image.' };
   }
 }
