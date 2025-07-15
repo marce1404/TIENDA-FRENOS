@@ -37,7 +37,7 @@ export default function HomePage() {
   const { addToCart } = useCart();
   const { defaultPastillaImage, defaultDiscoImage } = useDefaultImages();
   const [whatsappNumber, setWhatsappNumber] = useState('56912345678');
-  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [promoProducts, setPromoProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
@@ -45,7 +45,8 @@ export default function HomePage() {
     const loadClientData = () => {
       // Load products from localStorage
       const allProducts = getProducts();
-      setFeaturedProducts(allProducts.filter((product) => product.isFeatured));
+      // Show products that are either featured or on sale on the homepage promo section
+      setPromoProducts(allProducts.filter((product) => product.isFeatured || product.isOnSale));
       setIsLoading(false);
 
       // Load WhatsApp number from localStorage
@@ -127,7 +128,7 @@ export default function HomePage() {
       </section>
       <section className="bg-card/50">
           <div className="container mx-auto px-4 py-16 md:py-24">
-              <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center">Productos Destacados</h2>
+              <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center">Productos Destacados y Ofertas</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
                   {isLoading ? (
                     Array.from({ length: 6 }).map((_, i) => (
@@ -146,7 +147,7 @@ export default function HomePage() {
                       </Card>
                     ))
                   ) : (
-                    featuredProducts.map((product) => (
+                    promoProducts.map((product) => (
                         <FeaturedProductCard
                           key={product.id}
                           product={product}
