@@ -11,6 +11,7 @@ export function getProducts(): Product[] {
     return initialProducts;
   }
   
+  // Client-side logic using localStorage
   try {
     const savedProductsJSON = localStorage.getItem('products');
     

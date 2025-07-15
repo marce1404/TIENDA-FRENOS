@@ -6,8 +6,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const products = getProducts();
   const baseUrl = 'https://repufrenos.cl';
 
-  const productEntries: MetadataRoute.Sitemap = products.map(({ id }) => ({
-    url: `${baseUrl}/productos/${id}`,
+  const productEntries: MetadataRoute.Sitemap = products.map((product) => ({
+    url: `${baseUrl}/productos/${product.id}`,
     lastModified: new Date(),
   }));
 
@@ -27,3 +27,4 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...productEntries,
   ];
 }
+

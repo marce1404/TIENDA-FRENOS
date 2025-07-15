@@ -58,16 +58,13 @@ export default function HomePage() {
 
     loadClientData();
     
-    // Listen for storage changes to update UI across tabs
-    const handleStorageChange = (e: StorageEvent) => {
-        if (e.key === 'products' || e.key === 'whatsappInfo') {
-            loadClientData();
-        }
+    const handleStorage = () => {
+        loadClientData();
     };
-    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('storage', handleStorage);
 
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('storage', handleStorage);
     };
   }, []);
 
