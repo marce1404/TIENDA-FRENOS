@@ -1,9 +1,8 @@
 
 import { MetadataRoute } from 'next';
-import { getProducts } from '@/lib/products';
+import { products } from '@/data/products';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const products = getProducts();
   const baseUrl = 'https://repufrenos.cl';
 
   const productEntries: MetadataRoute.Sitemap = products.map((product) => ({
@@ -27,4 +26,3 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...productEntries,
   ];
 }
-
