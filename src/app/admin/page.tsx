@@ -3,7 +3,8 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import type { Product } from '@/lib/types';
-import { getProducts, saveProducts } from '@/lib/products';
+import { getProducts } from '@/lib/products';
+import { saveProductsToServer } from '@/actions/saveProductsToServer';
 import {
   Table,
   TableBody,
@@ -58,11 +59,9 @@ export default function AdminPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const { toast } = useToast();
   
-  // State for settings
   const [whatsappNumber, setWhatsappNumber] = useState('');
   const [contactName, setContactName] = useState('');
 
-  // State for .env settings form
   const [isSavingUser, setIsSavingUser] = useState<Record<number, boolean>>({});
   const [isSavingSmtp, setIsSavingSmtp] = useState(false);
   const [adminUsers, setAdminUsers] = useState(() => Array(3).fill(null).map(() => ({ username: '', password: '', repeatPassword: '' })));
@@ -77,7 +76,6 @@ export default function AdminPage() {
   const [smtpRecipients, setSmtpRecipients] = useState('');
   const [smtpSecure, setSmtpSecure] = useState(false);
 
-  // State for default images
   const [defaultPastillaImageFile, setDefaultPastillaImageFile] = useState<File | null>(null);
   const [defaultPastillaImagePreview, setDefaultPastillaImagePreview] = useState<string | null>(null);
   const [isSavingPastillaImage, setIsSavingPastillaImage] = useState(false);
@@ -92,9 +90,28 @@ export default function AdminPage() {
   
   const [adminSearchTerm, setAdminSearchTerm] = useState('');
   
-  // State for pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [productsPerPage] = useState(10);
+  
+  const [isSavingProducts, setIsSavingProducts] = useState(false);
+
+  async function handleSaveChanges(updatedProducts: Product[]) {
+    setIsSavingProducts(true);
+    const result = await saveProductsToServer(updatedProducts);
+    if (result.success) {
+      toast({
+        title: "¡Productos Guardados!",
+        description: "Los cambios en los productos se han guardado en el servidor.",
+      });
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Error al Guardar Productos",
+        description: result.error,
+      });
+    }
+    setIsSavingProducts(false);
+  }
 
   useEffect(() => {
     setProducts(getProducts());
@@ -326,7 +343,7 @@ export default function AdminPage() {
         return prev;
       }
       const updatedProducts = [...prev, newProductData];
-      saveProducts(updatedProducts);
+      handleSaveChanges(updatedProducts);
       setIsAddDialogOpen(false);
       return updatedProducts;
     });
@@ -335,7 +352,7 @@ export default function AdminPage() {
   const handleUpdateProduct = (updatedProduct: Product) => {
     setProducts(prev => {
       const updatedProducts = prev.map(p => p.id === updatedProduct.id ? updatedProduct : p);
-      saveProducts(updatedProducts);
+      handleSaveChanges(updatedProducts);
       return updatedProducts;
     });
     setIsEditDialogOpen(false);
@@ -345,7 +362,7 @@ export default function AdminPage() {
   const handleDeleteProduct = (productId: number) => {
     setProducts(prev => {
       const updatedProducts = prev.filter(p => p.id !== productId);
-      saveProducts(updatedProducts);
+      handleSaveChanges(updatedProducts);
       return updatedProducts;
     });
   };
@@ -355,7 +372,7 @@ export default function AdminPage() {
       const updatedProducts = prevProducts.map(p =>
         p.id === productId ? { ...p, isFeatured: !p.isFeatured } : p
       );
-      saveProducts(updatedProducts);
+      handleSaveChanges(updatedProducts);
       return updatedProducts;
     });
   };
@@ -365,7 +382,7 @@ export default function AdminPage() {
       const updatedProducts = prevProducts.map(p =>
         p.id === productId ? { ...p, isOnSale: !p.isOnSale, salePrice: p.isOnSale ? undefined : p.salePrice || p.price } : p
       );
-      saveProducts(updatedProducts);
+      handleSaveChanges(updatedProducts);
       return updatedProducts;
     });
   };
