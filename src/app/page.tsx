@@ -21,6 +21,7 @@ import { useCart } from '@/hooks/use-cart';
 import Image from 'next/image';
 import { useDefaultImages } from '@/hooks/use-default-images';
 import { WhatsAppIcon } from '@/components/icons/WhatsAppIcon';
+import { Badge } from '@/components/ui/badge';
 
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat('es-CL', {
@@ -39,23 +40,36 @@ export default function HomePage() {
   const [whatsappNumber, setWhatsappNumber] = useState('56912345678');
   
   useEffect(() => {
-    const allProducts = getProducts();
-    setFeaturedProducts(allProducts.filter((product) => product.isFeatured));
-    setIsMounted(true);
-
-    const getWhatsappNumber = () => {
-        let loadedNumber = '56912345678';
-        const savedInfo = localStorage.getItem('whatsappInfo');
-        if (savedInfo) {
-            try {
-                const { number } = JSON.parse(savedInfo);
-                if (number) loadedNumber = number;
-            } catch (e) {}
-        }
-        setWhatsappNumber(loadedNumber);
+    const loadData = () => {
+      const allProducts = getProducts();
+      setFeaturedProducts(allProducts.filter((product) => product.isFeatured));
+      
+      let loadedNumber = '56912345678';
+      const savedInfo = localStorage.getItem('whatsappInfo');
+      if (savedInfo) {
+          try {
+              const { number } = JSON.parse(savedInfo);
+              if (number) loadedNumber = number;
+          } catch (e) {}
+      }
+      setWhatsappNumber(loadedNumber);
     };
 
-    getWhatsappNumber();
+    loadData();
+    setIsMounted(true);
+    
+    // Refresh data when tab becomes visible again to reflect changes from admin panel
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        loadData();
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, []);
 
   const features = [
@@ -162,6 +176,7 @@ export default function HomePage() {
           <DialogContent className="sm:max-w-3xl">
             <DialogHeader>
               <DialogTitle className="text-2xl">{selectedProduct.name}</DialogTitle>
+               {selectedProduct.isOnSale && <Badge variant="destructive" className="absolute top-4 right-16">OFERTA</Badge>}
             </DialogHeader>
             <div className="grid md:grid-cols-2 gap-8 py-4">
                 <div className="relative aspect-square w-full bg-muted rounded-lg overflow-hidden">
