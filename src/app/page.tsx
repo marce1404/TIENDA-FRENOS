@@ -41,15 +41,10 @@ export default function HomePage() {
   const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
-    // This effect now handles all client-side data loading
     const loadClientData = () => {
-      // Load products from localStorage
       const allProducts = getProducts();
-      // Show products that are either featured or on sale on the homepage promo section
       setPromoProducts(allProducts.filter((product) => product.isFeatured || product.isOnSale));
-      setIsLoading(false);
-
-      // Load WhatsApp number from localStorage
+      
       let loadedNumber = '56912345678';
       const savedInfo = localStorage.getItem('whatsappInfo');
       if (savedInfo) {
@@ -59,12 +54,17 @@ export default function HomePage() {
           } catch (e) {}
       }
       setWhatsappNumber(loadedNumber);
+      setIsLoading(false);
     };
 
     loadClientData();
     
-    // Optional: Listen for storage changes to update UI across tabs
-    const handleStorageChange = () => loadClientData();
+    // Listen for storage changes to update UI across tabs
+    const handleStorageChange = (e: StorageEvent) => {
+        if (e.key === 'products' || e.key === 'whatsappInfo') {
+            loadClientData();
+        }
+    };
     window.addEventListener('storage', handleStorageChange);
 
     return () => {
@@ -194,7 +194,7 @@ export default function HomePage() {
           <DialogContent className="sm:max-w-3xl">
             <DialogHeader>
               <DialogTitle className="text-2xl">{selectedProduct.name}</DialogTitle>
-               {selectedProduct.isOnSale && <Badge variant="destructive" className="absolute top-4 right-16">OFERTA</Badge>}
+               {selectedProduct.isOnSale && <Badge className="absolute top-4 right-16 bg-red-600 text-yellow-300 border-red-700">OFERTA</Badge>}
             </DialogHeader>
             <div className="grid md:grid-cols-2 gap-8 py-4">
                 <div className="relative aspect-square w-full bg-muted rounded-lg overflow-hidden">

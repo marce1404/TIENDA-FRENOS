@@ -293,7 +293,7 @@ export default function ProductosPage() {
             <DialogContent className="sm:max-w-3xl">
               <DialogHeader>
                 <DialogTitle className="text-2xl">{selectedProduct.name}</DialogTitle>
-                {selectedProduct.isOnSale && <Badge variant="destructive" className="absolute top-4 right-16">OFERTA</Badge>}
+                {selectedProduct.isOnSale && <Badge className="absolute top-4 right-16 bg-red-600 text-yellow-300 border-red-700">OFERTA</Badge>}
               </DialogHeader>
                <div className="grid md:grid-cols-2 gap-8 py-4">
                 <div className="relative aspect-square w-full bg-muted rounded-lg overflow-hidden">

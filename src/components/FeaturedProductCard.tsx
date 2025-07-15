@@ -48,7 +48,7 @@ export function FeaturedProductCard({ product, onProductClick }: FeaturedProduct
         className="flex flex-col overflow-hidden h-full cursor-pointer transition-all hover:shadow-lg hover:-translate-y-1 relative"
         onClick={() => onProductClick(product)}
     >
-        {product.isOnSale && <Badge variant="destructive" className="absolute top-2 right-2">OFERTA</Badge>}
+        {product.isOnSale && <Badge className="absolute top-2 right-2 bg-red-600 text-yellow-300 border-red-700">OFERTA</Badge>}
         <CardHeader className="flex-col items-start p-4">
             <div className="flex flex-row items-start justify-between w-full">
               <CardTitle className="text-base font-bold leading-tight pr-6">{product.name}</CardTitle>
