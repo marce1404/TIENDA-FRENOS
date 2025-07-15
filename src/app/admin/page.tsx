@@ -46,7 +46,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { getAdminSettingsForForm } from '@/actions/getAdminSettings';
 import Image from 'next/image';
 import { uploadImage } from '@/actions/uploadImage';
-import { uploadDefaultImage } from '@/actions/uploadDefaultImage';
 import { Badge } from '@/components/ui/badge';
 
 
@@ -120,7 +119,6 @@ export default function AdminPage() {
         setWhatsappNumber('56912345678');
     }
     
-    // Load default image previews from localStorage
     const pastillaUrl = localStorage.getItem('defaultPastillaImageUrl');
     if (pastillaUrl) setDefaultPastillaImagePreview(pastillaUrl);
 
@@ -185,7 +183,7 @@ export default function AdminPage() {
       if (isValid) {
         setIsAuthenticated(true);
         sessionStorage.setItem('isAdminAuthenticated', 'true');
-        setInitialSettingsLoaded(false); // Force reload of settings
+        setInitialSettingsLoaded(false); 
       } else {
         setError('Usuario o contraseña incorrectos.');
       }
@@ -201,7 +199,7 @@ export default function AdminPage() {
     setIsAuthenticated(false);
     setUsername('');
     setPassword('');
-    setInitialSettingsLoaded(false); // Reset for next login
+    setInitialSettingsLoaded(false); 
     setError('');
   };
 
@@ -241,7 +239,7 @@ export default function AdminPage() {
 
       const settings: any = {};
       settings[`ADMIN_USER_${index + 1}_USERNAME`] = user.username;
-      // Solo envía la contraseña si se ha ingresado una nueva
+      
       if (user.password) {
           settings[`ADMIN_USER_${index + 1}_PASSWORD`] = user.password;
       }
@@ -262,7 +260,6 @@ export default function AdminPage() {
               return newNames;
           });
           
-          // Limpiar solo los campos de contraseña del usuario guardado
           setAdminUsers(currentUsers => {
             const newUsers = [...currentUsers];
             newUsers[index] = { ...newUsers[index], password: '', repeatPassword: '' };
@@ -410,14 +407,15 @@ export default function AdminPage() {
     savingSetter(true);
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('type', type);
+    formData.append('fileName', `default_${type}`);
+    formData.append('uploadDir', 'images/defaults');
 
-    const result = await uploadDefaultImage(formData);
+    const result = await uploadImage(formData);
 
     if (result.success) {
-      // The result.url is now a Data URL, save it to localStorage
-      localStorage.setItem(storageKey, result.url);
-      previewSetter(result.url); // Update the preview with the new Data URL
+      const imageUrlWithCacheBuster = `${result.url}?t=${new Date().getTime()}`;
+      localStorage.setItem(storageKey, imageUrlWithCacheBuster);
+      previewSetter(imageUrlWithCacheBuster);
       toast({
         title: '¡Imagen Guardada!',
         description: `La imagen por defecto para ${type}s se ha actualizado.`,
@@ -1035,7 +1033,7 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
                 setFormData(getInitialFormData());
                 setImagePreview(null);
             }
-            setImageFile(null); // Reset file on open
+            setImageFile(null); 
         }
     }, [isOpen, product, nextProductId]);
 
@@ -1043,9 +1041,9 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
         const { id, value } = e.target;
         
         if (id === 'price' || id === 'salePrice') {
-             // Allow empty string, otherwise convert to number
+             
             const numericValue = value === '' ? '' : parseFloat(value);
-            // Prevent NaN if user types non-numeric characters
+            
             if (value === '' || !isNaN(numericValue as number)) {
                  setFormData(prev => ({
                     ...prev,
@@ -1100,7 +1098,8 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
             
             const imageFormData = new FormData();
             imageFormData.append('file', imageFile);
-            imageFormData.append('productCode', formData.code);
+            imageFormData.append('fileName', formData.code);
+            imageFormData.append('uploadDir', 'images/products');
             
             const result = await uploadImage(imageFormData);
 

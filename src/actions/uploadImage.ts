@@ -1,3 +1,4 @@
+
 'use server';
 
 import fs from 'fs/promises';
@@ -6,20 +7,22 @@ import { z } from 'zod';
 
 const uploadSchema = z.object({
   file: z.instanceof(File),
-  productCode: z.string().min(1, 'Product code is required.'),
+  fileName: z.string().min(1, 'File name is required.'),
+  uploadDir: z.string().min(1, 'Upload directory is required.'),
 });
 
 export async function uploadImage(formData: FormData): Promise<{ success: true; url: string } | { success: false; error: string }> {
   const file = formData.get('file');
-  const productCode = formData.get('productCode');
-
-  const validatedFields = uploadSchema.safeParse({ file, productCode });
-
+  const fileName = formData.get('fileName');
+  const uploadDir = formData.get('uploadDir');
+  
+  const validatedFields = uploadSchema.safeParse({ file, fileName, uploadDir });
+  
   if (!validatedFields.success) {
     return { success: false, error: 'Invalid input.' };
   }
 
-  const { file: validFile, productCode: validProductCode } = validatedFields.data;
+  const { file: validFile, fileName: validFileName, uploadDir: validUploadDir } = validatedFields.data;
 
   if (validFile.size === 0) {
     return { success: false, error: 'Please select a file.' };
@@ -27,13 +30,13 @@ export async function uploadImage(formData: FormData): Promise<{ success: true; 
 
   try {
     const buffer = Buffer.from(await validFile.arrayBuffer());
-    // Sanitize product code to use as a filename
-    const sanitizedCode = validProductCode.replace(/[^a-z0-9_.-]/gi, '_');
-    const extension = path.extname(validFile.name) || '.png'; // Default to .png if no extension
-    const filename = `${sanitizedCode}${extension}`;
+    // Sanitize filename to prevent directory traversal
+    const sanitizedFileName = validFileName.replace(/[^a-z0-9_.-]/gi, '_');
+    const extension = path.extname(validFile.name) || '.png';
+    const finalFilename = `${sanitizedFileName}${extension}`;
     
-    const publicDir = path.join(process.cwd(), 'public', 'images', 'products');
-    const uploadPath = path.join(publicDir, filename);
+    const publicDir = path.join(process.cwd(), 'public', validUploadDir);
+    const uploadPath = path.join(publicDir, finalFilename);
 
     // Ensure the directory exists
     await fs.mkdir(publicDir, { recursive: true });
@@ -41,10 +44,11 @@ export async function uploadImage(formData: FormData): Promise<{ success: true; 
     // Write the file
     await fs.writeFile(uploadPath, buffer);
 
-    const publicUrl = `/images/products/${filename}`;
+    const publicUrl = `/${validUploadDir}/${finalFilename}`;
     return { success: true, url: publicUrl };
   } catch (error) {
     console.error('Error uploading image:', error);
-    return { success: false, error: 'Failed to upload image.' };
+    // Provide a more generic error for security
+    return { success: false, error: 'Failed to upload image due to a server error.' };
   }
 }
