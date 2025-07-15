@@ -32,18 +32,18 @@ const formatPrice = (price: number) => {
 
 
 export default function HomePage() {
-  const [isMounted, setIsMounted] = useState(false);
-  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const { addToCart } = useCart();
   const { defaultPastillaImage, defaultDiscoImage } = useDefaultImages();
   const [whatsappNumber, setWhatsappNumber] = useState('56912345678');
   
+  // Get products directly on each render to ensure data is always fresh
+  const allProducts = getProducts();
+  const featuredProducts = allProducts.filter((product) => product.isFeatured);
+
   useEffect(() => {
-    const loadData = () => {
-      const allProducts = getProducts();
-      setFeaturedProducts(allProducts.filter((product) => product.isFeatured));
-      
+    // This effect now only handles client-side data that is less frequently updated
+    const getWhatsappNumber = () => {
       let loadedNumber = '56912345678';
       const savedInfo = localStorage.getItem('whatsappInfo');
       if (savedInfo) {
@@ -55,21 +55,7 @@ export default function HomePage() {
       setWhatsappNumber(loadedNumber);
     };
 
-    loadData();
-    setIsMounted(true);
-    
-    // Refresh data when tab becomes visible again to reflect changes from admin panel
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        loadData();
-      }
-    };
-    
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
+    getWhatsappNumber();
   }, []);
 
   const features = [
@@ -130,7 +116,7 @@ export default function HomePage() {
           <div className="container mx-auto px-4 py-16 md:py-24">
               <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center">Productos Destacados</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-                  {isMounted && featuredProducts.map((product) => (
+                  {featuredProducts.map((product) => (
                       <FeaturedProductCard
                         key={product.id}
                         product={product}
