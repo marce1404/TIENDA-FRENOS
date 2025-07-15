@@ -17,7 +17,7 @@ export function getProducts(): Product[] {
     if (savedProductsJSON) {
         const productsFromStorage = JSON.parse(savedProductsJSON);
         // Ensure it's a non-empty array before returning
-        if (Array.isArray(productsFromStorage) && productsFromStorage.length > 0) {
+        if (Array.isArray(productsFromStorage)) {
             return productsFromStorage;
         }
     }
