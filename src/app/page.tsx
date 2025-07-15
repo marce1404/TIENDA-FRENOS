@@ -22,6 +22,7 @@ import Image from 'next/image';
 import { useDefaultImages } from '@/hooks/use-default-images';
 import { WhatsAppIcon } from '@/components/icons/WhatsAppIcon';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat('es-CL', {
@@ -36,14 +37,18 @@ export default function HomePage() {
   const { addToCart } = useCart();
   const { defaultPastillaImage, defaultDiscoImage } = useDefaultImages();
   const [whatsappNumber, setWhatsappNumber] = useState('56912345678');
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   
-  // Get products directly on each render to ensure data is always fresh
-  const allProducts = getProducts();
-  const featuredProducts = allProducts.filter((product) => product.isFeatured);
-
   useEffect(() => {
-    // This effect now only handles client-side data that is less frequently updated
-    const getWhatsappNumber = () => {
+    // This effect now handles all client-side data loading
+    const loadClientData = () => {
+      // Load products from localStorage
+      const allProducts = getProducts();
+      setFeaturedProducts(allProducts.filter((product) => product.isFeatured));
+      setIsLoading(false);
+
+      // Load WhatsApp number from localStorage
       let loadedNumber = '56912345678';
       const savedInfo = localStorage.getItem('whatsappInfo');
       if (savedInfo) {
@@ -55,7 +60,15 @@ export default function HomePage() {
       setWhatsappNumber(loadedNumber);
     };
 
-    getWhatsappNumber();
+    loadClientData();
+    
+    // Optional: Listen for storage changes to update UI across tabs
+    const handleStorageChange = () => loadClientData();
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
   const features = [
@@ -116,13 +129,31 @@ export default function HomePage() {
           <div className="container mx-auto px-4 py-16 md:py-24">
               <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center">Productos Destacados</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-                  {featuredProducts.map((product) => (
-                      <FeaturedProductCard
-                        key={product.id}
-                        product={product}
-                        onProductClick={handleProductClick}
-                      />
-                  ))}
+                  {isLoading ? (
+                    Array.from({ length: 6 }).map((_, i) => (
+                      <Card key={i} className="flex flex-col overflow-hidden h-full">
+                        <CardContent className="p-4 space-y-4">
+                          <Skeleton className="h-6 w-3/4" />
+                          <Skeleton className="h-4 w-1/2" />
+                          <Skeleton className="h-24 w-full" />
+                          <Skeleton className="h-4 w-full" />
+                          <Skeleton className="h-4 w-full" />
+                          <div className="flex justify-between items-center pt-4">
+                             <Skeleton className="h-8 w-1/3" />
+                             <Skeleton className="h-9 w-1/3" />
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))
+                  ) : (
+                    featuredProducts.map((product) => (
+                        <FeaturedProductCard
+                          key={product.id}
+                          product={product}
+                          onProductClick={handleProductClick}
+                        />
+                    ))
+                  )}
               </div>
           </div>
       </section>
