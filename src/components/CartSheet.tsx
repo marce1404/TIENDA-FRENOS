@@ -37,16 +37,16 @@ export function CartSheet() {
   useEffect(() => {
     const getWhatsappNumber = () => {
         let loadedNumber = '56912345678'; // Default value
-        const savedInfo = localStorage.getItem('whatsappInfo');
-        if (savedInfo) {
-            try {
-                const { number } = JSON.parse(savedInfo);
-                if (number) {
-                    loadedNumber = number;
-                }
-            } catch (e) {
-                // use default if parsing fails
-            }
+        try {
+          const savedInfo = localStorage.getItem('whatsappInfo');
+          if (savedInfo) {
+              const { number } = JSON.parse(savedInfo);
+              if (number) {
+                  loadedNumber = number;
+              }
+          }
+        } catch (e) {
+            // use default if parsing fails
         }
         setWhatsappNumber(loadedNumber);
     };
@@ -54,10 +54,8 @@ export function CartSheet() {
     getWhatsappNumber(); // Initial load
 
     // Listen for changes in localStorage
-    const handleStorageChange = (e: StorageEvent) => {
-        if (e.key === 'whatsappInfo') {
-            getWhatsappNumber();
-        }
+    const handleStorageChange = () => {
+        getWhatsappNumber();
     };
     
     window.addEventListener('storage', handleStorageChange);

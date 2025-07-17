@@ -227,7 +227,7 @@ export default function AdminPage() {
         number: whatsappNumber,
     };
     localStorage.setItem('whatsappInfo', JSON.stringify(whatsappInfo));
-    localStorage.removeItem('whatsappNumber'); 
+    window.dispatchEvent(new Event('storage')); // Notificar a otros componentes
     alert('Configuración de contacto actualizada.');
   };
 
@@ -433,6 +433,7 @@ export default function AdminPage() {
       const imageUrlWithCacheBuster = `${result.url}?t=${new Date().getTime()}`;
       localStorage.setItem(storageKey, imageUrlWithCacheBuster);
       previewSetter(imageUrlWithCacheBuster);
+      window.dispatchEvent(new Event('storage')); // Notificar a otros componentes del cambio
       toast({
         title: '¡Imagen Guardada!',
         description: `La imagen por defecto para ${type}s se ha actualizado.`,
