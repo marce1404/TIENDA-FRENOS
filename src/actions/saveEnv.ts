@@ -18,6 +18,9 @@ const envSchema = z.object({
   SMTP_PASS: z.string().optional(),
   SMTP_RECIPIENTS: z.string().optional(),
   SMTP_SECURE: z.string().optional(),
+  CLOUDINARY_CLOUD_NAME: z.string().optional(),
+  CLOUDINARY_API_KEY: z.string().optional(),
+  CLOUDINARY_API_SECRET: z.string().optional(),
 });
 
 type EnvSettings = z.infer<typeof envSchema>;

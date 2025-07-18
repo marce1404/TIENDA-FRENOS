@@ -35,7 +35,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Pencil, Trash2, PlusCircle, LogIn, LogOut, Star, Phone, Settings, Save, Package, Mail, Loader2, Search, Users, Eye, EyeOff, Upload, Image as ImageIcon, Percent } from 'lucide-react';
+import { Pencil, Trash2, PlusCircle, LogIn, LogOut, Star, Phone, Settings, Save, Package, Mail, Loader2, Search, Users, Eye, EyeOff, Upload, Image as ImageIcon, Percent, Cloud } from 'lucide-react';
 import { ArrowLeftIcon, ArrowRightIcon } from '@radix-ui/react-icons';
 import { verifyCredentials } from '@/actions/auth';
 import { saveEnvSettings } from '@/actions/saveEnv';
@@ -64,17 +64,23 @@ export default function AdminPage() {
 
   const [isSavingUser, setIsSavingUser] = useState<Record<number, boolean>>({});
   const [isSavingSmtp, setIsSavingSmtp] = useState(false);
+  const [isSavingCloudinary, setIsSavingCloudinary] = useState(false);
   const [adminUsers, setAdminUsers] = useState(() => Array(3).fill(null).map(() => ({ username: '', password: '', repeatPassword: '' })));
   const [savedUsernames, setSavedUsernames] = useState<(string | undefined)[]>([]);
   const [initialSettingsLoaded, setInitialSettingsLoaded] = useState(false);
   const [showPasswords, setShowPasswords] = useState([false, false, false]);
   const [showRepeatPasswords, setShowRepeatPasswords] = useState([false, false, false]);
+  
   const [smtpHost, setSmtpHost] = useState('');
   const [smtpPort, setSmtpPort] = useState('');
   const [smtpUser, setSmtpUser] = useState('');
   const [smtpPass, setSmtpPass] = useState('');
   const [smtpRecipients, setSmtpRecipients] = useState('');
   const [smtpSecure, setSmtpSecure] = useState(false);
+  
+  const [cloudinaryCloudName, setCloudinaryCloudName] = useState('');
+  const [cloudinaryApiKey, setCloudinaryApiKey] = useState('');
+  const [cloudinaryApiSecret, setCloudinaryApiSecret] = useState('');
 
   const [defaultPastillaImageFile, setDefaultPastillaImageFile] = useState<File | null>(null);
   const [defaultPastillaImagePreview, setDefaultPastillaImagePreview] = useState<string | null>(null);
@@ -173,6 +179,9 @@ export default function AdminPage() {
                     setSmtpUser(settings.smtp.user || '');
                     setSmtpRecipients(settings.smtp.recipients || '');
                     setSmtpSecure(settings.smtp.secure || false);
+
+                    setCloudinaryCloudName(settings.cloudinary.cloudName || '');
+                    setCloudinaryApiKey(settings.cloudinary.apiKey || '');
 
                     setInitialSettingsLoaded(true);
                 } catch (error) {
@@ -316,6 +325,34 @@ export default function AdminPage() {
         setSmtpPass('');
     } else {
          toast({
+            variant: "destructive",
+            title: "Error al Guardar",
+            description: result.error || "Ocurrió un problema al guardar la configuración.",
+        });
+    }
+  };
+
+  const handleSaveCloudinary = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSavingCloudinary(true);
+
+    const settings = {
+      CLOUDINARY_CLOUD_NAME: cloudinaryCloudName,
+      CLOUDINARY_API_KEY: cloudinaryApiKey,
+      CLOUDINARY_API_SECRET: cloudinaryApiSecret,
+    };
+    
+    const result = await saveEnvSettings(settings);
+    setIsSavingCloudinary(false);
+
+    if (result.success) {
+        toast({
+            title: "¡Configuración de Cloudinary Guardada!",
+            description: "Las credenciales se han guardado en el servidor.",
+        });
+        setCloudinaryApiSecret('');
+    } else {
+        toast({
             variant: "destructive",
             title: "Error al Guardar",
             description: result.error || "Ocurrió un problema al guardar la configuración.",
@@ -554,9 +591,10 @@ export default function AdminPage() {
 
         <TabsContent value="settings" className="mt-6">
           <Tabs defaultValue="contact" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="contact"><Phone className="mr-2 h-4 w-4" />Contacto</TabsTrigger>
-              <TabsTrigger value="email"><Mail className="mr-2 h-4 w-4" />Usuarios y Correo</TabsTrigger>
+              <TabsTrigger value="users"><Users className="mr-2 h-4 w-4" />Usuarios</TabsTrigger>
+              <TabsTrigger value="services"><Cloud className="mr-2 h-4 w-4" />Servicios Externos</TabsTrigger>
               <TabsTrigger value="images"><ImageIcon className="mr-2 h-4 w-4" />Imágenes por Defecto</TabsTrigger>
             </TabsList>
             <TabsContent value="contact">
@@ -604,20 +642,20 @@ export default function AdminPage() {
                 </form>
               </Card>
             </TabsContent>
-            <TabsContent value="email">
+            <TabsContent value="users">
                 <div className="mt-6 space-y-6">
-                    <div>
-                      <CardHeader className="px-0">
+                    <Card>
+                      <CardHeader>
                         <CardTitle>Gestión de Usuarios Administradores</CardTitle>
                         <CardDescription>
                             Puedes configurar hasta 3 usuarios. Un campo de contraseña vacío significa que no se cambiará.
                         </CardDescription>
                       </CardHeader>
-                      <div className="space-y-4">
+                      <CardContent className="space-y-4">
                           {adminUsers.map((user, index) => (
-                              <Card key={index}>
+                              <Card key={index} className="p-4">
                                 <form onSubmit={(e) => handleSaveUser(e, index)}>
-                                  <CardContent className="p-6 space-y-4">
+                                  <div className="space-y-4">
                                       <div>
                                           <Label htmlFor={`admin-username-${index}`}>
                                             Usuario {index + 1} {savedUsernames[index] ? `(${savedUsernames[index]})` : ''}
@@ -626,7 +664,7 @@ export default function AdminPage() {
                                       </div>
                                       
                                       <div className="space-y-2">
-                                          <Label htmlFor={`admin-password-${index}`}>Nueva Contraseña Usuario {index + 1}</Label>
+                                          <Label htmlFor={`admin-password-${index}`}>Nueva Contraseña</Label>
                                           <div className="relative">
                                               <Input
                                                   id={`admin-password-${index}`}
@@ -677,8 +715,8 @@ export default function AdminPage() {
                                               <p className="text-xs text-destructive">Las contraseñas no coinciden.</p>
                                           )}
                                       </div>
-                                  </CardContent>
-                                  <CardFooter>
+                                  </div>
+                                  <CardFooter className="px-0 pt-6 pb-0">
                                      <Button type="submit" disabled={isSavingUser[index] || !initialSettingsLoaded}>
                                         {isSavingUser[index] ? (
                                             <>
@@ -696,15 +734,18 @@ export default function AdminPage() {
                                 </form>
                               </Card>
                           ))}
-                      </div>
-                    </div>
-                    
-                    <Card className="mt-6">
+                      </CardContent>
+                    </Card>
+                </div>
+            </TabsContent>
+            <TabsContent value="services">
+                <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <Card>
                       <form onSubmit={handleSaveSmtp}>
                         <CardHeader>
                           <CardTitle>Configuración de Correo (SMTP)</CardTitle>
                            <CardDescription>
-                              Gestiona las credenciales para el envío de correos.
+                              Credenciales para el envío de correos desde los formularios de contacto.
                           </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
@@ -746,7 +787,46 @@ export default function AdminPage() {
                             ) : (
                                 <>
                                     <Save className="mr-2 h-4 w-4" />
-                                    Guardar Configuración de Correo
+                                    Guardar Configuración SMTP
+                                </>
+                            )}
+                          </Button>
+                        </CardFooter>
+                      </form>
+                    </Card>
+                    <Card>
+                      <form onSubmit={handleSaveCloudinary}>
+                        <CardHeader>
+                          <CardTitle>Configuración de Cloudinary</CardTitle>
+                           <CardDescription>
+                              Credenciales para el almacenamiento de imágenes de productos en la nube.
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="cloudinary-cloud-name">Cloud Name (CLOUDINARY_CLOUD_NAME)</Label>
+                                <Input id="cloudinary-cloud-name" placeholder="tu-cloud-name" value={cloudinaryCloudName} onChange={(e) => setCloudinaryCloudName(e.target.value)}/>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="cloudinary-api-key">API Key (CLOUDINARY_API_KEY)</Label>
+                                <Input id="cloudinary-api-key" placeholder="tu-api-key" value={cloudinaryApiKey} onChange={(e) => setCloudinaryApiKey(e.target.value)}/>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="cloudinary-api-secret">API Secret (CLOUDINARY_API_SECRET)</Label>
+                                <Input id="cloudinary-api-secret" type="password" placeholder="Dejar en blanco para no cambiar" value={cloudinaryApiSecret} onChange={(e) => setCloudinaryApiSecret(e.target.value)}/>
+                            </div>
+                        </CardContent>
+                        <CardFooter>
+                          <Button type="submit" disabled={isSavingCloudinary || !initialSettingsLoaded}>
+                            {isSavingCloudinary ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Guardando...
+                                </>
+                            ) : (
+                                <>
+                                    <Save className="mr-2 h-4 w-4" />
+                                    Guardar Configuración Cloudinary
                                 </>
                             )}
                           </Button>

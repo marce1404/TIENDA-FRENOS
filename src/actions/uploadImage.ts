@@ -82,7 +82,7 @@ export async function uploadImage(formData: FormData): Promise<{ success: true; 
     }
 
     return { success: true, url: secureUrl };
-  } catch (error) {
+  } catch (error) => {
     console.error('Error al subir imagen a Cloudinary:', error);
     return { success: false, error: 'Error del servidor al subir la imagen.' };
   }
