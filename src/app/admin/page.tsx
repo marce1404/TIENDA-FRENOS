@@ -50,6 +50,15 @@ import { uploadImage } from '@/actions/uploadImage';
 import { Badge } from '@/components/ui/badge';
 
 
+// Helper para convertir File a Base64
+const toBase64 = (file: File): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = (error) => reject(error);
+  });
+
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [username, setUsername] = useState('');
@@ -459,30 +468,40 @@ export default function AdminPage() {
     }
 
     savingSetter(true);
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('fileName', `default_${type}`);
-    formData.append('uploadDir', 'images/defaults');
+    
+    try {
+        const fileBase64 = await toBase64(file);
+        const result = await uploadImage({
+            fileBase64,
+            fileName: `default_${type}`,
+            uploadDir: 'images/defaults',
+        });
 
-    const result = await uploadImage(formData);
-
-    if (result.success) {
-      const imageUrlWithCacheBuster = `${result.url}?t=${new Date().getTime()}`;
-      localStorage.setItem(storageKey, imageUrlWithCacheBuster);
-      previewSetter(imageUrlWithCacheBuster);
-      window.dispatchEvent(new Event('storage')); // Notificar a otros componentes del cambio
-      toast({
-        title: '¡Imagen Guardada!',
-        description: `La imagen por defecto para ${type}s se ha actualizado.`,
-      });
-    } else {
-      toast({
-        variant: 'destructive',
-        title: 'Error al Subir',
-        description: result.error,
-      });
+        if (result.success) {
+          const imageUrlWithCacheBuster = `${result.url}?t=${new Date().getTime()}`;
+          localStorage.setItem(storageKey, imageUrlWithCacheBuster);
+          previewSetter(imageUrlWithCacheBuster);
+          window.dispatchEvent(new Event('storage')); // Notificar a otros componentes del cambio
+          toast({
+            title: '¡Imagen Guardada!',
+            description: `La imagen por defecto para ${type}s se ha actualizado.`,
+          });
+        } else {
+          toast({
+            variant: 'destructive',
+            title: 'Error al Subir',
+            description: result.error,
+          });
+        }
+    } catch (error) {
+        toast({
+            variant: 'destructive',
+            title: 'Error de Archivo',
+            description: 'No se pudo procesar el archivo para la subida.',
+        });
+    } finally {
+        savingSetter(false);
     }
-    savingSetter(false);
   };
 
   const filteredProducts = useMemo(() => {
@@ -1194,20 +1213,30 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
                 return;
             }
             
-            const imageFormData = new FormData();
-            imageFormData.append('file', imageFile);
-            imageFormData.append('fileName', formData.code);
-            imageFormData.append('uploadDir', 'images/products');
-            
-            const result = await uploadImage(imageFormData);
+            try {
+                const fileBase64 = await toBase64(imageFile);
+                const result = await uploadImage({
+                    fileBase64,
+                    fileName: formData.code,
+                    uploadDir: 'images/products'
+                });
 
-            if (result.success) {
-                finalImageUrl = result.url;
-            } else {
-                toast({
+                if (result.success) {
+                    finalImageUrl = result.url;
+                } else {
+                    toast({
+                        variant: 'destructive',
+                        title: 'Error al Subir Imagen',
+                        description: result.error,
+                    });
+                    setIsSaving(false);
+                    return;
+                }
+            } catch (error) {
+                 toast({
                     variant: 'destructive',
-                    title: 'Error al Subir Imagen',
-                    description: result.error,
+                    title: 'Error de Archivo',
+                    description: 'No se pudo procesar el archivo para la subida.',
                 });
                 setIsSaving(false);
                 return;
@@ -1333,3 +1362,5 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
         </Dialog>
     );
 }
+
+    

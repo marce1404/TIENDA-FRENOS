@@ -5,11 +5,14 @@ import { v2 as cloudinary } from 'cloudinary';
 import { z } from 'zod';
 import { getEnvSettings } from '@/lib/env';
 
+// Schema for receiving Base64 data from the client
 const uploadSchema = z.object({
-  file: z.instanceof(File),
+  fileBase64: z.string().startsWith('data:image/'),
   fileName: z.string().min(1, 'File name is required.'),
   uploadDir: z.string().min(1, 'Upload directory is required.'),
 });
+
+type UploadInput = z.infer<typeof uploadSchema>;
 
 // Configure Cloudinary using environment variables
 async function configureCloudinary() {
@@ -31,7 +34,7 @@ async function configureCloudinary() {
   });
 }
 
-export async function uploadImage(formData: FormData): Promise<{ success: true; url: string } | { success: false; error: string }> {
+export async function uploadImage(input: UploadInput): Promise<{ success: true; url: string } | { success: false; error: string }> {
   try {
     await configureCloudinary();
   } catch (error: any) {
@@ -39,51 +42,34 @@ export async function uploadImage(formData: FormData): Promise<{ success: true; 
     return { success: false, error: error.message };
   }
   
-  const file = formData.get('file');
-  const fileName = formData.get('fileName');
-  const uploadDir = formData.get('uploadDir');
-  
-  const validatedFields = uploadSchema.safeParse({ file, fileName, uploadDir });
+  const validatedFields = uploadSchema.safeParse(input);
   
   if (!validatedFields.success) {
+      console.error('Invalid input data:', validatedFields.error);
     return { success: false, error: 'Datos de entrada inválidos.' };
   }
 
-  const { file: validFile, fileName: validFileName, uploadDir: validUploadDir } = validatedFields.data;
+  const { fileBase64, fileName, uploadDir } = validatedFields.data;
 
-  if (validFile.size === 0) {
-    return { success: false, error: 'Por favor, selecciona un archivo.' };
-  }
-  
   try {
-    const arrayBuffer = await validFile.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-
-    const result = await new Promise<{ secure_url?: string; error?: any }>((resolve, reject) => {
-        cloudinary.uploader.upload_stream(
-            {
-                folder: validUploadDir,
-                public_id: validFileName,
-                overwrite: true,
-            },
-            (error, result) => {
-                if (error) {
-                    reject(error);
-                    return;
-                }
-                resolve(result || {});
-            }
-        ).end(buffer);
+    const result = await cloudinary.uploader.upload(fileBase64, {
+      public_id: fileName,
+      folder: uploadDir,
+      overwrite: true,
     });
 
-    if (result.error || !result.secure_url) {
-      console.error('Error en la respuesta de Cloudinary:', result.error || 'No se recibió una URL segura.');
+    if (!result.secure_url) {
+      console.error('Error en la respuesta de Cloudinary:', result);
       throw new Error('La carga a Cloudinary no devolvió una URL segura.');
     }
 
     return { success: true, url: result.secure_url };
   } catch (error) {
     console.error('Error al subir imagen a Cloudinary:', error);
-    return { success: false, error: 'Error del servidor al subir la imagen.' };
+    // Be careful not to expose detailed error messages to the client
+    const errorMessage = error instanceof Error ? error.message : 'Error desconocido del servidor.';
+    return { success: false, error: `Error del servidor al subir la imagen.` };
   }
 }
+
+    
