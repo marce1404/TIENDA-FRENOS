@@ -1,4 +1,3 @@
-
 export interface Product {
   id: number;
   code: string;
@@ -9,9 +8,9 @@ export interface Product {
   price: number;
   category: string;
   isFeatured: boolean;
-  imageUrl?: string;
-  isOnSale?: boolean;
-  salePrice?: number;
+  imageUrl?: string | null;
+  isOnSale?: boolean | null;
+  salePrice?: number | null;
 }
 
 export interface CartItem extends Product {

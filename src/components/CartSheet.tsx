@@ -67,7 +67,7 @@ export function CartSheet() {
 
   const handleCheckout = () => {
     const messageLines = cartItems.map(item => {
-        const priceToUse = item.isOnSale && typeof item.salePrice === 'number' ? item.salePrice : item.price;
+        const priceToUse = item.isOnSale && typeof item.salePrice === 'number' && item.salePrice > 0 ? item.salePrice : item.price;
         return `- ${item.quantity}x ${item.name} (${item.brand}) - ${formatPrice(priceToUse * item.quantity)}`;
     });
     const message = `¡Hola! Quisiera cotizar los siguientes productos de REPUFRENOS.CL:\n\n${messageLines.join('\n')}\n\n*Total: ${formatPrice(cartTotal)}*`;
@@ -106,7 +106,7 @@ export function CartSheet() {
               <div className="flex flex-col gap-4 py-4 pr-6">
                 {cartItems.map((item) => {
                   const itemImage = getProductImage(item);
-                  const priceToUse = item.isOnSale && typeof item.salePrice === 'number' ? item.salePrice : item.price;
+                  const priceToUse = item.isOnSale && typeof item.salePrice === 'number' && item.salePrice > 0 ? item.salePrice : item.price;
                   return (
                     <div key={item.id} className="flex items-center gap-4">
                       <div className="relative flex-shrink-0 w-16 h-16 rounded-md bg-muted/50 flex items-center justify-center border overflow-hidden">
@@ -123,7 +123,7 @@ export function CartSheet() {
                       <div className="flex-1 space-y-1">
                         <p className="font-medium">{item.name}</p>
                         <div className="flex items-center gap-2">
-                           {item.isOnSale && typeof item.salePrice === 'number' ? (
+                           {item.isOnSale && typeof item.salePrice === 'number' && item.salePrice > 0 ? (
                               <>
                                 <p className="text-sm text-primary font-bold">{formatPrice(item.salePrice)}</p>
                                 <p className="text-sm text-muted-foreground line-through">{formatPrice(item.price)}</p>

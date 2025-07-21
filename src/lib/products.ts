@@ -1,4 +1,3 @@
-
 import type { Product } from '@/lib/types';
 import { db } from './db/drizzle';
 import { products } from './db/schema';
@@ -16,7 +15,11 @@ export async function getProducts(): Promise<Product[]> {
     const data = await db.select().from(products).orderBy(products.id);
     // The data from the DB should already match the Product type.
     // Drizzle with Zod schemas would provide stronger typing here.
-    return data as Product[];
+    return data.map(p => ({
+      ...p,
+      price: Number(p.price),
+      salePrice: p.salePrice ? Number(p.salePrice) : undefined,
+    })) as Product[];
   } catch (error) {
     console.error("Database Error:", error);
     // In case of a DB error, we can return an empty array 
@@ -37,7 +40,12 @@ export async function getProductById(id: number): Promise<Product | null> {
         if (productArray.length === 0) {
             return null;
         }
-        return productArray[0] as Product;
+        const p = productArray[0];
+        return {
+          ...p,
+          price: Number(p.price),
+          salePrice: p.salePrice ? Number(p.salePrice) : undefined,
+        } as Product;
     } catch (error) {
         console.error("Database error fetching product by ID:", error);
         return null;

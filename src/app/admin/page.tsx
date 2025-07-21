@@ -469,8 +469,10 @@ export default function AdminPage() {
 
   const nextProductId = useMemo(() => {
     if (products.length === 0) return 1;
+    // Find the highest ID and add 1. This is safer than relying on length.
     return Math.max(...products.map(p => p.id)) + 1;
   }, [products]);
+
 
   useEffect(() => {
     if (currentPage > totalPages && totalPages > 0) {
@@ -1015,7 +1017,7 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
     const [isPending, startTransition] = useTransition();
 
     const getInitialFormData = () => ({
-        id: nextProductId || 0,
+        id: product ? product.id : nextProductId || 0,
         code: '',
         name: '',
         brand: '',
@@ -1143,6 +1145,7 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
 
         const productToSave: Product = {
             ...formData,
+            id: product ? product.id : nextProductId!,
             price: Number(formData.price) || 0,
             salePrice: formData.isOnSale ? (Number(formData.salePrice) || 0) : undefined,
             imageUrl: finalImageUrl,
@@ -1238,7 +1241,7 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
                                 <div className="flex items-center gap-2">
                                   <Switch
                                       id="isOnSale"
-                                      checked={formData.isOnSale}
+                                      checked={!!formData.isOnSale}
                                       onCheckedChange={(c) => handleSwitchChange('isOnSale', c)}
                                   />
                                   <Label htmlFor="isOnSale">En Oferta</Label>
@@ -1248,7 +1251,7 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
                         {formData.isOnSale && (
                            <div className="grid grid-cols-4 items-center gap-4">
                               <Label htmlFor="salePrice" className="text-right">Precio de Oferta</Label>
-                              <Input id="salePrice" type="text" value={formData.salePrice === 0 ? '0' : formData.salePrice || ''} onChange={handleChange} required={formData.isOnSale} className="col-span-3" />
+                              <Input id="salePrice" type="text" value={formData.salePrice === 0 ? '0' : formData.salePrice || ''} onChange={handleChange} required={!!formData.isOnSale} className="col-span-3" />
                           </div>
                         )}
                     </div>
