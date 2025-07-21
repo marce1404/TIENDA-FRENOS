@@ -1,12 +1,32 @@
 
 'use server';
 
-import { promises as fs } from 'fs';
-import path from 'path';
+import { v2 as cloudinary } from 'cloudinary';
 import { z } from 'zod';
+import { getEnvSettings } from '@/lib/env';
+
+// Configure Cloudinary using environment variables
+async function configureCloudinary() {
+    const { 
+        CLOUDINARY_CLOUD_NAME, 
+        CLOUDINARY_API_KEY, 
+        CLOUDINARY_API_SECRET 
+    } = await getEnvSettings();
+
+    if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_API_KEY || !CLOUDINARY_API_SECRET) {
+        throw new Error('Cloudinary environment variables are not set.');
+    }
+
+    cloudinary.config({
+        cloud_name: CLOUDINARY_CLOUD_NAME,
+        api_key: CLOUDINARY_API_KEY,
+        api_secret: CLOUDINARY_API_SECRET,
+        secure: true,
+    });
+}
 
 const uploadSchema = z.object({
-  file: z.instanceof(File),
+  fileAsDataUrl: z.string().startsWith('data:image/'),
   fileName: z.string(),
   uploadDir: z.string(),
 });
@@ -14,41 +34,31 @@ const uploadSchema = z.object({
 type UploadInput = z.infer<typeof uploadSchema>;
 
 /**
- * DEPRECATED: This function attempts to save files to the local filesystem,
- * which is not supported in serverless environments like Vercel.
- * It is kept for historical purposes but should not be used.
- * @deprecated Use a cloud storage provider like Cloudinary instead.
+ * Uploads an image to Cloudinary using its Base64 data URL representation.
+ * @param {UploadInput} input - The data for the image to upload.
+ * @returns {Promise<{ success: true; filePath: string } | { success: false; error: string }>}
  */
 export async function uploadImage(input: UploadInput): Promise<{ success: true; filePath: string } | { success: false; error: string }> {
-  console.warn("DEPRECATED: uploadImage to local filesystem is not supported on Vercel.");
-  
   const validatedFields = uploadSchema.safeParse(input);
   if (!validatedFields.success) {
     return { success: false, error: 'Datos de entrada inválidos.' };
   }
   
-  const { file, fileName, uploadDir } = validatedFields.data;
-
-  // The 'public' directory is served at the root.
-  // e.g., 'public/images/products' will be accessible at '/images/products'
-  const targetDir = path.join(process.cwd(), 'public', uploadDir);
-  const filePath = path.join(targetDir, fileName);
-  const publicPath = path.join('/', uploadDir, fileName).replace(/\\/g, '/');
-
+  const { fileAsDataUrl, fileName, uploadDir } = validatedFields.data;
+  
   try {
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+    await configureCloudinary();
 
-    // Create directory if it doesn't exist
-    await fs.mkdir(targetDir, { recursive: true });
-    
-    // Write the file to the public directory
-    await fs.writeFile(filePath, buffer);
+    const result = await cloudinary.uploader.upload(fileAsDataUrl, {
+      public_id: fileName, // Use the provided filename without extension
+      folder: uploadDir, // Use the provided directory as a folder in Cloudinary
+      overwrite: true, // Overwrite if a file with the same public_id exists
+    });
 
-    console.log(`File uploaded successfully to ${filePath}`);
-    return { success: true, filePath: publicPath };
-  } catch (error) {
-    console.error('Error al subir imagen:', error);
-    return { success: false, error: 'Error del servidor al subir la imagen.' };
+    console.log(`Image uploaded successfully to Cloudinary: ${result.secure_url}`);
+    return { success: true, filePath: result.secure_url };
+  } catch (error: any) {
+    console.error('Error al subir imagen a Cloudinary:', error);
+    return { success: false, error: error.message || 'Error del servidor al subir la imagen.' };
   }
 }

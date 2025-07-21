@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useMemo, useTransition } from 'react';
@@ -47,6 +48,16 @@ import { getAdminSettingsForForm } from '@/actions/getAdminSettings';
 import Image from 'next/image';
 import { uploadImage } from '@/actions/uploadImage';
 import { Badge } from '@/components/ui/badge';
+
+// Helper function to convert a File to a Base64 Data URL
+const fileToDataUrl = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+};
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -409,16 +420,17 @@ export default function AdminPage() {
     savingSetter(true);
     
     try {
+        const fileAsDataUrl = await fileToDataUrl(file);
         const result = await uploadImage({
-            file,
-            fileName: `default_${type}.${file.name.split('.').pop()}`,
-            uploadDir: 'images/defaults',
+            fileAsDataUrl,
+            fileName: `default_${type}`,
+            uploadDir: 'repufrenos/defaults',
         });
 
         if (result.success) {
-          const imageUrlWithCacheBuster = `${result.filePath}?t=${new Date().getTime()}`;
-          localStorage.setItem(storageKey, imageUrlWithCacheBuster);
-          previewSetter(imageUrlWithCacheBuster);
+          // No cache buster needed for Cloudinary URLs
+          localStorage.setItem(storageKey, result.filePath);
+          previewSetter(result.filePath);
           window.dispatchEvent(new Event('storage')); // Notificar a otros componentes del cambio
           toast({
             title: '¡Imagen Guardada!',
@@ -1115,10 +1127,11 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
             }
             
             try {
+                const fileAsDataUrl = await fileToDataUrl(imageFile);
                 const result = await uploadImage({
-                    file: imageFile,
-                    fileName: `${formData.code}.${imageFile.name.split('.').pop()}`,
-                    uploadDir: 'images/products'
+                    fileAsDataUrl,
+                    fileName: formData.code, // Cloudinary uses this as public_id
+                    uploadDir: 'repufrenos/products'
                 });
 
                 if (result.success) {
@@ -1221,7 +1234,7 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
                                     />
                                 ) : (
                                     <div className="h-16 w-16 bg-muted rounded-md flex items-center justify-center">
-                                        <Upload className="h-8 w-8 text-muted-foreground" />
+                                        <Cloud className="h-8 w-8 text-muted-foreground" />
                                     </div>
                                 )}
                                 <Input id="image" type="file" onChange={handleImageChange} accept="image/png, image/jpeg, image/webp" className="col-span-3" />
