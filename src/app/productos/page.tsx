@@ -44,9 +44,13 @@ export default function ProductosPage() {
   const [whatsappNumber, setWhatsappNumber] = useState('56912345678');
 
   useEffect(() => {
-    // This effect runs only on the client-side
-    setAllProducts(getProducts());
-    setIsLoading(false);
+    async function fetchProducts() {
+      const dbProducts = await getProducts();
+      setAllProducts(dbProducts);
+      setIsLoading(false);
+    }
+
+    fetchProducts();
 
     const getWhatsappNumber = () => {
         let loadedNumber = '56912345678';
@@ -228,7 +232,7 @@ export default function ProductosPage() {
                         <TableCell>{product.brand}</TableCell>
                         <TableCell>{product.compatibility}</TableCell>
                         <TableCell className="text-right">
-                          {product.isOnSale && typeof product.salePrice === 'number' ? (
+                          {product.isOnSale && typeof product.salePrice === 'number' && product.salePrice > 0 ? (
                             <div className="flex flex-col items-end">
                               <span className="line-through text-muted-foreground text-xs">{formatPrice(product.price)}</span>
                               <span className="text-primary font-bold">{formatPrice(product.salePrice)}</span>
@@ -312,7 +316,7 @@ export default function ProductosPage() {
                 </div>
                 <div className="flex flex-col space-y-4">
                   <div>
-                    {selectedProduct.isOnSale && typeof selectedProduct.salePrice === 'number' ? (
+                    {selectedProduct.isOnSale && typeof selectedProduct.salePrice === 'number' && selectedProduct.salePrice > 0 ? (
                       <div className="flex items-baseline gap-2">
                         <p className="text-3xl font-bold text-primary">{formatPrice(selectedProduct.salePrice)}</p>
                         <p className="text-xl font-medium text-muted-foreground line-through">{formatPrice(selectedProduct.price)}</p>

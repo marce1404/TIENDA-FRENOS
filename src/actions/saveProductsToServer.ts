@@ -1,57 +1,69 @@
 
 'use server';
 
-import { promises as fs } from 'fs';
-import path from 'path';
 import type { Product } from '@/lib/types';
-import { z } from 'zod';
-
-// Define a schema for a single product to ensure type safety.
-const productSchema = z.object({
-  id: z.number(),
-  code: z.string(),
-  name: z.string(),
-  brand: z.string(),
-  model: z.string(),
-  compatibility: z.string(),
-  price: z.number(),
-  category: z.string(),
-  isFeatured: z.boolean(),
-  imageUrl: z.string().optional(),
-  isOnSale: z.boolean().optional(),
-  salePrice: z.number().optional(),
-});
-
-// Define a schema for an array of products.
-const productsSchema = z.array(productSchema);
+import { products as productsTable } from '@/lib/db/schema';
+import { db } from '@/lib/db/drizzle';
+import { eq } from 'drizzle-orm';
+import { revalidatePath } from 'next/cache';
 
 /**
- * Saves the entire list of products to the products.json file on the server.
- * This function should only be called from a trusted environment (like the admin panel).
- * @param {Product[]} products The full, updated list of products to save.
+ * Saves a single product (either creating or updating) to the database.
+ * @param {Product} product The product data to save.
  * @returns {Promise<{success: boolean; error?: string}>} An object indicating success or failure.
  */
-export async function saveProductsToServer(products: Product[]): Promise<{ success: true } | { success: false; error: string }> {
+export async function saveProduct(product: Product): Promise<{ success: boolean; error?: string }> {
   try {
-    // Validate the incoming data against our schema.
-    const validation = productsSchema.safeParse(products);
-    if (!validation.success) {
-      console.error('Invalid product data received:', validation.error);
-      return { success: false, error: 'Los datos de los productos son inválidos.' };
-    }
+    // `upsert` will insert a new row or update an existing one if the ID conflicts.
+    await db.insert(productsTable)
+      .values({
+        ...product,
+        // Ensure price and salePrice are stored as numbers, not strings from the form
+        price: Number(product.price),
+        salePrice: product.isOnSale ? Number(product.salePrice) : null,
+      })
+      .onConflictDoUpdate({
+        target: productsTable.id,
+        set: {
+          ...product,
+          price: Number(product.price),
+          salePrice: product.isOnSale ? Number(product.salePrice) : null,
+        },
+      });
 
-    // Path to the JSON file that acts as our database.
-    const dbPath = path.join(process.cwd(), 'src', 'data', 'products.json');
-    
-    // Convert the product array to a formatted JSON string.
-    const data = JSON.stringify(validation.data, null, 2);
-    
-    // Write the new data to the file, overwriting the old data.
-    await fs.writeFile(dbPath, data, 'utf8');
+    // Revalidate paths to show updated data immediately
+    revalidatePath('/admin');
+    revalidatePath('/productos');
+    revalidatePath('/');
+    if (product.id) {
+        revalidatePath(`/productos/${product.id}`);
+    }
 
     return { success: true };
   } catch (error) {
-    console.error('Failed to save products to server:', error);
-    return { success: false, error: 'No se pudo guardar los productos en el servidor.' };
+    console.error('Failed to save product to database:', error);
+    return { success: false, error: 'No se pudo guardar el producto en la base de datos.' };
+  }
+}
+
+
+/**
+ * Deletes a product from the database by its ID.
+ * @param {number} productId The ID of the product to delete.
+ * @returns {Promise<{success: boolean; error?: string}>} An object indicating success or failure.
+ */
+export async function deleteProduct(productId: number): Promise<{ success: boolean; error?: string }> {
+  try {
+    await db.delete(productsTable).where(eq(productsTable.id, productId));
+    
+    // Revalidate paths
+    revalidatePath('/admin');
+    revalidatePath('/productos');
+    revalidatePath('/');
+
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to delete product from database:', error);
+    return { success: false, error: 'No se pudo eliminar el producto de la base de datos.' };
   }
 }

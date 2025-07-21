@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useTransition } from 'react';
 import type { Product } from '@/lib/types';
 import { getProducts } from '@/lib/products';
-import { saveProductsToServer } from '@/actions/saveProductsToServer';
+import { saveProduct, deleteProduct } from '@/actions/saveProductsToServer';
 import {
   Table,
   TableBody,
@@ -56,7 +56,8 @@ export default function AdminPage() {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const { toast } = useToast();
-  
+  const [isPending, startTransition] = useTransition();
+
   const [whatsappNumber, setWhatsappNumber] = useState('');
   const [contactName, setContactName] = useState('');
 
@@ -92,28 +93,12 @@ export default function AdminPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [productsPerPage] = useState(10);
   
-  const [isSavingProducts, setIsSavingProducts] = useState(false);
-
-  async function handleSaveChanges(updatedProducts: Product[]) {
-    setIsSavingProducts(true);
-    const result = await saveProductsToServer(updatedProducts);
-    if (result.success) {
-      toast({
-        title: "¡Productos Guardados!",
-        description: "Los cambios en los productos se han guardado en el servidor.",
-      });
-    } else {
-      toast({
-        variant: "destructive",
-        title: "Error al Guardar Productos",
-        description: result.error,
-      });
-    }
-    setIsSavingProducts(false);
-  }
-
   useEffect(() => {
-    setProducts(getProducts());
+    async function fetchProducts() {
+      const dbProducts = await getProducts();
+      setProducts(dbProducts);
+    }
+    fetchProducts();
 
     const authStatus = sessionStorage.getItem('isAdminAuthenticated');
     if (authStatus === 'true') {
@@ -330,60 +315,61 @@ export default function AdminPage() {
     }).format(price);
   };
 
-  const handleAddProduct = (newProductData: Product) => {
-    setProducts(prev => {
-      const idExists = prev.some(p => p.id === newProductData.id);
-      if (idExists) {
-        toast({
-          variant: "destructive",
-          title: "Error de ID",
-          description: "Ya existe un producto con ese ID.",
-        });
-        return prev;
-      }
-      const updatedProducts = [...prev, newProductData];
-      handleSaveChanges(updatedProducts);
-      setIsAddDialogOpen(false);
-      return updatedProducts;
+  const handleAddOrUpdateProduct = (product: Product) => {
+    startTransition(async () => {
+        const result = await saveProduct(product);
+        if (result.success) {
+            const dbProducts = await getProducts();
+            setProducts(dbProducts);
+            toast({
+                title: productToEdit ? "¡Producto Actualizado!" : "¡Producto Creado!",
+                description: "Tus cambios se han guardado en la base de datos.",
+            });
+            setIsAddDialogOpen(false);
+            setIsEditDialogOpen(false);
+            setProductToEdit(null);
+        } else {
+            toast({
+                variant: "destructive",
+                title: "Error al Guardar",
+                description: result.error,
+            });
+        }
     });
-  };
-  
-  const handleUpdateProduct = (updatedProduct: Product) => {
-    setProducts(prev => {
-      const updatedProducts = prev.map(p => p.id === updatedProduct.id ? updatedProduct : p);
-      handleSaveChanges(updatedProducts);
-      return updatedProducts;
-    });
-    setIsEditDialogOpen(false);
-    setProductToEdit(null);
-  };
-  
+};
+
   const handleDeleteProduct = (productId: number) => {
-    setProducts(prev => {
-      const updatedProducts = prev.filter(p => p.id !== productId);
-      handleSaveChanges(updatedProducts);
-      return updatedProducts;
+    startTransition(async () => {
+        const result = await deleteProduct(productId);
+        if (result.success) {
+            const dbProducts = await getProducts();
+            setProducts(dbProducts);
+            toast({
+                title: "¡Producto Eliminado!",
+                description: "El producto ha sido eliminado de la base de datos.",
+            });
+        } else {
+            toast({
+                variant: "destructive",
+                title: "Error al Eliminar",
+                description: result.error,
+            });
+        }
     });
   };
 
-  const handleToggleFeatured = (productId: number) => {
-    setProducts(prevProducts => {
-      const updatedProducts = prevProducts.map(p =>
-        p.id === productId ? { ...p, isFeatured: !p.isFeatured } : p
-      );
-      handleSaveChanges(updatedProducts);
-      return updatedProducts;
-    });
+  const handleToggleFeatured = (product: Product) => {
+    const updatedProduct = { ...product, isFeatured: !product.isFeatured };
+    handleAddOrUpdateProduct(updatedProduct);
   };
 
-  const handleToggleOnSale = (productId: number) => {
-    setProducts(prevProducts => {
-      const updatedProducts = prevProducts.map(p =>
-        p.id === productId ? { ...p, isOnSale: !p.isOnSale, salePrice: p.isOnSale ? undefined : p.salePrice || p.price } : p
-      );
-      handleSaveChanges(updatedProducts);
-      return updatedProducts;
-    });
+  const handleToggleOnSale = (product: Product) => {
+    const updatedProduct = { 
+        ...product, 
+        isOnSale: !product.isOnSale, 
+        salePrice: !product.isOnSale ? (product.salePrice || product.price) : undefined 
+    };
+    handleAddOrUpdateProduct(updatedProduct);
   };
   
   const handleDefaultImageChange = (
@@ -812,7 +798,7 @@ export default function AdminPage() {
                        <CardDescription>
                         Esta imagen se usará si un producto de la categoría "Discos" no tiene su propia imagen.
                       </CardDescription>
-                    </CardHeader>
+                    </Header>
                     <CardContent className="space-y-4">
                       <div className="space-y-2">
                         <Label htmlFor="default-disco-image">Subir nueva imagen</Label>
@@ -917,13 +903,13 @@ export default function AdminPage() {
                             )}
                         </TableCell>
                         <TableCell className="text-center">
-                          <Button variant="ghost" size="icon" onClick={() => handleToggleOnSale(product.id)}>
+                          <Button variant="ghost" size="icon" onClick={() => handleToggleOnSale(product)}>
                             <Percent className={cn("h-5 w-5", product.isOnSale ? "fill-destructive text-destructive" : "text-muted-foreground")} />
                             <span className="sr-only">Toggle Oferta</span>
                           </Button>
                         </TableCell>
                         <TableCell className="text-center">
-                          <Button variant="ghost" size="icon" onClick={() => handleToggleFeatured(product.id)}>
+                          <Button variant="ghost" size="icon" onClick={() => handleToggleFeatured(product)}>
                               <Star className={cn("h-5 w-5", product.isFeatured ? "fill-primary text-primary" : "text-muted-foreground")} />
                               <span className="sr-only">Toggle Destacado</span>
                           </Button>
@@ -997,7 +983,7 @@ export default function AdminPage() {
       <ProductFormDialog
         isOpen={isAddDialogOpen}
         onOpenChange={setIsAddDialogOpen}
-        onSave={handleAddProduct}
+        onSave={handleAddOrUpdateProduct}
         title="Añadir Nuevo Producto"
         nextProductId={nextProductId}
       />
@@ -1006,7 +992,7 @@ export default function AdminPage() {
          <ProductFormDialog
            isOpen={isEditDialogOpen}
            onOpenChange={setIsEditDialogOpen}
-           onSave={handleUpdateProduct}
+           onSave={handleAddOrUpdateProduct}
            product={productToEdit}
            title="Editar Producto"
          />
@@ -1026,6 +1012,8 @@ interface ProductFormDialogProps {
 
 function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextProductId }: ProductFormDialogProps) {
     const { toast } = useToast();
+    const [isPending, startTransition] = useTransition();
+
     const getInitialFormData = () => ({
         id: nextProductId || 0,
         code: '',
@@ -1044,7 +1032,7 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
     const [formData, setFormData] = useState(getInitialFormData());
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
-    const [isSaving, setIsSaving] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
 
     useEffect(() => {
         if (isOpen) {
@@ -1110,17 +1098,17 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setIsSaving(true);
         let finalImageUrl = formData.imageUrl;
     
         if (imageFile) {
+            setIsUploading(true);
             if (!formData.code) {
                 toast({
                     variant: 'destructive',
                     title: 'Error',
                     description: 'El código del producto es obligatorio para subir una imagen.',
                 });
-                setIsSaving(false);
+                setIsUploading(false);
                 return;
             }
             
@@ -1139,7 +1127,7 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
                         title: 'Error al Subir Imagen',
                         description: result.error,
                     });
-                    setIsSaving(false);
+                    setIsUploading(false);
                     return;
                 }
             } catch (error) {
@@ -1148,19 +1136,23 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
                     title: 'Error de Archivo',
                     description: 'No se pudo procesar el archivo para la subida.',
                 });
-                setIsSaving(false);
+                setIsUploading(false);
                 return;
             }
         }
 
-        onSave({
+        const productToSave: Product = {
             ...formData,
             price: Number(formData.price) || 0,
             salePrice: formData.isOnSale ? (Number(formData.salePrice) || 0) : undefined,
             imageUrl: finalImageUrl,
-        });
-        setIsSaving(false);
+        };
+
+        setIsUploading(false);
+        onSave(productToSave);
     };
+
+    const isSaving = isUploading || isPending;
 
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>

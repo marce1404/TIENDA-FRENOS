@@ -40,8 +40,8 @@ export default function HomePage() {
   const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
-    const loadClientData = () => {
-      const allProducts = getProducts();
+    async function loadClientData() {
+      const allProducts = await getProducts();
       setPromoProducts(allProducts.filter((product) => product.isFeatured || product.isOnSale));
       
       let loadedNumber = '56912345678';
@@ -210,7 +210,7 @@ export default function HomePage() {
                 </div>
                 <div className="flex flex-col space-y-4">
                    <div>
-                    {selectedProduct.isOnSale && typeof selectedProduct.salePrice === 'number' ? (
+                    {selectedProduct.isOnSale && typeof selectedProduct.salePrice === 'number' && selectedProduct.salePrice > 0 ? (
                       <div className="flex items-baseline gap-2">
                         <p className="text-3xl font-bold text-primary">{formatPrice(selectedProduct.salePrice)}</p>
                         <p className="text-xl font-medium text-muted-foreground line-through">{formatPrice(selectedProduct.price)}</p>

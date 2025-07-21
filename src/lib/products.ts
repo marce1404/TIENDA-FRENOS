@@ -1,35 +1,45 @@
 
 import type { Product } from '@/lib/types';
-import { products as initialProducts } from '@/data/products';
-import productsData from '@/data/products.json';
+import { db } from './db/drizzle';
+import { products } from './db/schema';
+import { eq } from 'drizzle-orm';
+import { unstable_noStore as noStore } from 'next/cache';
 
 /**
- * Obtiene la lista de productos desde el archivo products.json.
- * Esta función está diseñada para funcionar tanto en el servidor como en el cliente.
- * 
- * CÓMO FUNCIONA:
- * Lee directamente el archivo `products.json` que fue importado.
- * Esto asegura que tanto el servidor (durante la compilación y renderizado)
- * como el cliente (en la navegación) usen la misma fuente de datos centralizada.
- * 
- * @returns {Product[]} La lista de productos.
+ * Fetches all products from the database.
+ * Uses noStore() to ensure data is always fresh.
+ * @returns {Promise<Product[]>} A promise that resolves to an array of products.
  */
-export function getProducts(): Product[] {
-  // Ahora, la única fuente de verdad es el archivo products.json importado.
-  // Esto funciona en el servidor y en el cliente.
-  return productsData;
+export async function getProducts(): Promise<Product[]> {
+  noStore(); // Prevents caching of this data
+  try {
+    const data = await db.select().from(products).orderBy(products.id);
+    // The data from the DB should already match the Product type.
+    // Drizzle with Zod schemas would provide stronger typing here.
+    return data as Product[];
+  } catch (error) {
+    console.error("Database Error:", error);
+    // In case of a DB error, we can return an empty array 
+    // or throw the error depending on desired behavior.
+    return [];
+  }
 }
 
 /**
- * Guarda la lista completa de productos.
- * En la nueva implementación, esta función es un contenedor del lado del cliente.
- * El guardado real se delega a una Server Action para que ocurra en el servidor.
- * La mantenemos por compatibilidad con las llamadas existentes en el panel de admin.
- * @param {Product[]} products La lista de productos actualizada para guardar.
+ * Fetches a single product by its ID from the database.
+ * @param {number} id The ID of the product to fetch.
+ * @returns {Promise<Product | null>} A promise that resolves to the product or null if not found.
  */
-export function saveProducts(products: Product[]): void {
-  // Esta función ahora sirve como un punto de entrada en el cliente.
-  // El guardado real se hará con una Server Action (`saveProductsToServer`).
-  // Se deja aquí para que los componentes que la usaban no se rompan.
-  console.log("saveProducts en el cliente. El guardado real debe hacerse a través de una Server Action.");
+export async function getProductById(id: number): Promise<Product | null> {
+    noStore();
+    try {
+        const productArray = await db.select().from(products).where(eq(products.id, id)).limit(1);
+        if (productArray.length === 0) {
+            return null;
+        }
+        return productArray[0] as Product;
+    } catch (error) {
+        console.error("Database error fetching product by ID:", error);
+        return null;
+    }
 }

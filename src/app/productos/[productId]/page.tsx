@@ -2,7 +2,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getProducts } from '@/lib/products';
+import { getProductById } from '@/lib/products';
 import { Product } from '@/lib/types';
 import { notFound } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -25,31 +25,31 @@ const formatPrice = (price: number) => {
 };
 
 export default function ProductDetailPage({ params }: { params: { productId: string } }) {
-  const [product, setProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [product, setProduct] = useState<Product | null | undefined>(undefined);
   const { addToCart } = useCart();
   const { defaultPastillaImage, defaultDiscoImage } = useDefaultImages();
 
-
   useEffect(() => {
-    const allProducts = getProducts();
-    const productIdNum = parseInt(params.productId, 10);
-    const foundProduct = allProducts.find((p) => p.id === productIdNum);
-    
-    if (foundProduct) {
+    async function fetchProduct() {
+      const productIdNum = parseInt(params.productId, 10);
+      if (isNaN(productIdNum)) {
+        setProduct(null);
+        return;
+      }
+      const foundProduct = await getProductById(productIdNum);
       setProduct(foundProduct);
     }
-    setLoading(false);
+    fetchProduct();
   }, [params.productId]);
 
-  const getProductImage = (product: Product) => {
-    if (product.imageUrl) return product.imageUrl;
-    if (product.category === 'Pastillas') return defaultPastillaImage;
-    if (product.category === 'Discos') return defaultDiscoImage;
+  const getProductImage = (p: Product) => {
+    if (p.imageUrl) return p.imageUrl;
+    if (p.category === 'Pastillas') return defaultPastillaImage;
+    if (p.category === 'Discos') return defaultDiscoImage;
     return null;
   };
 
-  if (loading) {
+  if (product === undefined) {
     return (
       <div className="container mx-auto px-4 py-16">
         <Skeleton className="h-10 w-48 mb-8" />
@@ -71,7 +71,7 @@ export default function ProductDetailPage({ params }: { params: { productId: str
     );
   }
 
-  if (!product) {
+  if (product === null) {
     notFound();
     return null;
   }
@@ -112,7 +112,7 @@ export default function ProductDetailPage({ params }: { params: { productId: str
                     </div>
                     <div className="flex flex-col space-y-6">
                         <div>
-                            {product.isOnSale && typeof product.salePrice === 'number' ? (
+                            {product.isOnSale && typeof product.salePrice === 'number' && product.salePrice > 0 ? (
                               <div className="flex items-baseline gap-4 mb-4">
                                 <p className="text-4xl font-extrabold text-primary">{formatPrice(product.salePrice)}</p>
                                 <p className="text-2xl font-medium text-muted-foreground line-through">{formatPrice(product.price)}</p>
