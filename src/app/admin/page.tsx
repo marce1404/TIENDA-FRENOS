@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -49,16 +48,6 @@ import Image from 'next/image';
 import { uploadImage } from '@/actions/uploadImage';
 import { Badge } from '@/components/ui/badge';
 
-
-// Helper para convertir File a Base64
-const toBase64 = (file: File): Promise<string> =>
-  new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = (error) => reject(error);
-  });
-
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [username, setUsername] = useState('');
@@ -73,7 +62,6 @@ export default function AdminPage() {
 
   const [isSavingUser, setIsSavingUser] = useState<Record<number, boolean>>({});
   const [isSavingSmtp, setIsSavingSmtp] = useState(false);
-  const [isSavingCloudinary, setIsSavingCloudinary] = useState(false);
   const [adminUsers, setAdminUsers] = useState(() => Array(3).fill(null).map(() => ({ username: '', password: '', repeatPassword: '' })));
   const [savedUsernames, setSavedUsernames] = useState<(string | undefined)[]>([]);
   const [initialSettingsLoaded, setInitialSettingsLoaded] = useState(false);
@@ -87,10 +75,6 @@ export default function AdminPage() {
   const [smtpRecipients, setSmtpRecipients] = useState('');
   const [smtpSecure, setSmtpSecure] = useState(false);
   
-  const [cloudinaryCloudName, setCloudinaryCloudName] = useState('');
-  const [cloudinaryApiKey, setCloudinaryApiKey] = useState('');
-  const [cloudinaryApiSecret, setCloudinaryApiSecret] = useState('');
-
   const [defaultPastillaImageFile, setDefaultPastillaImageFile] = useState<File | null>(null);
   const [defaultPastillaImagePreview, setDefaultPastillaImagePreview] = useState<string | null>(null);
   const [isSavingPastillaImage, setIsSavingPastillaImage] = useState(false);
@@ -188,9 +172,6 @@ export default function AdminPage() {
                     setSmtpUser(settings.smtp.user || '');
                     setSmtpRecipients(settings.smtp.recipients || '');
                     setSmtpSecure(settings.smtp.secure || false);
-
-                    setCloudinaryCloudName(settings.cloudinary.cloudName || '');
-                    setCloudinaryApiKey(settings.cloudinary.apiKey || '');
 
                     setInitialSettingsLoaded(true);
                 } catch (error) {
@@ -341,34 +322,6 @@ export default function AdminPage() {
     }
   };
 
-  const handleSaveCloudinary = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSavingCloudinary(true);
-
-    const settings = {
-      CLOUDINARY_CLOUD_NAME: cloudinaryCloudName,
-      CLOUDINARY_API_KEY: cloudinaryApiKey,
-      CLOUDINARY_API_SECRET: cloudinaryApiSecret,
-    };
-    
-    const result = await saveEnvSettings(settings);
-    setIsSavingCloudinary(false);
-
-    if (result.success) {
-        toast({
-            title: "¡Configuración de Cloudinary Guardada!",
-            description: "Las credenciales se han guardado en el servidor.",
-        });
-        setCloudinaryApiSecret('');
-    } else {
-        toast({
-            variant: "destructive",
-            title: "Error al Guardar",
-            description: result.error || "Ocurrió un problema al guardar la configuración.",
-        });
-    }
-  };
-
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('es-CL', {
@@ -470,15 +423,14 @@ export default function AdminPage() {
     savingSetter(true);
     
     try {
-        const fileBase64 = await toBase64(file);
         const result = await uploadImage({
-            fileBase64,
-            fileName: `default_${type}`,
+            file,
+            fileName: `default_${type}.${file.name.split('.').pop()}`,
             uploadDir: 'images/defaults',
         });
 
         if (result.success) {
-          const imageUrlWithCacheBuster = `${result.url}?t=${new Date().getTime()}`;
+          const imageUrlWithCacheBuster = `${result.filePath}?t=${new Date().getTime()}`;
           localStorage.setItem(storageKey, imageUrlWithCacheBuster);
           previewSetter(imageUrlWithCacheBuster);
           window.dispatchEvent(new Event('storage')); // Notificar a otros componentes del cambio
@@ -613,7 +565,7 @@ export default function AdminPage() {
             <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="contact"><Phone className="mr-2 h-4 w-4" />Contacto</TabsTrigger>
               <TabsTrigger value="users"><Users className="mr-2 h-4 w-4" />Usuarios</TabsTrigger>
-              <TabsTrigger value="services"><Cloud className="mr-2 h-4 w-4" />Servicios Externos</TabsTrigger>
+              <TabsTrigger value="services"><Mail className="mr-2 h-4 w-4" />Correo</TabsTrigger>
               <TabsTrigger value="images"><ImageIcon className="mr-2 h-4 w-4" />Imágenes por Defecto</TabsTrigger>
             </TabsList>
             <TabsContent value="contact">
@@ -758,101 +710,60 @@ export default function AdminPage() {
                 </div>
             </TabsContent>
             <TabsContent value="services">
-                <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <Card>
-                      <form onSubmit={handleSaveSmtp}>
-                        <CardHeader>
-                          <CardTitle>Configuración de Correo (SMTP)</CardTitle>
-                           <CardDescription>
-                              Credenciales para el envío de correos desde los formularios de contacto.
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="smtp-host">Host del Servidor (SMTP_HOST)</Label>
-                                <Input id="smtp-host" placeholder="smtp.example.com" value={smtpHost} onChange={(e) => setSmtpHost(e.target.value)}/>
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="smtp-port">Puerto (SMTP_PORT)</Label>
-                                <Input id="smtp-port" placeholder="587" value={smtpPort} onChange={(e) => setSmtpPort(e.target.value)}/>
-                            </div>
-                            <div className="flex items-center space-x-2 mt-2">
-                                <Switch id="smtp-secure" checked={smtpSecure} onCheckedChange={setSmtpSecure} />
-                                <Label htmlFor="smtp-secure">Usar cifrado SSL/TLS (SMTP_SECURE)</Label>
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="smtp-user">Usuario (SMTP_USER)</Label>
-                                <Input id="smtp-user" placeholder="user@example.com" value={smtpUser} onChange={(e) => setSmtpUser(e.target.value)}/>
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="smtp-pass">Contraseña (SMTP_PASS)</Label>
-                                <Input id="smtp-pass" type="password" placeholder="Dejar en blanco para no cambiar" value={smtpPass} onChange={(e) => setSmtpPass(e.target.value)}/>
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="smtp-recipients">Correos de Destino (SMTP_RECIPIENTS)</Label>
-                                <Input id="smtp-recipients" placeholder="correo1@example.com, correo2@example.com" value={smtpRecipients} onChange={(e) => setSmtpRecipients(e.target.value)}/>
-                                <p className="text-xs text-muted-foreground">
-                                    Importante: Esta es la lista de correos que recibirán los mensajes. Sepáralos por comas.
-                                </p>
-                            </div>
-                        </CardContent>
-                        <CardFooter>
-                          <Button type="submit" disabled={isSavingSmtp || !initialSettingsLoaded}>
-                            {isSavingSmtp ? (
-                                <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Guardando...
-                                </>
-                            ) : (
-                                <>
-                                    <Save className="mr-2 h-4 w-4" />
-                                    Guardar Configuración SMTP
-                                </>
-                            )}
-                          </Button>
-                        </CardFooter>
-                      </form>
-                    </Card>
-                    <Card>
-                      <form onSubmit={handleSaveCloudinary}>
-                        <CardHeader>
-                          <CardTitle>Configuración de Cloudinary</CardTitle>
-                           <CardDescription>
-                              Credenciales para el almacenamiento de imágenes de productos en la nube.
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="cloudinary-cloud-name">Cloud Name (CLOUDINARY_CLOUD_NAME)</Label>
-                                <Input id="cloudinary-cloud-name" placeholder="tu-cloud-name" value={cloudinaryCloudName} onChange={(e) => setCloudinaryCloudName(e.target.value)}/>
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="cloudinary-api-key">API Key (CLOUDINARY_API_KEY)</Label>
-                                <Input id="cloudinary-api-key" placeholder="tu-api-key" value={cloudinaryApiKey} onChange={(e) => setCloudinaryApiKey(e.target.value)}/>
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="cloudinary-api-secret">API Secret (CLOUDINARY_API_SECRET)</Label>
-                                <Input id="cloudinary-api-secret" type="password" placeholder="Dejar en blanco para no cambiar" value={cloudinaryApiSecret} onChange={(e) => setCloudinaryApiSecret(e.target.value)}/>
-                            </div>
-                        </CardContent>
-                        <CardFooter>
-                          <Button type="submit" disabled={isSavingCloudinary || !initialSettingsLoaded}>
-                            {isSavingCloudinary ? (
-                                <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Guardando...
-                                </>
-                            ) : (
-                                <>
-                                    <Save className="mr-2 h-4 w-4" />
-                                    Guardar Configuración Cloudinary
-                                </>
-                            )}
-                          </Button>
-                        </CardFooter>
-                      </form>
-                    </Card>
-                </div>
+                <Card className="mt-6">
+                  <form onSubmit={handleSaveSmtp}>
+                    <CardHeader>
+                      <CardTitle>Configuración de Correo (SMTP)</CardTitle>
+                        <CardDescription>
+                          Credenciales para el envío de correos desde los formularios de contacto.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="smtp-host">Host del Servidor (SMTP_HOST)</Label>
+                            <Input id="smtp-host" placeholder="smtp.example.com" value={smtpHost} onChange={(e) => setSmtpHost(e.target.value)}/>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="smtp-port">Puerto (SMTP_PORT)</Label>
+                            <Input id="smtp-port" placeholder="587" value={smtpPort} onChange={(e) => setSmtpPort(e.target.value)}/>
+                        </div>
+                        <div className="flex items-center space-x-2 mt-2">
+                            <Switch id="smtp-secure" checked={smtpSecure} onCheckedChange={setSmtpSecure} />
+                            <Label htmlFor="smtp-secure">Usar cifrado SSL/TLS (SMTP_SECURE)</Label>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="smtp-user">Usuario (SMTP_USER)</Label>
+                            <Input id="smtp-user" placeholder="user@example.com" value={smtpUser} onChange={(e) => setSmtpUser(e.target.value)}/>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="smtp-pass">Contraseña (SMTP_PASS)</Label>
+                            <Input id="smtp-pass" type="password" placeholder="Dejar en blanco para no cambiar" value={smtpPass} onChange={(e) => setSmtpPass(e.target.value)}/>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="smtp-recipients">Correos de Destino (SMTP_RECIPIENTS)</Label>
+                            <Input id="smtp-recipients" placeholder="correo1@example.com, correo2@example.com" value={smtpRecipients} onChange={(e) => setSmtpRecipients(e.target.value)}/>
+                            <p className="text-xs text-muted-foreground">
+                                Importante: Esta es la lista de correos que recibirán los mensajes. Sepáralos por comas.
+                            </p>
+                        </div>
+                    </CardContent>
+                    <CardFooter>
+                      <Button type="submit" disabled={isSavingSmtp || !initialSettingsLoaded}>
+                        {isSavingSmtp ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Guardando...
+                            </>
+                        ) : (
+                            <>
+                                <Save className="mr-2 h-4 w-4" />
+                                Guardar Configuración SMTP
+                            </>
+                        )}
+                      </Button>
+                    </CardFooter>
+                  </form>
+                </Card>
             </TabsContent>
             <TabsContent value="images">
               <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1214,15 +1125,14 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
             }
             
             try {
-                const fileBase64 = await toBase64(imageFile);
                 const result = await uploadImage({
-                    fileBase64,
-                    fileName: formData.code,
+                    file: imageFile,
+                    fileName: `${formData.code}.${imageFile.name.split('.').pop()}`,
                     uploadDir: 'images/products'
                 });
 
                 if (result.success) {
-                    finalImageUrl = result.url;
+                    finalImageUrl = result.filePath;
                 } else {
                     toast({
                         variant: 'destructive',
@@ -1362,5 +1272,3 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
         </Dialog>
     );
 }
-
-    

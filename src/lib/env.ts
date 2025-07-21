@@ -13,12 +13,6 @@ export type SmtpConfig = {
     SMTP_SECURE?: string;
 };
 
-export type CloudinaryConfig = {
-    CLOUDINARY_CLOUD_NAME?: string;
-    CLOUDINARY_API_KEY?: string;
-    CLOUDINARY_API_SECRET?: string;
-};
-
 export type AdminUser = {
     username?: string;
     password?: string;
@@ -28,7 +22,7 @@ export type AdminConfig = {
     users: AdminUser[];
 };
 
-type EnvConfig = SmtpConfig & AdminConfig & CloudinaryConfig;
+type EnvConfig = SmtpConfig & AdminConfig;
 
 async function readEnvFile(): Promise<Record<string, string>> {
   const envPath = path.resolve(process.cwd(), '.env');
@@ -66,7 +60,7 @@ async function readEnvFile(): Promise<Record<string, string>> {
  * It merges values from the .env file with those in process.env,
  * with the .env file taking precedence.
  */
-export async function getEnvSettings(): Promise<AdminConfig & SmtpConfig & CloudinaryConfig> {
+export async function getEnvSettings(): Promise<AdminConfig & SmtpConfig> {
     const envFromFile = await readEnvFile();
     
     // Values from .env file override any existing process.env values.
@@ -109,8 +103,5 @@ export async function getEnvSettings(): Promise<AdminConfig & SmtpConfig & Cloud
         SMTP_PASS: combinedEnv.SMTP_PASS,
         SMTP_RECIPIENTS: combinedEnv.SMTP_RECIPIENTS,
         SMTP_SECURE: combinedEnv.SMTP_SECURE,
-        CLOUDINARY_CLOUD_NAME: combinedEnv.CLOUDINARY_CLOUD_NAME,
-        CLOUDINARY_API_KEY: combinedEnv.CLOUDINARY_API_KEY,
-        CLOUDINARY_API_SECRET: combinedEnv.CLOUDINARY_API_SECRET,
     };
 }

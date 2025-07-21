@@ -13,10 +13,6 @@ export interface AdminSettingsForForm {
         recipients: string | undefined;
         secure: boolean;
     };
-    cloudinary: {
-        cloudName: string | undefined;
-        apiKey: string | undefined;
-    };
 }
 
 
@@ -35,10 +31,6 @@ export async function getAdminSettingsForForm(): Promise<AdminSettingsForForm> {
             user: settings.SMTP_USER,
             recipients: settings.SMTP_RECIPIENTS,
             secure: settings.SMTP_SECURE === 'true',
-        },
-        cloudinary: {
-            cloudName: settings.CLOUDINARY_CLOUD_NAME,
-            apiKey: settings.CLOUDINARY_API_KEY,
         },
     };
 }
