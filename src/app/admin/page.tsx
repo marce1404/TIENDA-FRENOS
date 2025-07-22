@@ -428,10 +428,9 @@ export default function AdminPage() {
         });
 
         if (result.success) {
-          // No cache buster needed for Cloudinary URLs
           localStorage.setItem(storageKey, result.filePath);
           previewSetter(result.filePath);
-          window.dispatchEvent(new Event('storage')); // Notificar a otros componentes del cambio
+          window.dispatchEvent(new Event('storage'));
           toast({
             title: '¡Imagen Guardada!',
             description: `La imagen por defecto para ${type}s se ha actualizado.`,
@@ -481,7 +480,6 @@ export default function AdminPage() {
 
   const nextProductId = useMemo(() => {
     if (products.length === 0) return 1;
-    // Find the highest ID and add 1. This is safer than relying on length.
     return Math.max(...products.map(p => p.id)) + 1;
   }, [products]);
 
@@ -1130,7 +1128,7 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
                 const fileAsDataUrl = await fileToDataUrl(imageFile);
                 const result = await uploadImage({
                     fileAsDataUrl,
-                    fileName: formData.code, // Cloudinary uses this as public_id
+                    fileName: formData.code,
                     uploadDir: 'repufrenos/products'
                 });
 
