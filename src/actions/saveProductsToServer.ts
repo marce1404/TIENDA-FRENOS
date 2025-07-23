@@ -17,28 +17,35 @@ export async function saveProduct(product: Product): Promise<{ success: boolean;
     // Separate the ID from the rest of the product data
     const { id, ...productData } = product;
 
+    // Convert numeric values from the form to strings for the database.
     const valuesToSave = {
         ...productData,
-        // Drizzle's pg-core expects numeric types as strings when inserting/updating
         price: String(product.price),
         salePrice: product.isOnSale && product.salePrice ? String(product.salePrice) : null,
     };
     
     // For updates, we explicitly exclude the 'id' from the 'set' object.
     const { id: _, ...updateData } = {
-        id,
-        ...valuesToSave
+        id, // Include id here so it's part of the spread object...
+        ...valuesToSave // ...but then it gets destructured out, leaving only updateData.
     };
 
-    await db.insert(productsTable)
-      .values({
-        id,
-        ...valuesToSave
-      })
-      .onConflictDoUpdate({
-        target: productsTable.id,
-        set: updateData,
-      });
+    if (id) {
+        // If an ID exists, it's an update.
+        await db.update(productsTable)
+            .set(updateData)
+            .where(eq(productsTable.id, id));
+    } else {
+        // If no ID, it's a new product. Drizzle will use the auto-incrementing serial.
+        // We need to ensure the `id` property is not passed to the insert statement.
+        const { id: removeId, ...insertData } = product;
+        
+        await db.insert(productsTable).values({
+            ...insertData,
+            price: String(insertData.price),
+            salePrice: insertData.isOnSale && insertData.salePrice ? String(insertData.salePrice) : null,
+        });
+    }
 
     // Revalidate paths to show updated data immediately
     revalidatePath('/admin');
@@ -76,3 +83,5 @@ export async function deleteProduct(productId: number): Promise<{ success: boole
     return { success: false, error: 'No se pudo eliminar el producto de la base de datos.' };
   }
 }
+
+    
