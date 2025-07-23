@@ -4,7 +4,6 @@ import {
   text,
   integer,
   boolean,
-  numeric,
 } from 'drizzle-orm/pg-core';
 
 export const products = pgTable('products', {
@@ -14,10 +13,10 @@ export const products = pgTable('products', {
   brand: text('brand').notNull(),
   model: text('model').notNull(),
   compatibility: text('compatibility').notNull(),
-  price: numeric('price', { precision: 10, scale: 2 }).notNull(),
+  price: integer('price').notNull(),
   category: text('category').notNull(),
   isFeatured: boolean('is_featured').default(false).notNull(),
   imageUrl: text('image_url'),
   isOnSale: boolean('is_on_sale').default(false),
-  salePrice: numeric('sale_price', { precision: 10, scale: 2 }),
+  salePrice: integer('sale_price'),
 });
