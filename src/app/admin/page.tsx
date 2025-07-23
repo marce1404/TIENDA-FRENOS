@@ -1033,12 +1033,12 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
         brand: '',
         model: '',
         compatibility: '',
-        price: '' as string | number,
+        price: '',
         category: '',
         isFeatured: false,
         imageUrl: '',
         isOnSale: false,
-        salePrice: '' as string | number,
+        salePrice: '',
     });
     
     const [formData, setFormData] = useState(getInitialFormData());
@@ -1051,10 +1051,10 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
             if (product) {
                 setFormData({
                     ...product,
-                    price: product.price,
+                    price: String(product.price),
                     imageUrl: product.imageUrl || '',
                     isOnSale: product.isOnSale || false,
-                    salePrice: product.salePrice ?? '',
+                    salePrice: product.salePrice != null ? String(product.salePrice) : '',
                 });
                 setImagePreview(product.imageUrl || null);
             } else {
@@ -1279,5 +1279,3 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
         </Dialog>
     );
 }
-
-    

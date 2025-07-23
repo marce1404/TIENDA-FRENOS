@@ -14,37 +14,26 @@ import { revalidatePath } from 'next/cache';
  */
 export async function saveProduct(product: Product): Promise<{ success: boolean; error?: string }> {
   try {
-    // Separate the ID from the rest of the product data
-    const { id, ...productData } = product;
-
-    // Convert numeric values from the form to strings for the database.
+    // Drizzle's pg-core expects numeric types as strings when inserting/updating.
+    // The incoming product object from the form should have price as a number.
     const valuesToSave = {
-        ...productData,
+        ...product,
         price: String(product.price),
         salePrice: product.isOnSale && product.salePrice ? String(product.salePrice) : null,
     };
-    
-    // For updates, we explicitly exclude the 'id' from the 'set' object.
-    const { id: _, ...updateData } = {
-        id, // Include id here so it's part of the spread object...
-        ...valuesToSave // ...but then it gets destructured out, leaving only updateData.
-    };
 
-    if (id) {
+    // Exclude 'id' from the 'set' object for updates.
+    const { id: _, ...updateData } = valuesToSave;
+
+    if (product.id) {
         // If an ID exists, it's an update.
         await db.update(productsTable)
             .set(updateData)
-            .where(eq(productsTable.id, id));
+            .where(eq(productsTable.id, product.id));
     } else {
         // If no ID, it's a new product. Drizzle will use the auto-incrementing serial.
-        // We need to ensure the `id` property is not passed to the insert statement.
-        const { id: removeId, ...insertData } = product;
-        
-        await db.insert(productsTable).values({
-            ...insertData,
-            price: String(insertData.price),
-            salePrice: insertData.isOnSale && insertData.salePrice ? String(insertData.salePrice) : null,
-        });
+        const { id: removeId, ...insertData } = valuesToSave;
+        await db.insert(productsTable).values(insertData);
     }
 
     // Revalidate paths to show updated data immediately
@@ -83,5 +72,3 @@ export async function deleteProduct(productId: number): Promise<{ success: boole
     return { success: false, error: 'No se pudo eliminar el producto de la base de datos.' };
   }
 }
-
-    
