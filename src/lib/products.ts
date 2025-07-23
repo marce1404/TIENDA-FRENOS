@@ -1,53 +1,27 @@
+
 import type { Product } from '@/lib/types';
-import { db } from './db/drizzle';
-import { products } from './db/schema';
-import { eq } from 'drizzle-orm';
+import { products as staticProducts } from '@/data/products';
 import { unstable_noStore as noStore } from 'next/cache';
 
 /**
- * Fetches all products from the database.
+ * Fetches all products from the static data file.
  * Uses noStore() to ensure data is always fresh.
  * @returns {Promise<Product[]>} A promise that resolves to an array of products.
  */
 export async function getProducts(): Promise<Product[]> {
   noStore(); // Prevents caching of this data
-  try {
-    const data = await db.select().from(products).orderBy(products.id);
-    // The data from the DB should already match the Product type.
-    // Drizzle with Zod schemas would provide stronger typing here.
-    return data.map(p => ({
-      ...p,
-      price: Number(p.price),
-      salePrice: p.salePrice ? Number(p.salePrice) : undefined,
-    })) as Product[];
-  } catch (error) {
-    console.error("Database Error:", error);
-    // In case of a DB error, we can return an empty array 
-    // or throw the error depending on desired behavior.
-    return [];
-  }
+  // NOTE: This is reading from the static file, not the database.
+  return Promise.resolve(staticProducts);
 }
 
 /**
- * Fetches a single product by its ID from the database.
+ * Fetches a single product by its ID from the static data file.
  * @param {number} id The ID of the product to fetch.
  * @returns {Promise<Product | null>} A promise that resolves to the product or null if not found.
  */
 export async function getProductById(id: number): Promise<Product | null> {
     noStore();
-    try {
-        const productArray = await db.select().from(products).where(eq(products.id, id)).limit(1);
-        if (productArray.length === 0) {
-            return null;
-        }
-        const p = productArray[0];
-        return {
-          ...p,
-          price: Number(p.price),
-          salePrice: p.salePrice ? Number(p.salePrice) : undefined,
-        } as Product;
-    } catch (error) {
-        console.error("Database error fetching product by ID:", error);
-        return null;
-    }
+    // NOTE: This is reading from the static file, not the database.
+    const product = staticProducts.find(p => p.id === id);
+    return Promise.resolve(product || null);
 }
