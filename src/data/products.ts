@@ -13,7 +13,7 @@ export const products: Product[] = [
     isFeatured: true,
     isOnSale: true,
     salePrice: 29990,
-    imageUrl: 'https://res.cloudinary.com/repufrenos/image/upload/v1716335 Repufrenos/products/BAL-BP101.png'
+    imageUrl: 'https://res.cloudinary.com/repufrenos/image/upload/v1716335Repufrenos/products/BAL-BP101.png'
   },
   {
     id: 2,
@@ -25,7 +25,7 @@ export const products: Product[] = [
     price: 89990,
     category: 'Pastillas',
     isFeatured: true,
-    imageUrl: 'https://res.cloudinary.com/repufrenos/image/upload/v1716335 Repufrenos/products/BRE-P85020.png'
+    imageUrl: 'https://res.cloudinary.com/repufrenos/image/upload/v1716335Repufrenos/products/BRE-P85020.png'
   },
   {
     id: 3,
@@ -37,7 +37,7 @@ export const products: Product[] = [
     price: 129990,
     category: 'Discos',
     isFeatured: true,
-    imageUrl: 'https://res.cloudinary.com/repufrenos/image/upload/v1716335 Repufrenos/products/BRE-09788011.png'
+    imageUrl: 'https://res.cloudinary.com/repufrenos/image/upload/v1716335Repufrenos/products/BRE-09788011.png'
   },
   {
     id: 4,
@@ -49,7 +49,7 @@ export const products: Product[] = [
     price: 95000,
     category: 'Discos',
     isFeatured: false,
-    imageUrl: 'https://res.cloudinary.com/repufrenos/image/upload/v1716335 Repufrenos/defaults/default_disco.png'
+    imageUrl: 'https://res.cloudinary.com/repufrenos/image/upload/v1716335Repufrenos/defaults/default_disco.png'
   },
   {
     id: 5,
@@ -63,7 +63,7 @@ export const products: Product[] = [
     isFeatured: false,
     isOnSale: true,
     salePrice: 64990,
-    imageUrl: 'https://res.cloudinary.com/repufrenos/image/upload/v1716335 Repufrenos/defaults/default_pastilla.png'
+    imageUrl: 'https://res.cloudinary.com/repufrenos/image/upload/v1716335Repufrenos/defaults/default_pastilla.png'
   },
   {
     id: 6,
@@ -75,7 +75,7 @@ export const products: Product[] = [
     price: 65000,
     category: 'Discos',
     isFeatured: false,
-    imageUrl: 'https://res.cloudinary.com/repufrenos/image/upload/v1716335 Repufrenos/products/BOS-BD1261.png'
+    imageUrl: 'https://res.cloudinary.com/repufrenos/image/upload/v1716335Repufrenos/products/BOS-BD1261.png'
   },
   {
     id: 7,
@@ -87,7 +87,7 @@ export const products: Product[] = [
     price: 68000,
     category: 'Pastillas',
     isFeatured: false,
-    imageUrl: 'https://res.cloudinary.com/repufrenos/image/upload/v1716335 Repufrenos/defaults/default_pastilla.png'
+    imageUrl: 'https://res.cloudinary.com/repufrenos/image/upload/v1716335Repufrenos/defaults/default_pastilla.png'
   },
   {
     id: 8,
@@ -99,7 +99,7 @@ export const products: Product[] = [
     price: 55000,
     category: 'Discos',
     isFeatured: true,
-    imageUrl: 'https://res.cloudinary.com/repufrenos/image/upload/v1716335 Repufrenos/products/RAY-980502R.png'
+    imageUrl: 'https://res.cloudinary.com/repufrenos/image/upload/v1716335Repufrenos/products/RAY-980502R.png'
   },
   {
     id: 9,
@@ -111,7 +111,7 @@ export const products: Product[] = [
     price: 82000,
     category: 'Pastillas',
     isFeatured: false,
-    imageUrl: 'https://res.cloudinary.com/repufrenos/image/upload/v1716335 Repufrenos/defaults/default_pastilla.png'
+    imageUrl: 'https://res.cloudinary.com/repufrenos/image/upload/v1716335Repufrenos/defaults/default_pastilla.png'
   },
   {
     id: 10,
@@ -123,7 +123,7 @@ export const products: Product[] = [
     price: 78000,
     category: 'Discos',
     isFeatured: false,
-    imageUrl: 'https://res.cloudinary.com/repufrenos/image/upload/v1716335 Repufrenos/defaults/default_disco.png'
+    imageUrl: 'https://res.cloudinary.com/repufrenos/image/upload/v1716335Repufrenos/defaults/default_disco.png'
   },
   {
     id: 11,
@@ -135,7 +135,7 @@ export const products: Product[] = [
     price: 99000,
     category: 'Pastillas',
     isFeatured: false,
-    imageUrl: 'https://res.cloudinary.com/repufrenos/image/upload/v1716335 Repufrenos/products/TEX-2358701.png'
+    imageUrl: 'https://res.cloudinary.com/repufrenos/image/upload/v1716335Repufrenos/products/TEX-2358701.png'
   },
   {
     id: 12,
@@ -149,6 +149,6 @@ export const products: Product[] = [
     isFeatured: false,
     isOnSale: true,
     salePrice: 99990,
-    imageUrl: 'https://res.cloudinary.com/repufrenos/image/upload/v1716335 Repufrenos/defaults/default_disco.png'
+    imageUrl: 'https://res.cloudinary.com/repufrenos/image/upload/v1716335Repufrenos/defaults/default_disco.png'
   }
 ];
