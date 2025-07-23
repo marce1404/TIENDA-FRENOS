@@ -14,27 +14,26 @@ import { revalidatePath } from 'next/cache';
  */
 export async function saveProduct(product: Product): Promise<{ success: boolean; error?: string }> {
   try {
-    // Drizzle's pg-core expects numeric types as strings when inserting/updating.
-    // The incoming product object from the form should have price as a number.
+    // Drizzle's pg-core expects numeric types as strings when inserting/updating
+    // The incoming product object from the form now sends numbers, so we convert them here.
     const valuesToSave = {
         ...product,
+        id: product.id, // Ensure id is passed for both insert and update checks
         price: String(product.price),
-        salePrice: product.isOnSale && product.salePrice ? String(product.salePrice) : null,
+        salePrice: product.isOnSale && product.salePrice != null ? String(product.salePrice) : null,
     };
-
-    // Exclude 'id' from the 'set' object for updates.
+    
+    // For updates, we explicitly exclude the 'id' from the 'set' object.
     const { id: _, ...updateData } = valuesToSave;
 
-    if (product.id) {
-        // If an ID exists, it's an update.
-        await db.update(productsTable)
-            .set(updateData)
-            .where(eq(productsTable.id, product.id));
-    } else {
-        // If no ID, it's a new product. Drizzle will use the auto-incrementing serial.
-        const { id: removeId, ...insertData } = valuesToSave;
-        await db.insert(productsTable).values(insertData);
-    }
+    // Use a single "upsert" operation.
+    // It will INSERT if the ID doesn't exist, or UPDATE if it does.
+    await db.insert(productsTable)
+      .values(valuesToSave)
+      .onConflictDoUpdate({
+        target: productsTable.id,
+        set: updateData,
+      });
 
     // Revalidate paths to show updated data immediately
     revalidatePath('/admin');
