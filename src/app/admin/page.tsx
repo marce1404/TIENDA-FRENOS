@@ -905,7 +905,7 @@ export default function AdminPage() {
                         <TableCell>{product.brand}</TableCell>
                         <TableCell>{product.compatibility}</TableCell>
                         <TableCell className="text-right">
-                          {product.isOnSale && typeof product.salePrice === 'number' ? (
+                          {product.isOnSale && typeof product.salePrice === 'number' && product.salePrice > 0 ? (
                               <div className='flex flex-col items-end'>
                                 <span className="line-through text-muted-foreground text-xs">{formatPrice(product.price)}</span>
                                 <span className="text-primary font-bold">{formatPrice(product.salePrice)}</span>
@@ -1034,7 +1034,7 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
         model: product?.model || '',
         compatibility: product?.compatibility || '',
         price: product ? String(product.price) : '',
-        category: product?.category || '',
+        category: product?.category || 'Pastillas',
         isFeatured: product?.isFeatured || false,
         imageUrl: product?.imageUrl || '',
         isOnSale: product?.isOnSale || false,
@@ -1048,19 +1048,23 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
 
     useEffect(() => {
         if (isOpen) {
-            if (product) {
-                setFormData({
-                    ...product,
-                    price: String(product.price),
-                    imageUrl: product.imageUrl || '',
-                    isOnSale: product.isOnSale || false,
-                    salePrice: product.salePrice != null ? String(product.salePrice) : '',
-                });
-                setImagePreview(product.imageUrl || null);
-            } else {
-                setFormData(getInitialFormData());
-                setImagePreview(null);
-            }
+            // This now correctly resets the form state each time the dialog opens.
+            const initialData = {
+                id: product ? product.id : nextProductId || 0,
+                code: product?.code || '',
+                name: product?.name || '',
+                brand: product?.brand || '',
+                model: product?.model || '',
+                compatibility: product?.compatibility || '',
+                price: product ? String(product.price) : '',
+                category: product?.category || 'Pastillas',
+                isFeatured: product?.isFeatured || false,
+                imageUrl: product?.imageUrl || '',
+                isOnSale: product?.isOnSale || false,
+                salePrice: product?.salePrice != null ? String(product.salePrice) : '',
+            };
+            setFormData(initialData);
+            setImagePreview(product?.imageUrl || null);
             setImageFile(null); 
         }
     }, [isOpen, product, nextProductId]);

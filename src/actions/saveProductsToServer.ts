@@ -14,13 +14,12 @@ import { revalidatePath } from 'next/cache';
  */
 export async function saveProduct(product: Product): Promise<{ success: boolean; error?: string }> {
   try {
-    // Drizzle's pg-core expects numeric types as strings when inserting/updating
-    // The incoming product object from the form sends numbers, so we convert them here.
+    // Prepare values, ensuring numeric types are numbers and nullable fields are handled.
+    // Drizzle ORM handles the conversion to string for pg-numeric type internally.
     const valuesToSave = {
         ...product,
-        id: product.id, // Ensure id is passed for both insert and update checks
-        price: String(product.price),
-        salePrice: product.isOnSale && product.salePrice != null ? String(product.salePrice) : null,
+        price: product.price, // Keep as number
+        salePrice: product.isOnSale && product.salePrice != null ? product.salePrice : null, // Keep as number or set to null
     };
     
     // For updates, we explicitly exclude the 'id' from the 'set' object.
