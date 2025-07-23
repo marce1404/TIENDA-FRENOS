@@ -11,7 +11,8 @@
     "category": "Pastillas",
     "isFeatured": true,
     "isOnSale": true,
-    "salePrice": 29990
+    "salePrice": 29990,
+    "imageUrl": "https://placehold.co/400x400.png"
   },
   {
     "id": 2,
@@ -22,7 +23,8 @@
     "compatibility": "Toyota Yaris 2018-2022",
     "price": 89990,
     "category": "Pastillas",
-    "isFeatured": true
+    "isFeatured": true,
+    "imageUrl": "https://placehold.co/400x400.png"
   },
   {
     "id": 3,
@@ -33,7 +35,8 @@
     "compatibility": "Chevrolet Onix 2020-2023",
     "price": 129990,
     "category": "Discos",
-    "isFeatured": true
+    "isFeatured": true,
+    "imageUrl": "https://placehold.co/400x400.png"
   },
   {
     "id": 4,
@@ -44,7 +47,8 @@
     "compatibility": "Volkswagen Golf MK7",
     "price": 95000,
     "category": "Discos",
-    "isFeatured": false
+    "isFeatured": false,
+    "imageUrl": "https://placehold.co/400x400.png"
   },
   {
     "id": 5,
@@ -57,7 +61,8 @@
     "category": "Pastillas",
     "isFeatured": false,
     "isOnSale": true,
-    "salePrice": 64990
+    "salePrice": 64990,
+    "imageUrl": "https://placehold.co/400x400.png"
   },
   {
     "id": 6,
@@ -68,7 +73,8 @@
     "compatibility": "Hyundai Accent 2017-2021",
     "price": 65000,
     "category": "Discos",
-    "isFeatured": false
+    "isFeatured": false,
+    "imageUrl": "https://placehold.co/400x400.png"
   },
   {
     "id": 7,
@@ -79,7 +85,8 @@
     "compatibility": "Honda Civic 2016-2021",
     "price": 68000,
     "category": "Pastillas",
-    "isFeatured": false
+    "isFeatured": false,
+    "imageUrl": "https://placehold.co/400x400.png"
   },
   {
     "id": 8,
@@ -90,7 +97,8 @@
     "compatibility": "Kia Rio 2018-2023",
     "price": 55000,
     "category": "Discos",
-    "isFeatured": true
+    "isFeatured": true,
+    "imageUrl": "https://placehold.co/400x400.png"
   },
   {
     "id": 9,
@@ -101,7 +109,8 @@
     "compatibility": "Mazda 3 2019-2023",
     "price": 82000,
     "category": "Pastillas",
-    "isFeatured": false
+    "isFeatured": false,
+    "imageUrl": "https://placehold.co/400x400.png"
   },
   {
     "id": 10,
@@ -112,7 +121,8 @@
     "compatibility": "Peugeot 208 2020-2024",
     "price": 78000,
     "category": "Discos",
-    "isFeatured": false
+    "isFeatured": false,
+    "imageUrl": "https://placehold.co/400x400.png"
   },
   {
     "id": 11,
@@ -123,7 +133,8 @@
     "compatibility": "BMW Serie 3 F30",
     "price": 99000,
     "category": "Pastillas",
-    "isFeatured": false
+    "isFeatured": false,
+    "imageUrl": "https://placehold.co/400x400.png"
   },
   {
     "id": 12,
@@ -136,6 +147,7 @@
     "category": "Discos",
     "isFeatured": false,
     "isOnSale": true,
-    "salePrice": 99990
+    "salePrice": 99990,
+    "imageUrl": "https://placehold.co/400x400.png"
   }
 ]
