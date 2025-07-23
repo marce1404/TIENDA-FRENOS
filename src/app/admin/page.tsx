@@ -1033,12 +1033,12 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
         brand: '',
         model: '',
         compatibility: '',
-        price: '' as number | '',
+        price: '' as string | number,
         category: '',
         isFeatured: false,
         imageUrl: '',
         isOnSale: false,
-        salePrice: '' as number | '',
+        salePrice: '' as string | number,
     });
     
     const [formData, setFormData] = useState(getInitialFormData());
@@ -1054,7 +1054,7 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
                     price: product.price,
                     imageUrl: product.imageUrl || '',
                     isOnSale: product.isOnSale || false,
-                    salePrice: product.salePrice || '',
+                    salePrice: product.salePrice ?? '',
                 });
                 setImagePreview(product.imageUrl || null);
             } else {
@@ -1069,15 +1069,11 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
         const { id, value } = e.target;
         
         if (id === 'price' || id === 'salePrice') {
-             
-            const numericValue = value === '' ? '' : parseFloat(value);
-            
-            if (value === '' || !isNaN(numericValue as number)) {
-                 setFormData(prev => ({
-                    ...prev,
-                    [id]: numericValue,
-                }));
-            }
+            const numericValue = value.replace(/[^0-9]/g, '');
+            setFormData(prev => ({
+                ...prev,
+                [id]: numericValue,
+            }));
         } else {
             setFormData(prev => ({
                 ...prev,
@@ -1105,7 +1101,12 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
     };
     
     const handleSwitchChange = (id: 'isFeatured' | 'isOnSale', checked: boolean) => {
-        setFormData(prev => ({ ...prev, [id]: checked }));
+        setFormData(prev => ({ 
+            ...prev, 
+            [id]: checked,
+            // Reset sale price if sale is toggled off
+            ...(id === 'isOnSale' && !checked && { salePrice: '' }) 
+        }));
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -1158,7 +1159,7 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
             ...formData,
             id: product ? product.id : nextProductId!,
             price: Number(formData.price) || 0,
-            salePrice: formData.isOnSale ? (Number(formData.salePrice) || 0) : undefined,
+            salePrice: formData.isOnSale ? (Number(formData.salePrice) || undefined) : undefined,
             imageUrl: finalImageUrl,
         };
 
@@ -1217,7 +1218,7 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="price" className="text-right">Precio</Label>
-                            <Input id="price" type="text" value={formData.price === 0 ? '0' : formData.price || ''} onChange={handleChange} required className="col-span-3" />
+                            <Input id="price" type="text" value={formData.price} onChange={handleChange} required className="col-span-3" />
                         </div>
                         <div className="grid grid-cols-4 items-start gap-4">
                             <Label htmlFor="image" className="text-right pt-2">Imagen</Label>
@@ -1262,7 +1263,7 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
                         {formData.isOnSale && (
                            <div className="grid grid-cols-4 items-center gap-4">
                               <Label htmlFor="salePrice" className="text-right">Precio de Oferta</Label>
-                              <Input id="salePrice" type="text" value={formData.salePrice === 0 ? '0' : formData.salePrice || ''} onChange={handleChange} required={!!formData.isOnSale} className="col-span-3" />
+                              <Input id="salePrice" type="text" value={formData.salePrice} onChange={handleChange} required={!!formData.isOnSale} className="col-span-3" />
                           </div>
                         )}
                     </div>

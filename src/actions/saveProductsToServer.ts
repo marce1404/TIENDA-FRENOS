@@ -14,19 +14,30 @@ import { revalidatePath } from 'next/cache';
  */
 export async function saveProduct(product: Product): Promise<{ success: boolean; error?: string }> {
   try {
+    // Separate the ID from the rest of the product data
+    const { id, ...productData } = product;
+
     const valuesToSave = {
-        ...product,
+        ...productData,
         // Drizzle's pg-core expects numeric types as strings when inserting/updating
         price: String(product.price),
         salePrice: product.isOnSale && product.salePrice ? String(product.salePrice) : null,
     };
+    
+    // For updates, we explicitly exclude the 'id' from the 'set' object.
+    const { id: _, ...updateData } = {
+        id,
+        ...valuesToSave
+    };
 
-    // `upsert` is not a standard Drizzle function. We use `insert` with `onConflictDoUpdate`.
     await db.insert(productsTable)
-      .values(valuesToSave)
+      .values({
+        id,
+        ...valuesToSave
+      })
       .onConflictDoUpdate({
         target: productsTable.id,
-        set: valuesToSave,
+        set: updateData,
       });
 
     // Revalidate paths to show updated data immediately
