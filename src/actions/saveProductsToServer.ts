@@ -15,7 +15,7 @@ import { revalidatePath } from 'next/cache';
 export async function saveProduct(product: Product): Promise<{ success: boolean; error?: string }> {
   try {
     // Drizzle's pg-core expects numeric types as strings when inserting/updating
-    // The incoming product object from the form now sends numbers, so we convert them here.
+    // The incoming product object from the form sends numbers, so we convert them here.
     const valuesToSave = {
         ...product,
         id: product.id, // Ensure id is passed for both insert and update checks

@@ -1028,17 +1028,17 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
 
     const getInitialFormData = () => ({
         id: product ? product.id : nextProductId || 0,
-        code: '',
-        name: '',
-        brand: '',
-        model: '',
-        compatibility: '',
-        price: '',
-        category: '',
-        isFeatured: false,
-        imageUrl: '',
-        isOnSale: false,
-        salePrice: '',
+        code: product?.code || '',
+        name: product?.name || '',
+        brand: product?.brand || '',
+        model: product?.model || '',
+        compatibility: product?.compatibility || '',
+        price: product ? String(product.price) : '',
+        category: product?.category || '',
+        isFeatured: product?.isFeatured || false,
+        imageUrl: product?.imageUrl || '',
+        isOnSale: product?.isOnSale || false,
+        salePrice: product?.salePrice != null ? String(product.salePrice) : '',
     });
     
     const [formData, setFormData] = useState(getInitialFormData());
