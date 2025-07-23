@@ -23,8 +23,10 @@ async function seed() {
   console.log('-------------------------------');
 
   // Clear existing data
+  console.log('🗑️  Clearing existing products table...');
   await db.delete(productsTable);
-  console.log('🗑️  Cleared existing products table.');
+  console.log('🗑️  Table cleared.');
+
 
   // Insert new data
   console.log(' Inserting new products data...');
