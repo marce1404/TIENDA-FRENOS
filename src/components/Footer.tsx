@@ -1,8 +1,16 @@
+
+'use client';
+
 import Link from 'next/link';
 import { MapPin, UserCog } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 export function Footer() {
-  const currentYear = new Date().getFullYear();
+  const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+
+  useEffect(() => {
+    setCurrentYear(new Date().getFullYear());
+  }, []);
 
   return (
     <footer className="bg-background border-t border-border mt-auto py-6">
