@@ -36,12 +36,12 @@ async function seed() {
       brand: product.brand,
       model: product.model,
       compatibility: product.compatibility,
-      price: product.price.toString(), // Drizzle expects numeric as string
+      price: product.price, // Use number directly
       category: product.category,
       isFeatured: product.isFeatured || false,
       imageUrl: product.imageUrl,
       isOnSale: product.isOnSale || false,
-      salePrice: product.salePrice ? product.salePrice.toString() : null,
+      salePrice: product.salePrice ? product.salePrice : null, // Use number or null
     });
     console.log(`- Inserted: ${product.name}`);
   }

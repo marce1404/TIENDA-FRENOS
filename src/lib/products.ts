@@ -15,17 +15,16 @@ export async function getProducts(): Promise<Product[]> {
   noStore();
   try {
     const dbProducts = await db.select().from(products);
-    // Drizzle returns numeric types as strings from some drivers, this ensures they are numbers.
+    // Drizzle/node-postgres can return numeric types as strings, this ensures they are numbers.
     return dbProducts.map(p => ({
       ...p,
       price: Number(p.price),
-      salePrice: p.salePrice != null ? Number(p.salePrice) : null, // Handle null properly
+      salePrice: p.salePrice != null ? Number(p.salePrice) : null,
     }));
   } catch (error) {
-    console.error("FATAL: Database query for all products failed. Check connection and credentials.", error);
-    // Re-throw the error to make it visible to Next.js and the user.
-    // Hiding this error by returning an empty array was the root cause of the "product not showing" issue.
-    throw error;
+    console.error("Database query for all products failed. Check connection and credentials.", error);
+    // Gracefully return an empty array to prevent the entire page from crashing.
+    return [];
   }
 }
 
@@ -49,8 +48,7 @@ export async function getProductById(id: number): Promise<Product | null> {
           salePrice: dbProduct.salePrice != null ? Number(dbProduct.salePrice) : null,
         };
     } catch (error) {
-        console.error(`FATAL: Database query for product ${id} failed. Check connection and credentials.`, error);
-        // Re-throw for visibility, consistent with getProducts.
-        throw error;
+        console.error(`Database query for product ${id} failed. Check connection and credentials.`, error);
+        return null;
     }
 }
