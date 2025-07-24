@@ -14,11 +14,11 @@ import { revalidatePath } from 'next/cache';
  */
 export async function saveProduct(product: Product): Promise<{ success: boolean; error?: string }> {
   try {
-    // Prepare values, ensuring numeric types are numbers and nullable fields are handled.
-    // Drizzle ORM handles the conversion to string for pg-numeric type internally.
+    // Drizzle/node-postgres works more reliably when numeric types are passed as strings.
+    // The incoming product object can have numbers, so we explicitly convert them here.
     const valuesToSave = {
         ...product,
-        price: product.price, // Keep as number
+        price: product.price, // Keep as number for now
         salePrice: product.isOnSale && product.salePrice != null ? product.salePrice : null, // Keep as number or set to null
     };
     
