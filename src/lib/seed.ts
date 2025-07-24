@@ -1,12 +1,8 @@
-
 // This is a development-only script to seed the database with initial data.
 // To use it, you'll need to run it with a tool like `tsx` or `ts-node`
 // that can handle TypeScript and environment variables.
-// Example: `npx tsx src/lib/seed.ts`
+// Example: `npm run db:seed`
 
-import { db } from './db/drizzle';
-import { products as productsTable } from './db/schema';
-import productsData from '../data/products.json';
 import { config } from 'dotenv';
 import path from 'path';
 import fs from 'fs';
@@ -27,6 +23,11 @@ if (fs.existsSync(envLocalPath)) {
   config({ path: envPath });
 }
 // --- End of robust loading ---
+
+import { db } from './db/drizzle';
+import { products as productsTable } from './db/schema';
+import productsData from '../data/products.json';
+
 
 async function seed() {
   console.log('🌱 Seeding database...');
@@ -58,7 +59,7 @@ async function seed() {
       brand: product.brand,
       model: product.model,
       compatibility: product.compatibility,
-      price: product.price, // Use number directly
+      price: product.price,
       category: product.category,
       isFeatured: product.isFeatured || false,
       imageUrl: product.imageUrl,
