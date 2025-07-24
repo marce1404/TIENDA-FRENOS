@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "db:seed": "tsx src/lib/seed.ts"
+    "db:seed": "dotenv -e .env.local -- tsx src/lib/seed.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.9.3",
@@ -56,6 +56,7 @@
     "tailwindcss": "^3.4.1",
     "tsx": "^4.10.5",
     "typescript": "^5",
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.4.5",
+    "dotenv-cli": "^7.4.2"
   }
 }
