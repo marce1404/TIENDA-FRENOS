@@ -1,3 +1,4 @@
+
 // This is a development-only script to seed the database with initial data.
 // To use it, you'll need to run it with a tool like `tsx` or `ts-node`
 // that can handle TypeScript and environment variables.
@@ -8,10 +9,24 @@ import { products as productsTable } from './db/schema';
 import productsData from '../data/products.json';
 import { config } from 'dotenv';
 import path from 'path';
+import fs from 'fs';
 
-// Load environment variables from .env file at the project root
-const envPath = path.resolve(process.cwd(), '.env');
-config({ path: envPath });
+// --- Robust .env file loading ---
+// The path to the project root.
+const rootPath = process.cwd();
+
+// Prioritize .env.local for local development secrets, then fall back to .env
+const envLocalPath = path.resolve(rootPath, '.env.local');
+const envPath = path.resolve(rootPath, '.env');
+
+if (fs.existsSync(envLocalPath)) {
+  console.log('⚡️ Loading environment variables from .env.local');
+  config({ path: envLocalPath });
+} else if (fs.existsSync(envPath)) {
+  console.log('⚡️ Loading environment variables from .env');
+  config({ path: envPath });
+}
+// --- End of robust loading ---
 
 async function seed() {
   console.log('🌱 Seeding database...');
@@ -21,7 +36,7 @@ async function seed() {
   const connectionString = process.env.POSTGRES_URL;
   if (!connectionString) {
     throw new Error(
-      `❌ POSTGRES_URL no se encontró. Asegúrate de que tu archivo .env en la raíz del proyecto existe y contiene la variable POSTGRES_URL.`
+      `❌ POSTGRES_URL no se encontró. Asegúrate de que tu archivo .env o .env.local en la raíz del proyecto existe y contiene la variable POSTGRES_URL.`
     );
   }
   console.log('✅ POSTGRES_URL encontrada. Conectando a la base de datos...');
