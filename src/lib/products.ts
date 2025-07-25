@@ -10,6 +10,26 @@ import { unstable_noStore as noStore } from 'next/cache';
 const DEFAULT_PASTILLA_IMAGE_URL = 'https://res.cloudinary.com/repufrenos/image/upload/v1716335805/repufrenos/defaults/default_pastilla.png';
 const DEFAULT_DISCO_IMAGE_URL = 'https://res.cloudinary.com/repufrenos/image/upload/v1716335805/repufrenos/defaults/default_disco.png';
 
+/**
+ * Maps a raw database product to a fully-formed Product object,
+ * ensuring it has a valid image URL.
+ * @param {typeof products.$inferSelect} p The raw product from the database.
+ * @returns {Product} The processed product with a guaranteed image URL.
+ */
+function mapDbProductToAppProduct(p: typeof products.$inferSelect): Product {
+  let imageUrl = p.imageUrl;
+  
+  if (!imageUrl) {
+    imageUrl = p.category === 'Pastillas' ? DEFAULT_PASTILLA_IMAGE_URL : DEFAULT_DISCO_IMAGE_URL;
+  }
+  
+  return {
+    ...p,
+    price: Number(p.price),
+    salePrice: p.salePrice != null ? Number(p.salePrice) : null,
+    imageUrl: imageUrl, // Now guaranteed to be a valid URL string
+  };
+}
 
 /**
  * Fetches all products from the database and assigns default images if necessary.
@@ -20,25 +40,7 @@ export async function getProducts(): Promise<Product[]> {
   noStore();
   try {
     const dbProducts = await db.select().from(products);
-    
-    // Process products to add default images on the server-side
-    return dbProducts.map(p => {
-      let imageUrl = p.imageUrl;
-      if (!imageUrl || imageUrl.trim() === '') {
-        if (p.category === 'Pastillas') {
-          imageUrl = DEFAULT_PASTILLA_IMAGE_URL;
-        } else if (p.category === 'Discos') {
-          imageUrl = DEFAULT_DISCO_IMAGE_URL;
-        }
-      }
-
-      return {
-        ...p,
-        price: Number(p.price),
-        salePrice: p.salePrice != null ? Number(p.salePrice) : null,
-        imageUrl: imageUrl, // Ensure imageUrl is assigned
-      };
-    });
+    return dbProducts.map(mapDbProductToAppProduct);
   } catch (error) {
     console.error("Database query for all products failed. Check connection and credentials.", error);
     return [];
@@ -57,23 +59,7 @@ export async function getProductById(id: number): Promise<Product | null> {
         if (result.length === 0) {
             return null;
         }
-        const dbProduct = result[0];
-
-        let imageUrl = dbProduct.imageUrl;
-        if (!imageUrl || imageUrl.trim() === '') {
-          if (dbProduct.category === 'Pastillas') {
-            imageUrl = DEFAULT_PASTILLA_IMAGE_URL;
-          } else if (dbProduct.category === 'Discos') {
-            imageUrl = DEFAULT_DISCO_IMAGE_URL;
-          }
-        }
-        
-        return {
-          ...dbProduct,
-          price: Number(dbProduct.price),
-          salePrice: dbProduct.salePrice != null ? Number(dbProduct.salePrice) : null,
-          imageUrl: imageUrl, // Ensure imageUrl is assigned
-        };
+        return mapDbProductToAppProduct(result[0]);
     } catch (error) {
         console.error(`Database query for product ${id} failed. Check connection and credentials.`, error);
         return null;
