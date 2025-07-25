@@ -1,4 +1,5 @@
 
+'use server';
 
 import type { Product } from '@/lib/types';
 import { db } from './db/drizzle';
@@ -15,7 +16,6 @@ export async function getProducts(): Promise<Product[]> {
   noStore();
   try {
     const dbProducts = await db.select().from(products);
-    // Drizzle/node-postgres can return numeric types as strings, this ensures they are numbers.
     return dbProducts.map(p => ({
       ...p,
       price: Number(p.price),
@@ -23,7 +23,6 @@ export async function getProducts(): Promise<Product[]> {
     }));
   } catch (error) {
     console.error("Database query for all products failed. Check connection and credentials.", error);
-    // Gracefully return an empty array to prevent the entire page from crashing.
     return [];
   }
 }
@@ -41,7 +40,6 @@ export async function getProductById(id: number): Promise<Product | null> {
             return null;
         }
         const dbProduct = result[0];
-        // Ensure numeric types are correctly parsed to numbers.
         return {
           ...dbProduct,
           price: Number(dbProduct.price),
