@@ -20,6 +20,7 @@ function mapDbProductToAppProduct(p: typeof products.$inferSelect): Product {
   let imageUrl = p.imageUrl;
   
   if (!imageUrl) {
+    console.log(`[DEBUG] Product ID ${p.id} has no image. Category: ${p.category}. Assigning default.`);
     imageUrl = p.category === 'Pastillas' ? DEFAULT_PASTILLA_IMAGE_URL : DEFAULT_DISCO_IMAGE_URL;
   }
   
@@ -38,11 +39,17 @@ function mapDbProductToAppProduct(p: typeof products.$inferSelect): Product {
  */
 export async function getProducts(): Promise<Product[]> {
   noStore();
+  console.log('[DEBUG] getProducts: Fetching all products from database.');
   try {
     const dbProducts = await db.select().from(products);
-    return dbProducts.map(mapDbProductToAppProduct);
+    console.log('[DEBUG] Raw products from DB:', JSON.stringify(dbProducts, null, 2));
+
+    const processedProducts = dbProducts.map(mapDbProductToAppProduct);
+    console.log('[DEBUG] Processed products with default images applied:', JSON.stringify(processedProducts, null, 2));
+
+    return processedProducts;
   } catch (error) {
-    console.error("Database query for all products failed. Check connection and credentials.", error);
+    console.error("[DEBUG] Database query for all products failed. Check connection and credentials.", error);
     return [];
   }
 }
@@ -54,14 +61,21 @@ export async function getProducts(): Promise<Product[]> {
  */
 export async function getProductById(id: number): Promise<Product | null> {
     noStore();
+    console.log(`[DEBUG] getProductById: Fetching product with ID: ${id}`);
     try {
         const result = await db.select().from(products).where(eq(products.id, id));
         if (result.length === 0) {
+            console.log(`[DEBUG] Product with ID ${id} not found.`);
             return null;
         }
-        return mapDbProductToAppProduct(result[0]);
+        console.log(`[DEBUG] Raw product from DB (ID: ${id}):`, JSON.stringify(result[0], null, 2));
+        
+        const processedProduct = mapDbProductToAppProduct(result[0]);
+        console.log(`[DEBUG] Processed product (ID: ${id}):`, JSON.stringify(processedProduct, null, 2));
+        
+        return processedProduct;
     } catch (error) {
-        console.error(`Database query for product ${id} failed. Check connection and credentials.`, error);
+        console.error(`[DEBUG] Database query for product ${id} failed.`, error);
         return null;
     }
 }
