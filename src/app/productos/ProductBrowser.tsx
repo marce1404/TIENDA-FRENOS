@@ -31,21 +31,18 @@ import { Badge } from '@/components/ui/badge';
 import { BrakePadIcon } from '@/components/icons/BrakePadIcon';
 import { BrakeDiscIcon } from '@/components/icons/BrakeDiscIcon';
 
-// This is the new Client Component that receives initial data as a prop.
-export function ProductClientPage({ initialProducts }: { initialProducts: Product[] }) {
-  // The state is initialized with the data from the server.
+// Este es el nuevo componente del navegador que recibe los datos iniciales.
+export function ProductBrowser({ initialProducts }: { initialProducts: Product[] }) {
+  // El estado se inicializa con los datos del servidor.
   const [allProducts, setAllProducts] = useState<Product[]>(initialProducts);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [selectedCategory, setSelectedCategory] = useState('all');
-  // isLoading is now only for client-side interactions, not initial load.
-  const [isLoading, setIsLoading] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const { addToCart } = useCart();
   const [whatsappNumber, setWhatsappNumber] = useState('56912345678');
 
-  // No more useEffect to fetch products, they are already here.
   useEffect(() => {
     const getWhatsappNumber = () => {
         let loadedNumber = '56912345678';
@@ -90,7 +87,7 @@ export function ProductClientPage({ initialProducts }: { initialProducts: Produc
   }, [searchTerm, selectedCategory, allProducts]);
 
   useEffect(() => {
-    // Reset to the first page when filters change
+    // Resetear a la primera página cuando los filtros cambian
     setCurrentPage(1);
   }, [searchTerm, selectedCategory]);
 

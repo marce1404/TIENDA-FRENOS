@@ -11,10 +11,10 @@ const DEFAULT_PASTILLA_IMAGE_URL = 'https://res.cloudinary.com/repufrenos/image/
 const DEFAULT_DISCO_IMAGE_URL = 'https://res.cloudinary.com/repufrenos/image/upload/v1716335805/repufrenos/defaults/default_disco.png';
 
 /**
- * Maps a raw database product to a fully-formed Product object,
- * ensuring it has a valid image URL.
- * @param {typeof products.$inferSelect} p The raw product from the database.
- * @returns {Product} The processed product with a guaranteed image URL.
+ * Mapea un producto crudo de la base de datos a un objeto Product completamente formado,
+ * asegurando que tenga una URL de imagen válida.
+ * @param {typeof products.$inferSelect} p El producto crudo de la base de datos.
+ * @returns {Product} El producto procesado con una URL de imagen garantizada.
  */
 function mapDbProductToAppProduct(p: typeof products.$inferSelect): Product {
   let imageUrl = p.imageUrl;
@@ -26,17 +26,17 @@ function mapDbProductToAppProduct(p: typeof products.$inferSelect): Product {
   return {
     ...p,
     price: Number(p.price),
-    // Ensure salePrice is null if it's not a positive number
+    // Asegurar que salePrice sea null si no es un número positivo
     salePrice: p.salePrice != null && Number(p.salePrice) > 0 ? Number(p.salePrice) : null,
     isOnSale: p.isOnSale === true && p.salePrice != null && Number(p.salePrice) > 0,
-    imageUrl: imageUrl, // Now guaranteed to be a valid URL string
+    imageUrl: imageUrl, // Ahora garantizado como una URL válida
   };
 }
 
 /**
- * Fetches all products from the database and assigns default images if necessary.
- * Uses noStore() to ensure data is always fresh.
- * @returns {Promise<Product[]>} A promise that resolves to an array of products.
+ * Obtiene todos los productos de la base de datos y asigna imágenes por defecto si es necesario.
+ * Usa noStore() para asegurar que los datos siempre sean frescos.
+ * @returns {Promise<Product[]>} Una promesa que se resuelve en un array de productos.
  */
 export async function getProducts(): Promise<Product[]> {
   noStore();
@@ -46,15 +46,15 @@ export async function getProducts(): Promise<Product[]> {
     const processedProducts = dbProducts.map(mapDbProductToAppProduct);
     return processedProducts;
   } catch (error) {
-    console.error("CRITICAL: Database query for all products failed.", error);
+    console.error("CRITICAL: La consulta a la base de datos para todos los productos falló.", error);
     return [];
   }
 }
 
 /**
- * Fetches a single product by its ID from the database and assigns a default image if necessary.
- * @param {number} id The ID of the product to fetch.
- * @returns {Promise<Product | null>} A promise that resolves to the product or null if not found.
+ * Obtiene un único producto por su ID de la base de datos y le asigna una imagen por defecto si es necesario.
+ * @param {number} id El ID del producto a obtener.
+ * @returns {Promise<Product | null>} Una promesa que se resuelve en el producto o null si no se encuentra.
  */
 export async function getProductById(id: number): Promise<Product | null> {
     noStore();
@@ -66,7 +66,7 @@ export async function getProductById(id: number): Promise<Product | null> {
         const processedProduct = mapDbProductToAppProduct(result[0]);
         return processedProduct;
     } catch (error) {
-        console.error(`CRITICAL: Database query for product ${id} failed.`, error);
+        console.error(`CRITICAL: La consulta a la base de datos para el producto ${id} falló.`, error);
         return null;
     }
 }

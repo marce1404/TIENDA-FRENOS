@@ -1,12 +1,18 @@
 
 import { getProducts } from '@/lib/products';
-import { ProductClientPage } from './ProductClientPage';
+import { ProductBrowser } from './ProductBrowser';
 import type { Product } from '@/lib/types';
 
-// This is now a Server Component. It fetches data once on the server.
+// Esto fuerza a Vercel a tratar esta página como dinámica, ignorando el caché estático.
+// La lectura de esta variable de entorno no existente invalida el caché.
+export const dynamic = 'force-dynamic';
+const cacheBuster = process.env.CACHE_BUSTER;
+
+
+// Este es ahora un Componente de Servidor puro.
 export default async function ProductosPage() {
   const initialProducts: Product[] = await getProducts();
 
-  // It then passes the initial data to a Client Component.
-  return <ProductClientPage initialProducts={initialProducts} />;
+  // Pasa los datos iniciales como prop a un componente de cliente.
+  return <ProductBrowser initialProducts={initialProducts} />;
 }
