@@ -19,14 +19,16 @@ const DEFAULT_DISCO_IMAGE_URL = 'https://res.cloudinary.com/repufrenos/image/upl
 function mapDbProductToAppProduct(p: typeof products.$inferSelect): Product {
   let imageUrl = p.imageUrl;
   
-  if (!imageUrl) {
+  if (!imageUrl || imageUrl.trim() === '') {
     imageUrl = p.category === 'Pastillas' ? DEFAULT_PASTILLA_IMAGE_URL : DEFAULT_DISCO_IMAGE_URL;
   }
   
   return {
     ...p,
     price: Number(p.price),
-    salePrice: p.salePrice != null ? Number(p.salePrice) : null,
+    // Ensure salePrice is null if it's not a positive number
+    salePrice: p.salePrice != null && Number(p.salePrice) > 0 ? Number(p.salePrice) : null,
+    isOnSale: p.isOnSale === true && p.salePrice != null && Number(p.salePrice) > 0,
     imageUrl: imageUrl, // Now guaranteed to be a valid URL string
   };
 }
@@ -38,12 +40,24 @@ function mapDbProductToAppProduct(p: typeof products.$inferSelect): Product {
  */
 export async function getProducts(): Promise<Product[]> {
   noStore();
+  console.log('[DEBUG v3.1] Attempting to fetch products. Checking DB connection...');
+  
   try {
     const dbProducts = await db.select().from(products);
+    console.log(`[DEBUG v3.1] DB query successful. Found ${dbProducts.length} raw products.`);
+    if (dbProducts.length > 0) {
+        console.log('[DEBUG v3.1] First raw product:', JSON.stringify(dbProducts[0], null, 2));
+    }
+    
     const processedProducts = dbProducts.map(mapDbProductToAppProduct);
+    console.log(`[DEBUG v3.1] Processing complete. Returning ${processedProducts.length} products.`);
+     if (processedProducts.length > 0) {
+        console.log('[DEBUG v3.1] First processed product:', JSON.stringify(processedProducts[0], null, 2));
+    }
+    
     return processedProducts;
   } catch (error) {
-    console.error("Database query for all products failed. Check connection and credentials.", error);
+    console.error("[DEBUG v3.1] CRITICAL: Database query for all products failed.", error);
     return [];
   }
 }
@@ -63,7 +77,7 @@ export async function getProductById(id: number): Promise<Product | null> {
         const processedProduct = mapDbProductToAppProduct(result[0]);
         return processedProduct;
     } catch (error) {
-        console.error(`Database query for product ${id} failed.`, error);
+        console.error(`[DEBUG v3.1] CRITICAL: Database query for product ${id} failed.`, error);
         return null;
     }
 }
