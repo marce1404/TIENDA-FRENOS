@@ -24,7 +24,7 @@ export async function getProducts(): Promise<Product[]> {
     // Process products to add default images on the server-side
     return dbProducts.map(p => {
       let imageUrl = p.imageUrl;
-      if (!imageUrl) {
+      if (!imageUrl || imageUrl.trim() === '') {
         if (p.category === 'Pastillas') {
           imageUrl = DEFAULT_PASTILLA_IMAGE_URL;
         } else if (p.category === 'Discos') {
@@ -60,7 +60,7 @@ export async function getProductById(id: number): Promise<Product | null> {
         const dbProduct = result[0];
 
         let imageUrl = dbProduct.imageUrl;
-        if (!imageUrl) {
+        if (!imageUrl || imageUrl.trim() === '') {
           if (dbProduct.category === 'Pastillas') {
             imageUrl = DEFAULT_PASTILLA_IMAGE_URL;
           } else if (dbProduct.category === 'Discos') {
