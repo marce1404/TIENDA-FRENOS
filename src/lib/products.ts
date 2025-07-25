@@ -40,24 +40,13 @@ function mapDbProductToAppProduct(p: typeof products.$inferSelect): Product {
  */
 export async function getProducts(): Promise<Product[]> {
   noStore();
-  console.log('[DEBUG v3.1] Attempting to fetch products. Checking DB connection...');
   
   try {
     const dbProducts = await db.select().from(products);
-    console.log(`[DEBUG v3.1] DB query successful. Found ${dbProducts.length} raw products.`);
-    if (dbProducts.length > 0) {
-        console.log('[DEBUG v3.1] First raw product:', JSON.stringify(dbProducts[0], null, 2));
-    }
-    
     const processedProducts = dbProducts.map(mapDbProductToAppProduct);
-    console.log(`[DEBUG v3.1] Processing complete. Returning ${processedProducts.length} products.`);
-     if (processedProducts.length > 0) {
-        console.log('[DEBUG v3.1] First processed product:', JSON.stringify(processedProducts[0], null, 2));
-    }
-    
     return processedProducts;
   } catch (error) {
-    console.error("[DEBUG v3.1] CRITICAL: Database query for all products failed.", error);
+    console.error("CRITICAL: Database query for all products failed.", error);
     return [];
   }
 }
@@ -77,7 +66,7 @@ export async function getProductById(id: number): Promise<Product | null> {
         const processedProduct = mapDbProductToAppProduct(result[0]);
         return processedProduct;
     } catch (error) {
-        console.error(`[DEBUG v3.1] CRITICAL: Database query for product ${id} failed.`, error);
+        console.error(`CRITICAL: Database query for product ${id} failed.`, error);
         return null;
     }
 }
