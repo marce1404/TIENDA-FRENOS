@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     default: 'Repuestos de Frenos en Santiago, Conchalí | Pastillas y Discos | Repufrenos.cl',
   },
   description: 'Encuentra repuestos de frenos de alta calidad en Santiago. Somos especialistas en pastillas, discos y balatas para todas las marcas. Asesoramiento experto en Conchalí. ¡Cotiza online!',
-  keywords: ['repuestos de frenos santiago', 'pastillas de freno conchalí', 'discos de freno santiago', 'venta de frenos', 'balatas para auto', 'taller de frenos conchalí', 'Brembo Chile', 'Bosch frenos', 'repuestos para autos santiago'],
+  keywords: ['repuestos de frenos chile', 'pastillas de freno', 'discos de freno', 'venta de frenos online', 'despacho a regiones', 'frenos para auto', 'Brembo', 'Bosch', 'TRW', 'repuestos para autos chile'],
 };
 
 export default function RootLayout({
