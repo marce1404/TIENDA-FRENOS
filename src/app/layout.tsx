@@ -10,11 +10,11 @@ const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | REPUFRENOS.CL',
-    default: 'REPUFRENOS.CL - Especialistas en Sistemas de Frenos',
+    template: '%s | Repufrenos.cl',
+    default: 'Repuestos de Frenos en Santiago, Conchalí | Pastillas y Discos | Repufrenos.cl',
   },
-  description: 'REPUFRENOS.CL. Tienda especialista en repuestos de frenos de alta calidad. Asesoramiento experto y las mejores marcas para tu seguridad. Pastillas, discos y más.',
-  keywords: ['frenos', 'repuestos de frenos', 'pastillas de freno', 'discos de freno', 'balatas', 'Brembo', 'Bosch', 'Conchalí', 'Santiago', 'venta de frenos', 'taller de frenos', 'repuestos para autos'],
+  description: 'Encuentra repuestos de frenos de alta calidad en Santiago. Somos especialistas en pastillas, discos y balatas para todas las marcas. Asesoramiento experto en Conchalí. ¡Cotiza online!',
+  keywords: ['repuestos de frenos santiago', 'pastillas de freno conchalí', 'discos de freno santiago', 'venta de frenos', 'balatas para auto', 'taller de frenos conchalí', 'Brembo Chile', 'Bosch frenos', 'repuestos para autos santiago'],
 };
 
 export default function RootLayout({
