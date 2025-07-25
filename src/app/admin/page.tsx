@@ -710,7 +710,7 @@ export default function AdminPage() {
                        <CardDescription>
                         Esta imagen se usa si un producto de la categoría "Discos" no tiene su propia imagen. Se gestiona desde el código.
                       </CardDescription>
-                    </Header>
+                    </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="space-y-2">
                         <Label>Vista previa actual</Label>
