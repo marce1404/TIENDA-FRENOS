@@ -18,7 +18,7 @@ export async function saveProduct(product: Product): Promise<{ success: boolean;
     // The incoming product object can have numbers, so we explicitly convert them here.
     const valuesToSave = {
         ...product,
-        price: product.price, // Keep as number for now
+        price: product.price, // Keep as number
         salePrice: product.isOnSale && product.salePrice != null ? product.salePrice : null, // Keep as number or set to null
     };
     

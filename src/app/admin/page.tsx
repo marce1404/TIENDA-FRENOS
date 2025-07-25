@@ -810,7 +810,7 @@ export default function AdminPage() {
                        <CardDescription>
                         Esta imagen se usará si un producto de la categoría "Discos" no tiene su propia imagen.
                       </CardDescription>
-                    </CardHeader>
+                    </Header>
                     <CardContent className="space-y-4">
                       <div className="space-y-2">
                         <Label htmlFor="default-disco-image">Subir nueva imagen</Label>
