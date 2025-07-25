@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -22,6 +23,8 @@ import { useDefaultImages } from '@/hooks/use-default-images';
 import { WhatsAppIcon } from '@/components/icons/WhatsAppIcon';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { BrakePadIcon } from '@/components/icons/BrakePadIcon';
+import { BrakeDiscIcon } from '@/components/icons/BrakeDiscIcon';
 
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat('es-CL', {
@@ -95,10 +98,10 @@ export default function HomePage() {
     setSelectedProduct(null); // Cerrar el diálogo después de añadir al carrito
   };
 
-  const getProductImage = (product: Product) => {
-    if (product.imageUrl) return product.imageUrl;
-    if (product.category === 'Pastillas') return defaultPastillaImage;
-    if (product.category === 'Discos') return defaultDiscoImage;
+  const getProductImage = (p: Product) => {
+    if (p.imageUrl) return p.imageUrl;
+    if (p.category === 'Pastillas') return defaultPastillaImage;
+    if (p.category === 'Discos') return defaultDiscoImage;
     return null;
   };
   
@@ -193,7 +196,7 @@ export default function HomePage() {
                {selectedProduct.isOnSale && <Badge className="absolute top-4 right-16 bg-red-600 text-yellow-300 border-red-700">OFERTA</Badge>}
             </DialogHeader>
             <div className="grid md:grid-cols-2 gap-8 py-4">
-                <div className="relative aspect-square w-full bg-muted rounded-lg overflow-hidden">
+                <div className="relative aspect-square w-full bg-muted rounded-lg overflow-hidden flex items-center justify-center">
                     {getProductImage(selectedProduct) ? (
                         <Image
                             src={getProductImage(selectedProduct)!}
@@ -203,9 +206,11 @@ export default function HomePage() {
                             data-ai-hint={selectedProduct.category === 'Pastillas' ? 'brake pad' : 'brake disc'}
                         />
                     ) : (
-                        <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">
-                            Sin imagen
-                        </div>
+                         selectedProduct.category === 'Pastillas' ? (
+                            <BrakePadIcon className="w-48 h-48 text-muted-foreground m-auto" />
+                        ) : (
+                            <BrakeDiscIcon className="w-48 h-48 text-muted-foreground m-auto" />
+                        )
                     )}
                 </div>
                 <div className="flex flex-col space-y-4">

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -33,10 +34,10 @@ export function FeaturedProductCard({ product, onProductClick }: FeaturedProduct
     addToCart(product);
   };
   
-  const getProductImage = (product: Product) => {
-    if (product.imageUrl) return product.imageUrl;
-    if (product.category === 'Pastillas') return defaultPastillaImage;
-    if (product.category === 'Discos') return defaultDiscoImage;
+  const getProductImage = (p: Product) => {
+    if (p.imageUrl) return p.imageUrl;
+    if (p.category === 'Pastillas') return defaultPastillaImage;
+    if (p.category === 'Discos') return defaultDiscoImage;
     return null;
   };
   
@@ -61,7 +62,7 @@ export function FeaturedProductCard({ product, onProductClick }: FeaturedProduct
             </div>
         </CardHeader>
         <CardContent className="p-4 pt-0 flex-grow flex flex-col justify-center items-center text-center">
-            <div className="relative w-full h-24 mb-4">
+            <div className="relative w-full h-24 mb-4 flex items-center justify-center">
                 {productImage ? (
                     <Image
                         src={productImage}
@@ -87,7 +88,7 @@ export function FeaturedProductCard({ product, onProductClick }: FeaturedProduct
             </div>
         </CardContent>
         <CardFooter className="p-4 pt-0 flex justify-between items-center">
-            {product.isOnSale && typeof product.salePrice === 'number' ? (
+            {product.isOnSale && typeof product.salePrice === 'number' && product.salePrice > 0 ? (
               <div className="flex flex-col items-start">
                 <span className="text-xs text-muted-foreground line-through">{formatPrice(product.price)}</span>
                 <span className="font-bold text-primary text-lg">{formatPrice(product.salePrice)}</span>
