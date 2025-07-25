@@ -4,7 +4,6 @@ import * as schema from './schema';
 
 // Vercel inyecta la variable de entorno POSTGRES_URL.
 // process.env.POSTGRES_URL es la forma correcta de acceder a ella en producción.
-// No es necesario usar dotenv aquí.
 if (!process.env.POSTGRES_URL) {
   throw new Error('La variable de entorno POSTGRES_URL no está definida.');
 }

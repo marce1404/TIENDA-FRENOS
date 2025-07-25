@@ -14,8 +14,8 @@ import { revalidatePath } from 'next/cache';
  */
 export async function saveProduct(product: Product): Promise<{ success: boolean; error?: string }> {
   try {
-    // Drizzle/node-postgres works more reliably when numeric types are passed as strings.
-    // The incoming product object can have numbers, so we explicitly convert them here.
+    // The robust pg driver setup handles numeric types correctly.
+    // We can pass numbers directly.
     const valuesToSave = {
         ...product,
         price: product.price, // Keep as number
