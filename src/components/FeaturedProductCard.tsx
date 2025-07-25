@@ -8,7 +8,6 @@ import type { Product } from '@/lib/types';
 import { useCart } from '@/hooks/use-cart';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
-import { useDefaultImages } from '@/hooks/use-default-images';
 import { BrakePadIcon } from './icons/BrakePadIcon';
 import { BrakeDiscIcon } from './icons/BrakeDiscIcon';
 import { Badge } from '@/components/ui/badge';
@@ -27,22 +26,12 @@ const formatPrice = (price: number) => {
 
 export function FeaturedProductCard({ product, onProductClick }: FeaturedProductCardProps) {
   const { addToCart } = useCart();
-  const { defaultPastillaImage, defaultDiscoImage } = useDefaultImages();
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();
     addToCart(product);
   };
   
-  const getProductImage = (p: Product) => {
-    if (p.imageUrl) return p.imageUrl;
-    if (p.category === 'Pastillas') return defaultPastillaImage;
-    if (p.category === 'Discos') return defaultDiscoImage;
-    return null;
-  };
-  
-  const productImage = getProductImage(product);
-
   return (
     <Card 
         className="flex flex-col overflow-hidden h-full cursor-pointer transition-all hover:shadow-lg hover:-translate-y-1 relative"
@@ -63,9 +52,9 @@ export function FeaturedProductCard({ product, onProductClick }: FeaturedProduct
         </CardHeader>
         <CardContent className="p-4 pt-0 flex-grow flex flex-col justify-center items-center text-center">
             <div className="relative w-full h-24 mb-4 flex items-center justify-center">
-                {productImage ? (
+                {product.imageUrl ? (
                     <Image
-                        src={productImage}
+                        src={product.imageUrl}
                         alt={`Imagen de ${product.name}`}
                         fill
                         className="object-contain"

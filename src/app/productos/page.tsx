@@ -27,7 +27,6 @@ import {
 } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import Image from 'next/image';
-import { useDefaultImages } from '@/hooks/use-default-images';
 import { WhatsAppIcon } from '@/components/icons/WhatsAppIcon';
 import { Badge } from '@/components/ui/badge';
 import { BrakePadIcon } from '@/components/icons/BrakePadIcon';
@@ -43,7 +42,6 @@ export default function ProductosPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const { addToCart } = useCart();
-  const { defaultPastillaImage, defaultDiscoImage } = useDefaultImages();
   const [whatsappNumber, setWhatsappNumber] = useState('56912345678');
 
   useEffect(() => {
@@ -123,13 +121,6 @@ export default function ProductosPage() {
   const handleAddToCartClick = (product: Product) => {
     addToCart(product);
     setSelectedProduct(null); // Cerrar el diálogo después de añadir al carrito
-  };
-
-  const getProductImage = (p: Product) => {
-    if (p.imageUrl) return p.imageUrl;
-    if (p.category === 'Pastillas') return defaultPastillaImage;
-    if (p.category === 'Discos') return defaultDiscoImage;
-    return null;
   };
   
   const handleContactClick = (product: Product) => {
@@ -303,9 +294,9 @@ export default function ProductosPage() {
               </DialogHeader>
                <div className="grid md:grid-cols-2 gap-8 py-4">
                 <div className="relative aspect-square w-full bg-muted rounded-lg overflow-hidden flex items-center justify-center">
-                    {getProductImage(selectedProduct) ? (
+                    {selectedProduct.imageUrl ? (
                         <Image
-                            src={getProductImage(selectedProduct)!}
+                            src={selectedProduct.imageUrl}
                             alt={`Imagen de ${selectedProduct.name}`}
                             fill
                             className="object-contain"

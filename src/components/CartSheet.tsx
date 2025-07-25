@@ -18,7 +18,6 @@ import { Separator } from './ui/separator';
 import { useEffect, useState } from 'react';
 import { BrakePadIcon } from './icons/BrakePadIcon';
 import { BrakeDiscIcon } from './icons/BrakeDiscIcon';
-import { useDefaultImages } from '@/hooks/use-default-images';
 import Image from 'next/image';
 import { CartItem } from '@/lib/types';
 
@@ -32,7 +31,6 @@ const formatPrice = (price: number) => {
 export function CartSheet() {
   const { cartItems, removeFromCart, updateQuantity, clearCart, cartCount, cartTotal } = useCart();
   const [whatsappNumber, setWhatsappNumber] = useState('56912345678');
-  const { defaultPastillaImage, defaultDiscoImage } = useDefaultImages();
   
   useEffect(() => {
     const getWhatsappNumber = () => {
@@ -75,13 +73,6 @@ export function CartSheet() {
     window.open(whatsappUrl, '_blank');
   };
 
-  const getProductImage = (item: CartItem) => {
-    if (item.imageUrl) return item.imageUrl;
-    if (item.category === 'Pastillas') return defaultPastillaImage;
-    if (item.category === 'Discos') return defaultDiscoImage;
-    return null;
-  };
-
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -105,13 +96,12 @@ export function CartSheet() {
             <ScrollArea className="flex-1">
               <div className="flex flex-col gap-4 py-4 pr-6">
                 {cartItems.map((item) => {
-                  const itemImage = getProductImage(item);
                   const priceToUse = item.isOnSale && typeof item.salePrice === 'number' && item.salePrice > 0 ? item.salePrice : item.price;
                   return (
                     <div key={item.id} className="flex items-center gap-4">
                       <div className="relative flex-shrink-0 w-16 h-16 rounded-md bg-muted/50 flex items-center justify-center border overflow-hidden">
-                        {itemImage ? (
-                           <Image src={itemImage} alt={`Imagen de ${item.name}`} fill className="object-contain" />
+                        {item.imageUrl ? (
+                           <Image src={item.imageUrl} alt={`Imagen de ${item.name}`} fill className="object-contain" />
                         ) : (
                           item.category === 'Pastillas' ? (
                             <BrakePadIcon className="w-8 h-8 text-muted-foreground" />

@@ -14,7 +14,6 @@ import { BrakeDiscIcon } from '@/components/icons/BrakeDiscIcon';
 import { useCart } from '@/hooks/use-cart';
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useDefaultImages } from '@/hooks/use-default-images';
 import Image from 'next/image';
 
 const formatPrice = (price: number) => {
@@ -27,7 +26,6 @@ const formatPrice = (price: number) => {
 export default function ProductDetailPage({ params }: { params: { productId: string } }) {
   const [product, setProduct] = useState<Product | null | undefined>(undefined);
   const { addToCart } = useCart();
-  const { defaultPastillaImage, defaultDiscoImage } = useDefaultImages();
 
   useEffect(() => {
     async function fetchProduct() {
@@ -41,13 +39,6 @@ export default function ProductDetailPage({ params }: { params: { productId: str
     }
     fetchProduct();
   }, [params.productId]);
-
-  const getProductImage = (p: Product) => {
-    if (p.imageUrl) return p.imageUrl;
-    if (p.category === 'Pastillas') return defaultPastillaImage;
-    if (p.category === 'Discos') return defaultDiscoImage;
-    return null;
-  };
 
   if (product === undefined) {
     return (
@@ -76,8 +67,6 @@ export default function ProductDetailPage({ params }: { params: { productId: str
     return null;
   }
 
-  const productImage = getProductImage(product);
-
   return (
     <div className="container mx-auto px-4 py-12 md:py-16">
         <div className="mb-8">
@@ -94,9 +83,9 @@ export default function ProductDetailPage({ params }: { params: { productId: str
             <CardContent className="p-6 pt-0">
                 <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
                      <div className="relative aspect-square w-full bg-muted rounded-lg border overflow-hidden">
-                         {productImage ? (
+                         {product.imageUrl ? (
                              <Image
-                                 src={productImage}
+                                 src={product.imageUrl}
                                  alt={`Imagen de ${product.name}`}
                                  fill
                                  className="object-contain"
