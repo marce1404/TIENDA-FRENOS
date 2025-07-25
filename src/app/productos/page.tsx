@@ -32,6 +32,7 @@ import { Badge } from '@/components/ui/badge';
 import { BrakePadIcon } from '@/components/icons/BrakePadIcon';
 import { BrakeDiscIcon } from '@/components/icons/BrakeDiscIcon';
 
+export const dynamic = 'force-dynamic';
 
 export default function ProductosPage() {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
