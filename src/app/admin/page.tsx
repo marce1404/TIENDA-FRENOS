@@ -88,14 +88,6 @@ export default function AdminPage() {
   const [smtpPass, setSmtpPass] = useState('');
   const [smtpRecipients, setSmtpRecipients] = useState('');
   const [smtpSecure, setSmtpSecure] = useState(false);
-  
-  const [defaultPastillaImageFile, setDefaultPastillaImageFile] = useState<File | null>(null);
-  const [defaultPastillaImagePreview, setDefaultPastillaImagePreview] = useState<string | null>(null);
-  const [isSavingPastillaImage, setIsSavingPastillaImage] = useState(false);
-
-  const [defaultDiscoImageFile, setDefaultDiscoImageFile] = useState<File | null>(null);
-  const [defaultDiscoImagePreview, setDefaultDiscoImagePreview] = useState<string | null>(null);
-  const [isSavingDiscoImage, setIsSavingDiscoImage] = useState(false);
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -136,10 +128,6 @@ export default function AdminPage() {
         setContactName('Ventas');
         setWhatsappNumber('56912345678');
     }
-    
-    // Set initial previews from hardcoded URLs
-    setDefaultPastillaImagePreview(DEFAULT_PASTILLA_IMAGE_URL);
-    setDefaultDiscoImagePreview(DEFAULT_DISCO_IMAGE_URL);
 
   }, []);
 
@@ -385,75 +373,6 @@ export default function AdminPage() {
         salePrice: !product.isOnSale ? (product.salePrice || product.price) : undefined 
     };
     handleAddOrUpdateProduct(updatedProduct);
-  };
-  
-  const handleDefaultImageChange = (
-    e: React.ChangeEvent<HTMLInputElement>, 
-    setter: React.Dispatch<React.SetStateAction<File | null>>, 
-    previewSetter: React.Dispatch<React.SetStateAction<string | null>>
-  ) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setter(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        previewSetter(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleSaveDefaultImage = async (
-    e: React.FormEvent,
-    file: File | null,
-    type: 'pastilla' | 'disco',
-    savingSetter: React.Dispatch<React.SetStateAction<boolean>>,
-    previewSetter: React.Dispatch<React.SetStateAction<string | null>>
-  ) => {
-    e.preventDefault();
-    if (!file) {
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Por favor, selecciona un archivo para subir.',
-      });
-      return;
-    }
-
-    savingSetter(true);
-    
-    try {
-        const fileAsDataUrl = await fileToDataUrl(file);
-        // The default image name is now hardcoded, as it's a fixed resource.
-        const result = await uploadImage({
-            fileAsDataUrl,
-            fileName: `default_${type}`,
-            uploadDir: 'repufrenos/defaults',
-        });
-
-        if (result.success) {
-          // The preview updates optimistically, but the source of truth is now the server.
-          previewSetter(result.filePath);
-          toast({
-            title: '¡Imagen Guardada!',
-            description: `La imagen por defecto para ${type}s se ha actualizado.`,
-          });
-        } else {
-          toast({
-            variant: 'destructive',
-            title: 'Error al Subir',
-            description: result.error,
-          });
-        }
-    } catch (error) {
-        toast({
-            variant: 'destructive',
-            title: 'Error de Archivo',
-            description: 'No se pudo procesar el archivo para la subida.',
-        });
-    } finally {
-        savingSetter(false);
-    }
   };
 
   const filteredProducts = useMemo(() => {
@@ -769,79 +688,37 @@ export default function AdminPage() {
             <TabsContent value="images">
               <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Card>
-                  <form onSubmit={(e) => handleSaveDefaultImage(e, defaultPastillaImageFile, 'pastilla', setIsSavingPastillaImage, setDefaultPastillaImagePreview)}>
                     <CardHeader>
                       <CardTitle>Imagen por Defecto para Pastillas</CardTitle>
                       <CardDescription>
-                        Esta imagen se usará si un producto de la categoría "Pastillas" no tiene su propia imagen.
+                        Esta imagen se usa si un producto de la categoría "Pastillas" no tiene su propia imagen. Se gestiona desde el código.
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="space-y-2">
-                        <Label htmlFor="default-pastilla-image">Subir nueva imagen</Label>
-                        <Input
-                          id="default-pastilla-image"
-                          type="file"
-                          accept="image/png, image/jpeg, image/webp"
-                          onChange={(e) => handleDefaultImageChange(e, setDefaultPastillaImageFile, setDefaultPastillaImagePreview)}
-                        />
-                      </div>
-                      <div className="space-y-2">
                         <Label>Vista previa actual</Label>
                         <div className="h-32 w-full bg-muted rounded-md flex items-center justify-center border">
-                          {defaultPastillaImagePreview ? (
-                            <Image src={defaultPastillaImagePreview} alt="Vista previa de imagen para pastillas" width={128} height={128} className="object-contain h-32 w-32" />
-                          ) : (
-                            <span className="text-sm text-muted-foreground">No hay imagen guardada</span>
-                          )}
+                            <Image src={DEFAULT_PASTILLA_IMAGE_URL} alt="Vista previa de imagen para pastillas" width={128} height={128} className="object-contain h-32 w-32" />
                         </div>
                       </div>
                     </CardContent>
-                    <CardFooter>
-                      <Button type="submit" disabled={isSavingPastillaImage}>
-                        {isSavingPastillaImage ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                        Guardar Imagen
-                      </Button>
-                    </CardFooter>
-                  </form>
                 </Card>
 
                 <Card>
-                  <form onSubmit={(e) => handleSaveDefaultImage(e, defaultDiscoImageFile, 'disco', setIsSavingDiscoImage, setDefaultDiscoImagePreview)}>
                     <CardHeader>
                       <CardTitle>Imagen por Defecto para Discos</CardTitle>
                        <CardDescription>
-                        Esta imagen se usará si un producto de la categoría "Discos" no tiene su propia imagen.
+                        Esta imagen se usa si un producto de la categoría "Discos" no tiene su propia imagen. Se gestiona desde el código.
                       </CardDescription>
                     </Header>
                     <CardContent className="space-y-4">
                       <div className="space-y-2">
-                        <Label htmlFor="default-disco-image">Subir nueva imagen</Label>
-                        <Input
-                          id="default-disco-image"
-                          type="file"
-                          accept="image/png, image/jpeg, image/webp"
-                          onChange={(e) => handleDefaultImageChange(e, setDefaultDiscoImageFile, setDefaultDiscoImagePreview)}
-                        />
-                      </div>
-                      <div className="space-y-2">
                         <Label>Vista previa actual</Label>
                         <div className="h-32 w-full bg-muted rounded-md flex items-center justify-center border">
-                          {defaultDiscoImagePreview ? (
-                             <Image src={defaultDiscoImagePreview} alt="Vista previa de imagen para discos" width={128} height={128} className="object-contain h-32 w-32" />
-                          ) : (
-                            <span className="text-sm text-muted-foreground">No hay imagen guardada</span>
-                          )}
+                           <Image src={DEFAULT_DISCO_IMAGE_URL} alt="Vista previa de imagen para discos" width={128} height={128} className="object-contain h-32 w-32" />
                         </div>
                       </div>
                     </CardContent>
-                    <CardFooter>
-                      <Button type="submit" disabled={isSavingDiscoImage}>
-                         {isSavingDiscoImage ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                        Guardar Imagen
-                      </Button>
-                    </CardFooter>
-                  </form>
                 </Card>
               </div>
             </TabsContent>
