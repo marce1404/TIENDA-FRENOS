@@ -2,7 +2,7 @@
 import type { MetadataRoute } from 'next';
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = 'https://repufrenos.cl';
+  const baseUrl = 'https://www.repufrenos.cl';
 
   return {
     rules: {
