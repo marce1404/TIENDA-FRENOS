@@ -60,7 +60,7 @@ export function FeaturedProductCard({ product, onProductClick }: FeaturedProduct
                         className="object-contain"
                         data-ai-hint={product.category === 'Pastillas' ? 'brake pad' : 'brake disc'}
                     />
-                ) : (
+                ) : ( // Fallback to icons if imageUrl is somehow still null/undefined
                     product.category === 'Pastillas' ? (
                         <BrakePadIcon className="w-16 h-16 text-muted-foreground mx-auto" />
                     ) : (

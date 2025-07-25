@@ -48,6 +48,8 @@ import { getAdminSettingsForForm } from '@/actions/getAdminSettings';
 import Image from 'next/image';
 import { uploadImage } from '@/actions/uploadImage';
 import { Badge } from '@/components/ui/badge';
+import { BrakePadIcon } from '@/components/icons/BrakePadIcon';
+import { BrakeDiscIcon } from '@/components/icons/BrakeDiscIcon';
 
 // Helper function to convert a File to a Base64 Data URL
 const fileToDataUrl = (file: File): Promise<string> => {
@@ -104,6 +106,10 @@ export default function AdminPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [productsPerPage] = useState(10);
   
+  // Hardcoded URLs for default image previews in the admin panel
+  const DEFAULT_PASTILLA_IMAGE_URL = 'https://res.cloudinary.com/repufrenos/image/upload/v1716335805/repufrenos/defaults/default_pastilla.png';
+  const DEFAULT_DISCO_IMAGE_URL = 'https://res.cloudinary.com/repufrenos/image/upload/v1716335805/repufrenos/defaults/default_disco.png';
+
   useEffect(() => {
     async function fetchProducts() {
       const dbProducts = await getProducts();
@@ -131,11 +137,9 @@ export default function AdminPage() {
         setWhatsappNumber('56912345678');
     }
     
-    const pastillaUrl = localStorage.getItem('defaultPastillaImageUrl');
-    if (pastillaUrl) setDefaultPastillaImagePreview(pastillaUrl);
-
-    const discoUrl = localStorage.getItem('defaultDiscoImageUrl');
-    if (discoUrl) setDefaultDiscoImagePreview(discoUrl);
+    // Set initial previews from hardcoded URLs
+    setDefaultPastillaImagePreview(DEFAULT_PASTILLA_IMAGE_URL);
+    setDefaultDiscoImagePreview(DEFAULT_DISCO_IMAGE_URL);
 
   }, []);
 
@@ -404,7 +408,6 @@ export default function AdminPage() {
     file: File | null,
     type: 'pastilla' | 'disco',
     savingSetter: React.Dispatch<React.SetStateAction<boolean>>,
-    storageKey: string,
     previewSetter: React.Dispatch<React.SetStateAction<string | null>>
   ) => {
     e.preventDefault();
@@ -421,6 +424,7 @@ export default function AdminPage() {
     
     try {
         const fileAsDataUrl = await fileToDataUrl(file);
+        // The default image name is now hardcoded, as it's a fixed resource.
         const result = await uploadImage({
             fileAsDataUrl,
             fileName: `default_${type}`,
@@ -428,9 +432,8 @@ export default function AdminPage() {
         });
 
         if (result.success) {
-          localStorage.setItem(storageKey, result.filePath);
+          // The preview updates optimistically, but the source of truth is now the server.
           previewSetter(result.filePath);
-          window.dispatchEvent(new Event('storage'));
           toast({
             title: '¡Imagen Guardada!',
             description: `La imagen por defecto para ${type}s se ha actualizado.`,
@@ -766,7 +769,7 @@ export default function AdminPage() {
             <TabsContent value="images">
               <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Card>
-                  <form onSubmit={(e) => handleSaveDefaultImage(e, defaultPastillaImageFile, 'pastilla', setIsSavingPastillaImage, 'defaultPastillaImageUrl', setDefaultPastillaImagePreview)}>
+                  <form onSubmit={(e) => handleSaveDefaultImage(e, defaultPastillaImageFile, 'pastilla', setIsSavingPastillaImage, setDefaultPastillaImagePreview)}>
                     <CardHeader>
                       <CardTitle>Imagen por Defecto para Pastillas</CardTitle>
                       <CardDescription>
@@ -804,7 +807,7 @@ export default function AdminPage() {
                 </Card>
 
                 <Card>
-                  <form onSubmit={(e) => handleSaveDefaultImage(e, defaultDiscoImageFile, 'disco', setIsSavingDiscoImage, 'defaultDiscoImageUrl', setDefaultDiscoImagePreview)}>
+                  <form onSubmit={(e) => handleSaveDefaultImage(e, defaultDiscoImageFile, 'disco', setIsSavingDiscoImage, setDefaultDiscoImagePreview)}>
                     <CardHeader>
                       <CardTitle>Imagen por Defecto para Discos</CardTitle>
                        <CardDescription>
@@ -896,7 +899,7 @@ export default function AdminPage() {
                             />
                           ) : (
                             <div className="w-10 h-10 bg-muted rounded-md flex items-center justify-center text-xs text-muted-foreground">
-                              Sin foto
+                              {product.category === 'Pastillas' ? <BrakePadIcon className="h-6 w-6" /> : <BrakeDiscIcon className="h-6 w-6" />}
                             </div>
                           )}
                         </TableCell>
@@ -1115,7 +1118,7 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        let finalImageUrl = formData.imageUrl;
+        let finalImageUrl: string | null = formData.imageUrl || null;
     
         if (imageFile) {
             setIsUploading(true);
