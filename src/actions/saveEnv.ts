@@ -55,21 +55,33 @@ export async function saveEnvSettings(settings: EnvSettings) {
 
   try {
     const currentEnv = await readEnvFile(envPath);
+    
+    const newSettings = parsed.data;
 
-    // If user 1's username is being submitted (even if empty), consider it a migration action.
-    if (parsed.data.ADMIN_USER_1_USERNAME !== undefined) {
+    // Check if this is the first time setting a multi-user config
+    // to migrate away from the old single-user variables.
+    const isMigratingToMultiUser = 
+        newSettings.ADMIN_USER_1_USERNAME !== undefined &&
+        !currentEnv.ADMIN_USER_1_USERNAME;
+
+    if (isMigratingToMultiUser) {
         delete currentEnv.ADMIN_USERNAME;
         delete currentEnv.ADMIN_PASSWORD;
     }
 
-    // Merge new settings. If a value is provided, update it. If it's an empty string, remove the key.
-    for (const [key, value] of Object.entries(parsed.data)) {
-        if (value) { // This handles non-empty strings
-            currentEnv[key] = value;
-        } else if (value === '') { // This handles empty strings, meaning "delete this setting"
-            delete currentEnv[key];
+    // Merge new settings. 
+    for (const key in newSettings) {
+        const typedKey = key as keyof EnvSettings;
+        const value = newSettings[typedKey];
+
+        if (value !== undefined) { // A value was submitted in the form
+            if (value === '') { // An empty string means "delete this setting"
+                delete currentEnv[typedKey];
+            } else { // A non-empty string means "update this setting"
+                currentEnv[typedKey] = value;
+            }
         }
-        // `null` or `undefined` values from the form are ignored and do not change the file.
+        // If value is undefined, it wasn't in the form, so we don't touch it.
     }
     
     const newEnvContent = Object.entries(currentEnv)

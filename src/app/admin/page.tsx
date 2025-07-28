@@ -241,9 +241,11 @@ export default function AdminPage() {
 
       setIsSavingUser(prev => ({ ...prev, [index]: true }));
 
-      const settings: any = {};
-      settings[`ADMIN_USER_${index + 1}_USERNAME`] = user.username;
+      const settings: any = {
+        [`ADMIN_USER_${index + 1}_USERNAME`]: user.username,
+      };
       
+      // Only include the password in the payload if it's being changed.
       if (user.password) {
           settings[`ADMIN_USER_${index + 1}_PASSWORD`] = user.password;
       }
@@ -264,6 +266,7 @@ export default function AdminPage() {
               return newNames;
           });
           
+          // Clear password fields from form state after successful save
           setAdminUsers(currentUsers => {
             const newUsers = [...currentUsers];
             newUsers[index] = { ...newUsers[index], password: '', repeatPassword: '' };
@@ -283,14 +286,19 @@ export default function AdminPage() {
     e.preventDefault();
     setIsSavingSmtp(true);
     
-    const settings = {
+    const settings: any = {
       SMTP_HOST: smtpHost,
       SMTP_PORT: smtpPort,
       SMTP_USER: smtpUser,
-      SMTP_PASS: smtpPass,
       SMTP_RECIPIENTS: smtpRecipients,
       SMTP_SECURE: smtpSecure.toString(),
     };
+    
+    // Only include the password if the user has entered a new one.
+    // An empty string will be ignored by the server action.
+    if (smtpPass) {
+        settings.SMTP_PASS = smtpPass;
+    }
 
     const result = await saveEnvSettings(settings);
     setIsSavingSmtp(false);
@@ -300,6 +308,7 @@ export default function AdminPage() {
             title: "¡Configuración de Correo Guardada!",
             description: "Tus cambios se han guardado y aplicado.",
         });
+        // Clear the password field in the form for security
         setSmtpPass('');
     } else {
          toast({
