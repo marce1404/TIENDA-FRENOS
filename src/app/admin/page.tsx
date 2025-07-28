@@ -635,7 +635,7 @@ export default function AdminPage() {
                     <CardHeader>
                       <CardTitle>Configuración de Correo (SMTP)</CardTitle>
                         <CardDescription>
-                          Credenciales para el envío de correos desde los formularios de contacto.
+                          Credenciales para el envío de correos desde los formularios de contacto. Compatible con Gmail (usando Contraseñas de Aplicación).
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
@@ -1163,3 +1163,5 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
         </Dialog>
     );
 }
+
+    
