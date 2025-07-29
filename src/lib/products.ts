@@ -33,6 +33,8 @@ function mapProductToAppProduct(
         imageUrl = defaultPastillaUrl || null;
     } else if (p.category === 'Discos') {
         imageUrl = defaultDiscoUrl || null;
+    } else {
+        imageUrl = null;
     }
   }
   
