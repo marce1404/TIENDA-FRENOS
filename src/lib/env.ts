@@ -52,13 +52,9 @@ export async function getEnvSettings(): Promise<AppSettings> {
             }
 
             // --- Start of Correction ---
-            // Gmail requires secure to be true for port 465.
-            // This logic ensures that if port 465 is used, secure is always true,
-            // overriding any potentially incorrect value from the DB.
-            let isSecure = settings.SMTP_SECURE === 'true';
-            if (settings.SMTP_PORT === '465') {
-                isSecure = true;
-            }
+            // Gmail requires secure to be true for port 465, but false for port 587 (which uses STARTTLS).
+            // This logic ensures the correct secure setting based on the specified port.
+            const isSecure = settings.SMTP_PORT === '465';
             // --- End of Correction ---
 
             return {
@@ -94,11 +90,8 @@ export async function getEnvSettings(): Promise<AppSettings> {
         });
     }
 
-    // Apply the same port 465 logic to environment variables for consistency
-    let isSecureFromEnv = process.env.SMTP_SECURE === 'true';
-    if (process.env.SMTP_PORT === '465') {
-        isSecureFromEnv = true;
-    }
+    // Apply the same port logic to environment variables for consistency
+    const isSecureFromEnv = process.env.SMTP_PORT === '465';
 
     return { 
         users,
