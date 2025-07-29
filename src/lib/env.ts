@@ -51,6 +51,16 @@ export async function getEnvSettings(): Promise<AppSettings> {
                 });
             }
 
+            // --- Start of Correction ---
+            // Gmail requires secure to be true for port 465.
+            // This logic ensures that if port 465 is used, secure is always true,
+            // overriding any potentially incorrect value from the DB.
+            let isSecure = settings.SMTP_SECURE === 'true';
+            if (settings.SMTP_PORT === '465') {
+                isSecure = true;
+            }
+            // --- End of Correction ---
+
             return {
                 users,
                 SMTP_HOST: settings.SMTP_HOST,
@@ -58,8 +68,7 @@ export async function getEnvSettings(): Promise<AppSettings> {
                 SMTP_USER: settings.SMTP_USER,
                 SMTP_PASS: settings.SMTP_PASS,
                 SMTP_RECIPIENTS: settings.SMTP_RECIPIENTS,
-                // Ensure SMTP_SECURE is always a boolean
-                SMTP_SECURE: settings.SMTP_SECURE === 'true',
+                SMTP_SECURE: isSecure, // Use the corrected value
                 CLOUDINARY_CLOUD_NAME: settings.CLOUDINARY_CLOUD_NAME,
                 CLOUDINARY_API_KEY: settings.CLOUDINARY_API_KEY,
                 CLOUDINARY_API_SECRET: settings.CLOUDINARY_API_SECRET,
@@ -85,6 +94,12 @@ export async function getEnvSettings(): Promise<AppSettings> {
         });
     }
 
+    // Apply the same port 465 logic to environment variables for consistency
+    let isSecureFromEnv = process.env.SMTP_SECURE === 'true';
+    if (process.env.SMTP_PORT === '465') {
+        isSecureFromEnv = true;
+    }
+
     return { 
         users,
         SMTP_HOST: process.env.SMTP_HOST,
@@ -92,8 +107,7 @@ export async function getEnvSettings(): Promise<AppSettings> {
         SMTP_USER: process.env.SMTP_USER,
         SMTP_PASS: process.env.SMTP_PASS,
         SMTP_RECIPIENTS: process.env.SMTP_RECIPIENTS,
-        // Ensure SMTP_SECURE is always a boolean
-        SMTP_SECURE: process.env.SMTP_SECURE === 'true',
+        SMTP_SECURE: isSecureFromEnv,
         CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME,
         CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY,
         CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET,
