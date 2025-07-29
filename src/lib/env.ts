@@ -1,3 +1,4 @@
+
 'use server';
 
 import { unstable_noStore as noStore } from 'next/cache';
@@ -30,26 +31,25 @@ export interface AppSettings {
 export async function getEnvSettings(): Promise<AppSettings> {
     noStore(); // Ensure settings are always fresh and not cached
 
-    // Start with Vercel/system environment variables as the base
-    const finalSettings: Record<string, any> = { ...process.env };
+    const envSettings = { ...process.env };
+    let dbSettings: Record<string, any> = {};
 
     try {
         const dbResult = await db.select().from(settingsTable);
-        
         if (dbResult.length > 0) {
-            // Intelligently merge database settings over environment variables
-            for (const { key, value } of dbResult) {
-                // Only override the environment variable if the database value is valid (not null, undefined, or an empty string)
-                if (value) {
-                    finalSettings[key] = value;
+            dbSettings = dbResult.reduce((acc, { key, value }) => {
+                if (value) { // Only consider settings from DB if they have a non-empty value
+                    acc[key] = value;
                 }
-            }
+                return acc;
+            }, {} as Record<string, any>);
         }
     } catch (error) {
-        // This is not a critical error, as we can still use env vars.
-        // It likely means the settings table doesn't exist yet.
         console.warn(`Could not read from settings table, falling back to environment variables. Error: ${error}`);
     }
+
+    // Merge environment settings and database settings, with database taking precedence for non-empty values.
+    const finalSettings = { ...envSettings, ...dbSettings };
     
     const users = [];
     for (let i = 1; i <= 3; i++) {
@@ -59,8 +59,6 @@ export async function getEnvSettings(): Promise<AppSettings> {
         });
     }
 
-    // Logic to determine `secure` based on the port, prioritizing 465.
-    // This makes the configuration robust regardless of the checkbox in the UI.
     const isSecure = finalSettings.SMTP_PORT === '465';
 
     return { 
