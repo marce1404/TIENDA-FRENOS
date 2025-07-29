@@ -44,7 +44,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { getAdminSettingsForForm } from '@/actions/getAdminSettings';
+import { getAdminSettingsForForm, type AdminSettingsForForm } from '@/actions/getAdminSettings';
 import Image from 'next/image';
 import { uploadImage } from '@/actions/uploadImage';
 import { Badge } from '@/components/ui/badge';
@@ -96,6 +96,7 @@ export default function AdminPage() {
   const [cloudinaryApiSecret, setCloudinaryApiSecret] = useState('');
   const [showCloudinarySecret, setShowCloudinarySecret] = useState(false);
   const [isSavingCloudinary, setIsSavingCloudinary] = useState(false);
+  const [showCloudinaryForm, setShowCloudinaryForm] = useState(false);
   
   const [defaultPastillaImageFile, setDefaultPastillaImageFile] = useState<File | null>(null);
   const [defaultPastillaImagePreview, setDefaultPastillaImagePreview] = useState<string | null>(null);
@@ -132,7 +133,7 @@ export default function AdminPage() {
         if (isAuthenticated) {
             if (!initialSettingsLoaded) {
                 try {
-                    const settings = await getAdminSettingsForForm();
+                    const settings: AdminSettingsForForm = await getAdminSettingsForForm();
 
                     const serverUsers = settings.users || [];
                     const usernamesFromServer: (string | undefined)[] = [];
@@ -157,8 +158,14 @@ export default function AdminPage() {
                     setSmtpRecipients(settings.smtp.recipients || '');
                     setSmtpSecure(settings.smtp.secure || false);
                     
-                    setCloudinaryCloudName(settings.cloudinary.cloudName || '');
-                    setCloudinaryApiKey(settings.cloudinary.apiKey || '');
+                    const cloudName = settings.cloudinary.cloudName || '';
+                    const apiKey = settings.cloudinary.apiKey || '';
+                    setCloudinaryCloudName(cloudName);
+                    setCloudinaryApiKey(apiKey);
+                    // Show form only if essential Cloudinary vars are missing from env
+                    if (!cloudName || !apiKey) {
+                        setShowCloudinaryForm(true);
+                    }
 
                     setContactName(settings.whatsapp.contactName || 'Ventas');
                     setWhatsappNumber(settings.whatsapp.number || '56912345678');
@@ -359,6 +366,8 @@ export default function AdminPage() {
         });
         // Clear the secret field for security
         setCloudinaryApiSecret('');
+        // Hide form on successful save as credentials are now in DB
+        setShowCloudinaryForm(false);
     } else {
         toast({
             variant: "destructive",
@@ -835,55 +844,57 @@ export default function AdminPage() {
                         </CardFooter>
                       </form>
                     </Card>
-                     <Card>
-                      <form onSubmit={handleSaveCloudinary}>
-                        <CardHeader>
-                          <CardTitle>Configuración de Cloudinary</CardTitle>
-                          <CardDescription>
-                            Credenciales para el almacenamiento de imágenes de productos.
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="cloudinary-cloud-name">Cloud Name</Label>
-                            <Input id="cloudinary-cloud-name" placeholder="tu-cloud-name" value={cloudinaryCloudName} onChange={(e) => setCloudinaryCloudName(e.target.value)} />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="cloudinary-api-key">API Key</Label>
-                            <Input id="cloudinary-api-key" placeholder="tu-api-key" value={cloudinaryApiKey} onChange={(e) => setCloudinaryApiKey(e.target.value)} />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="cloudinary-api-secret">API Secret</Label>
-                            <div className="relative">
-                                <Input
-                                    id="cloudinary-api-secret"
-                                    type={showCloudinarySecret ? 'text' : 'password'}
-                                    placeholder="Dejar en blanco para no cambiar"
-                                    value={cloudinaryApiSecret}
-                                    onChange={(e) => setCloudinaryApiSecret(e.target.value)}
-                                    className="pr-10"
-                                />
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="icon"
-                                    className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 text-muted-foreground hover:bg-transparent"
-                                    onClick={() => setShowCloudinarySecret((prev) => !prev)}
-                                >
-                                    {showCloudinarySecret ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                                    <span className="sr-only">Toggle secret visibility</span>
+                     {showCloudinaryForm && (
+                        <Card>
+                            <form onSubmit={handleSaveCloudinary}>
+                                <CardHeader>
+                                <CardTitle>Configuración de Cloudinary</CardTitle>
+                                <CardDescription>
+                                    Estas credenciales son necesarias para subir imágenes. Puedes obtenerlas desde tu dashboard de Cloudinary.
+                                </CardDescription>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="cloudinary-cloud-name">Cloud Name</Label>
+                                    <Input id="cloudinary-cloud-name" placeholder="tu-cloud-name" value={cloudinaryCloudName} onChange={(e) => setCloudinaryCloudName(e.target.value)} />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="cloudinary-api-key">API Key</Label>
+                                    <Input id="cloudinary-api-key" placeholder="tu-api-key" value={cloudinaryApiKey} onChange={(e) => setCloudinaryApiKey(e.target.value)} />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="cloudinary-api-secret">API Secret</Label>
+                                    <div className="relative">
+                                        <Input
+                                            id="cloudinary-api-secret"
+                                            type={showCloudinarySecret ? 'text' : 'password'}
+                                            placeholder="Dejar en blanco para no cambiar"
+                                            value={cloudinaryApiSecret}
+                                            onChange={(e) => setCloudinaryApiSecret(e.target.value)}
+                                            className="pr-10"
+                                        />
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="icon"
+                                            className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 text-muted-foreground hover:bg-transparent"
+                                            onClick={() => setShowCloudinarySecret((prev) => !prev)}
+                                        >
+                                            {showCloudinarySecret ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                            <span className="sr-only">Toggle secret visibility</span>
+                                        </Button>
+                                    </div>
+                                </div>
+                                </CardContent>
+                                <CardFooter>
+                                <Button type="submit" disabled={isSavingCloudinary || !initialSettingsLoaded}>
+                                    {isSavingCloudinary ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                                    Guardar Conf. de Cloudinary
                                 </Button>
-                            </div>
-                          </div>
-                        </CardContent>
-                        <CardFooter>
-                          <Button type="submit" disabled={isSavingCloudinary || !initialSettingsLoaded}>
-                            {isSavingCloudinary ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                            Guardar Conf. de Cloudinary
-                          </Button>
-                        </CardFooter>
-                      </form>
-                    </Card>
+                                </CardFooter>
+                            </form>
+                        </Card>
+                     )}
                 </div>
             </TabsContent>
             <TabsContent value="images">
