@@ -141,6 +141,7 @@ export function ProductBrowser({ initialProducts }: { initialProducts: Product[]
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead className="w-[100px]">Imagen</TableHead>
                       <TableHead>Nombre</TableHead>
                       <TableHead>Código</TableHead>
                       <TableHead>Marca</TableHead>
@@ -156,6 +157,22 @@ export function ProductBrowser({ initialProducts }: { initialProducts: Product[]
                         onClick={() => handleProductClick(product)}
                         className="cursor-pointer"
                       >
+                        <TableCell>
+                          {product.imageUrl ? (
+                            <Image
+                              src={product.imageUrl}
+                              alt={`Imagen de ${product.name}`}
+                              width={40}
+                              height={40}
+                              className="rounded-md object-contain"
+                              data-ai-hint={product.category === 'Pastillas' ? 'brake pad' : 'brake disc'}
+                            />
+                          ) : (
+                            <div className="w-10 h-10 bg-muted rounded-md flex items-center justify-center text-xs text-muted-foreground">
+                              {product.category === 'Pastillas' ? <BrakePadIcon className="h-6 w-6" /> : <BrakeDiscIcon className="h-6 w-6" />}
+                            </div>
+                          )}
+                        </TableCell>
                         <TableCell className="font-medium">{product.name}</TableCell>
                         <TableCell>{product.code}</TableCell>
                         <TableCell>{product.brand}</TableCell>
