@@ -61,8 +61,11 @@ export async function sendChatInquiry(formData: {
       html: emailHtml,
     });
     return { success: true };
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error al enviar correo de chat:', error);
+    if (error.code === 'EAUTH') {
+        return { success: false, error: 'Error de autenticación. Si usas Gmail, verifica que estés usando una "Contraseña de Aplicación".' };
+    }
     return { success: false, error: 'No se pudo enviar el correo.' };
   }
 }
