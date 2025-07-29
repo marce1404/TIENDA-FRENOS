@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 
 // This schema defines all possible settings keys that can be saved.
+// .partial() makes all fields optional, allowing us to save subsets of settings.
 const settingsSchema = z.object({
   'ADMIN_USER_1_USERNAME': z.string().optional(),
   'ADMIN_USER_1_PASSWORD': z.string().optional(),
@@ -32,7 +33,7 @@ const settingsSchema = z.object({
 type Settings = z.infer<typeof settingsSchema>;
 
 /**
- * Saves settings to the database. It performs an "upsert" operation.
+ * Saves settings to the database. It performs an "upsert" operation for each key provided.
  * If a key exists, it's updated. If not, it's inserted.
  * @param settingsToSave An object where keys are the setting name and values are the setting value.
  * @returns An object indicating success or failure.
@@ -48,30 +49,32 @@ export async function saveEnvSettings(settingsToSave: Settings): Promise<{ succe
   const data = parsed.data;
 
   try {
-    // Start a transaction to perform all upserts
+    // Start a transaction to perform all upserts atomically.
     await db.transaction(async (tx) => {
       for (const key in data) {
+        // We cast key to the correct type to satisfy TypeScript
         const typedKey = key as keyof Settings;
         const value = data[typedKey];
         
-        // Skip saving password fields if they are empty or undefined.
+        // Skip saving password fields if they are empty, null, or undefined.
         // This prevents overwriting a saved password with nothing.
         if (typedKey.includes('PASSWORD') && !value) {
             continue;
         }
 
-        if (value !== undefined && value !== null) {
+        // Only process keys where the value is not undefined.
+        if (value !== undefined) {
             await tx.insert(settingsTable)
-                .values({ key: typedKey, value })
+                .values({ key: typedKey, value: value === null ? '' : value }) // Handle null values gracefully
                 .onConflictDoUpdate({
                     target: settingsTable.key,
-                    set: { value: value },
+                    set: { value: value === null ? '' : value },
                 });
         }
       }
     });
 
-    // Revalidate paths to ensure new settings are loaded across the app
+    // Revalidate the entire site layout to ensure new settings are loaded everywhere.
     revalidatePath('/', 'layout');
     
     return { success: true };
