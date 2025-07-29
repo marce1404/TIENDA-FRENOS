@@ -4,6 +4,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import type { Product, CartItem } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
+import { getEnvSettings } from '@/lib/env';
 
 interface CartContextType {
   cartItems: CartItem[];
@@ -33,7 +34,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
 
   useEffect(() => {
-    // Load cart from localStorage
+    // Load cart from localStorage - this is session-specific and okay
     const savedCart = localStorage.getItem('cart');
     if (savedCart) {
       try {
@@ -44,16 +45,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
     }
     
-    // Load whatsapp number from localStorage as a fallback
-    const savedInfo = localStorage.getItem('whatsappInfo');
-    if (savedInfo) {
+    // Load global settings from the server
+    async function loadSettings() {
         try {
-            const { number } = JSON.parse(savedInfo);
-            if (number) setWhatsappNumber(number);
-        } catch(e) {
-             // ignore
+            const settings = await getEnvSettings();
+            if (settings.WHATSAPP_NUMBER) {
+                setWhatsappNumber(settings.WHATSAPP_NUMBER);
+            }
+        } catch (e) {
+            console.error("Could not load settings for cart provider", e);
         }
     }
+    loadSettings();
 
   }, []);
 
@@ -100,7 +103,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const cartCount = cartItems.reduce((count, item) => count + item.quantity, 0);
 
   const cartTotal = cartItems.reduce((total, item) => {
-    const priceToUse = item.isOnSale && typeof item.salePrice === 'number' ? item.salePrice : item.price;
+    const priceToUse = item.isOnSale && typeof item.salePrice === 'number' && item.salePrice > 0 ? item.salePrice : item.price;
     return total + priceToUse * item.quantity;
   }, 0);
 
