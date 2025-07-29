@@ -6,24 +6,13 @@ import { z } from 'zod';
 import { getEnvSettings } from '@/lib/env';
 
 // Configure Cloudinary using environment variables
-async function configureCloudinary() {
-    const { 
-        CLOUDINARY_CLOUD_NAME, 
-        CLOUDINARY_API_KEY, 
-        CLOUDINARY_API_SECRET 
-    } = await getEnvSettings();
-
-    if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_API_KEY || !CLOUDINARY_API_SECRET) {
-        throw new Error('Cloudinary environment variables are not set.');
-    }
-
-    cloudinary.config({
-        cloud_name: CLOUDINARY_CLOUD_NAME,
-        api_key: CLOUDINARY_API_KEY,
-        api_secret: CLOUDINARY_API_SECRET,
-        secure: true,
-    });
-}
+// This is now the single source of truth for this action.
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+    secure: true,
+});
 
 const uploadSchema = z.object({
   fileAsDataUrl: z.string().startsWith('data:image/'),
@@ -47,7 +36,10 @@ export async function uploadImage(input: UploadInput): Promise<{ success: true; 
   const { fileAsDataUrl, fileName, uploadDir } = validatedFields.data;
   
   try {
-    await configureCloudinary();
+    // Check if the credentials are set in the environment
+    if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+        throw new Error('Cloudinary environment variables are not set on the server.');
+    }
 
     const result = await cloudinary.uploader.upload(fileAsDataUrl, {
       public_id: fileName, // Use the provided filename without extension

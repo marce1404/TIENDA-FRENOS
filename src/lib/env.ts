@@ -25,7 +25,7 @@ export interface AppSettings {
 
 /**
  * Reads all settings from the database 'settings' table and merges them
- * with environment variables. Settings from the database take precedence ONLY if they are not null/empty.
+ * with environment variables. Settings from the database take precedence.
  * This is the single source of truth for dynamic application configuration.
  */
 export async function getEnvSettings(): Promise<AppSettings> {
@@ -36,14 +36,13 @@ export async function getEnvSettings(): Promise<AppSettings> {
 
     try {
         const dbResult = await db.select().from(settingsTable);
-        if (dbResult.length > 0) {
-            dbSettings = dbResult.reduce((acc, { key, value }) => {
-                if (value) { // Only consider settings from DB if they have a non-empty value
-                    acc[key] = value;
-                }
-                return acc;
-            }, {} as Record<string, any>);
-        }
+        dbSettings = dbResult.reduce((acc, { key, value }) => {
+            // Only consider settings from DB if they have a non-empty value
+            if (value !== null && value !== undefined && value.trim() !== '') { 
+                acc[key] = value;
+            }
+            return acc;
+        }, {} as Record<string, any>);
     } catch (error) {
         console.warn(`Could not read from settings table, falling back to environment variables. Error: ${error}`);
     }
@@ -53,12 +52,14 @@ export async function getEnvSettings(): Promise<AppSettings> {
     
     const users = [];
     for (let i = 1; i <= 3; i++) {
-        users.push({
-            username: finalSettings[`ADMIN_USER_${i}_USERNAME`],
-            password: finalSettings[`ADMIN_USER_${i}_PASSWORD`],
-        });
+        const username = finalSettings[`ADMIN_USER_${i}_USERNAME`];
+        const password = finalSettings[`ADMIN_USER_${i}_PASSWORD`];
+        if (username || password) {
+            users.push({ username, password });
+        }
     }
 
+    // Determine SMTP security based on the port. Port 465 is SSL, others use STARTTLS (secure: false for nodemailer).
     const isSecure = finalSettings.SMTP_PORT === '465';
 
     return { 
