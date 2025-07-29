@@ -15,11 +15,9 @@ import { Button } from '@/components/ui/button';
 import { ShoppingCart, Trash2, Plus, Minus } from 'lucide-react';
 import { ScrollArea } from './ui/scroll-area';
 import { Separator } from './ui/separator';
-import { useEffect, useState } from 'react';
 import { BrakePadIcon } from './icons/BrakePadIcon';
 import { BrakeDiscIcon } from './icons/BrakeDiscIcon';
 import Image from 'next/image';
-import { CartItem } from '@/lib/types';
 
 const formatPrice = (price: number) => {
     return new Intl.NumberFormat('es-CL', {
@@ -29,40 +27,8 @@ const formatPrice = (price: number) => {
   };
 
 export function CartSheet() {
-  const { cartItems, removeFromCart, updateQuantity, clearCart, cartCount, cartTotal } = useCart();
-  const [whatsappNumber, setWhatsappNumber] = useState('56912345678');
+  const { cartItems, removeFromCart, updateQuantity, clearCart, cartCount, cartTotal, whatsappNumber } = useCart();
   
-  useEffect(() => {
-    const getWhatsappNumber = () => {
-        let loadedNumber = '56912345678'; // Default value
-        try {
-          const savedInfo = localStorage.getItem('whatsappInfo');
-          if (savedInfo) {
-              const { number } = JSON.parse(savedInfo);
-              if (number) {
-                  loadedNumber = number;
-              }
-          }
-        } catch (e) {
-            // use default if parsing fails
-        }
-        setWhatsappNumber(loadedNumber);
-    };
-
-    getWhatsappNumber(); // Initial load
-
-    // Listen for changes in localStorage
-    const handleStorageChange = () => {
-        getWhatsappNumber();
-    };
-    
-    window.addEventListener('storage', handleStorageChange);
-
-    return () => {
-        window.removeEventListener('storage', handleStorageChange);
-    };
-  }, []);
-
   const handleCheckout = () => {
     const messageLines = cartItems.map(item => {
         const priceToUse = item.isOnSale && typeof item.salePrice === 'number' && item.salePrice > 0 ? item.salePrice : item.price;

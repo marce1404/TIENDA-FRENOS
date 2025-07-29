@@ -6,21 +6,29 @@ import { db } from './db/drizzle';
 import { products } from './db/schema';
 import { eq } from 'drizzle-orm';
 import { unstable_noStore as noStore } from 'next/cache';
-
-const DEFAULT_PASTILLA_IMAGE_URL = 'https://res.cloudinary.com/repufrenos/image/upload/v1716335805/repufrenos/defaults/default_pastilla.png';
-const DEFAULT_DISCO_IMAGE_URL = 'https://res.cloudinary.com/repufrenos/image/upload/v1716335805/repufrenos/defaults/default_disco.png';
+import { getEnvSettings } from './env';
 
 /**
  * Mapea un producto crudo de la base de datos a un objeto Product completamente formado,
  * asegurando que tenga una URL de imagen válida.
  * @param {typeof products.$inferSelect} p El producto crudo de la base de datos.
+ * @param {string | undefined} defaultPastillaUrl URL por defecto para pastillas.
+ * @param {string | undefined} defaultDiscoUrl URL por defecto para discos.
  * @returns {Product} El producto procesado con una URL de imagen garantizada.
  */
-function mapDbProductToAppProduct(p: typeof products.$inferSelect): Product {
+function mapDbProductToAppProduct(
+  p: typeof products.$inferSelect,
+  defaultPastillaUrl: string | undefined,
+  defaultDiscoUrl: string | undefined,
+): Product {
   let imageUrl = p.imageUrl;
   
   if (!imageUrl || imageUrl.trim() === '') {
-    imageUrl = p.category === 'Pastillas' ? DEFAULT_PASTILLA_IMAGE_URL : DEFAULT_DISCO_IMAGE_URL;
+    if (p.category === 'Pastillas') {
+        imageUrl = defaultPastillaUrl || null;
+    } else if (p.category === 'Discos') {
+        imageUrl = defaultDiscoUrl || null;
+    }
   }
   
   return {
@@ -29,7 +37,7 @@ function mapDbProductToAppProduct(p: typeof products.$inferSelect): Product {
     // Asegurar que salePrice sea null si no es un número positivo
     salePrice: p.salePrice != null && Number(p.salePrice) > 0 ? Number(p.salePrice) : null,
     isOnSale: p.isOnSale === true && p.salePrice != null && Number(p.salePrice) > 0,
-    imageUrl: imageUrl, // Ahora garantizado como una URL válida
+    imageUrl: imageUrl, // Ahora puede ser una URL o null
   };
 }
 
@@ -42,8 +50,11 @@ export async function getProducts(): Promise<Product[]> {
   noStore();
   
   try {
+    const settings = await getEnvSettings();
     const dbProducts = await db.select().from(products);
-    const processedProducts = dbProducts.map(mapDbProductToAppProduct);
+    const processedProducts = dbProducts.map(p => 
+        mapDbProductToAppProduct(p, settings.DEFAULT_PASTILLA_IMAGE_URL, settings.DEFAULT_DISCO_IMAGE_URL)
+    );
     return processedProducts;
   } catch (error) {
     console.error("CRITICAL: La consulta a la base de datos para todos los productos falló.", error);
@@ -59,11 +70,12 @@ export async function getProducts(): Promise<Product[]> {
 export async function getProductById(id: number): Promise<Product | null> {
     noStore();
     try {
+        const settings = await getEnvSettings();
         const result = await db.select().from(products).where(eq(products.id, id));
         if (result.length === 0) {
             return null;
         }
-        const processedProduct = mapDbProductToAppProduct(result[0]);
+        const processedProduct = mapDbProductToAppProduct(result[0], settings.DEFAULT_PASTILLA_IMAGE_URL, settings.DEFAULT_DISCO_IMAGE_URL);
         return processedProduct;
     } catch (error) {
         console.error(`CRITICAL: La consulta a la base de datos para el producto ${id} falló.`, error);

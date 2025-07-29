@@ -35,38 +35,20 @@ const formatPrice = (price: number) => {
 
 export default function HomePage() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const { addToCart } = useCart();
-  const [whatsappNumber, setWhatsappNumber] = useState('56912345678');
+  const { addToCart, whatsappNumber } = useCart();
   const [promoProducts, setPromoProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
     async function loadClientData() {
+      setIsLoading(true);
       const allProducts = await getProducts();
       setPromoProducts(allProducts.filter((product) => product.isFeatured || product.isOnSale));
-      
-      let loadedNumber = '56912345678';
-      const savedInfo = localStorage.getItem('whatsappInfo');
-      if (savedInfo) {
-          try {
-              const { number } = JSON.parse(savedInfo);
-              if (number) loadedNumber = number;
-          } catch (e) {}
-      }
-      setWhatsappNumber(loadedNumber);
       setIsLoading(false);
     };
 
     loadClientData();
     
-    const handleStorage = () => {
-        loadClientData();
-    };
-    window.addEventListener('storage', handleStorage);
-
-    return () => {
-      window.removeEventListener('storage', handleStorage);
-    };
   }, []);
 
   const features = [

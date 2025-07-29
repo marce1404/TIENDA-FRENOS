@@ -13,6 +13,14 @@ export interface AdminSettingsForForm {
         recipients: string | undefined;
         secure: boolean;
     };
+    whatsapp: {
+        number: string | undefined;
+        contactName: string | undefined;
+    };
+    defaultImages: {
+        pastillaUrl: string | undefined;
+        discoUrl: string | undefined;
+    }
 }
 
 
@@ -32,5 +40,13 @@ export async function getAdminSettingsForForm(): Promise<AdminSettingsForForm> {
             recipients: settings.SMTP_RECIPIENTS,
             secure: settings.SMTP_SECURE === 'true',
         },
+        whatsapp: {
+            number: settings.WHATSAPP_NUMBER,
+            contactName: settings.WHATSAPP_CONTACT_NAME,
+        },
+        defaultImages: {
+            pastillaUrl: settings.DEFAULT_PASTILLA_IMAGE_URL,
+            discoUrl: settings.DEFAULT_DISCO_IMAGE_URL,
+        }
     };
 }

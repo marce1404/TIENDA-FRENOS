@@ -40,24 +40,7 @@ export function ProductBrowser({ initialProducts }: { initialProducts: Product[]
   const itemsPerPage = 10;
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const { addToCart } = useCart();
-  const [whatsappNumber, setWhatsappNumber] = useState('56912345678');
-
-  useEffect(() => {
-    const getWhatsappNumber = () => {
-        let loadedNumber = '56912345678';
-        const savedInfo = localStorage.getItem('whatsappInfo');
-        if (savedInfo) {
-            try {
-                const { number } = JSON.parse(savedInfo);
-                if (number) loadedNumber = number;
-            } catch (e) {}
-        }
-        setWhatsappNumber(loadedNumber);
-    };
-
-    getWhatsappNumber();
-  }, []);
+  const { addToCart, whatsappNumber } = useCart();
   
   const categories = useMemo(() => {
     const uniqueCategories = [...new Set(allProducts.map(p => p.category))];

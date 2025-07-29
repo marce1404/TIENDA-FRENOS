@@ -4,49 +4,17 @@
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { WhatsAppIcon } from './icons/WhatsAppIcon';
+import { getEnvSettings } from '@/lib/env';
 
-export function WhatsAppButton() {
-  const [whatsappNumber, setWhatsappNumber] = useState('56912345678');
-  const [isMounted, setIsMounted] = useState(false);
 
-  useEffect(() => {
-    const getWhatsappNumber = () => {
-        let loadedNumber = '56912345678'; // Default number
-        try {
-          const savedInfo = localStorage.getItem('whatsappInfo');
-          if (savedInfo) {
-            const { number } = JSON.parse(savedInfo);
-            if (number) {
-                loadedNumber = number;
-            }
-          }
-        } catch (e) {
-          // use default if parsing fails
-        }
-        setWhatsappNumber(loadedNumber);
-    };
-    
-    getWhatsappNumber();
-    setIsMounted(true);
-
-    const handleStorageChange = () => {
-        getWhatsappNumber();
-    };
-    
-    window.addEventListener('storage', handleStorageChange);
-
-    return () => {
-        window.removeEventListener('storage', handleStorageChange);
-    };
-  }, []);
-
+export function WhatsAppButton({ initialNumber }: { initialNumber?: string | null }) {
+  const [whatsappNumber, setWhatsappNumber] = useState(initialNumber || '56912345678');
+  
   const openWhatsApp = () => {
     const whatsappUrl = `https://wa.me/${whatsappNumber}`;
     window.open(whatsappUrl, '_blank');
   };
-
-  if (!isMounted) return null;
-
+  
   return (
     <div className={cn("fixed bottom-6 left-6 z-50")}>
       <button

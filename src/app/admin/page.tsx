@@ -73,6 +73,7 @@ export default function AdminPage() {
 
   const [whatsappNumber, setWhatsappNumber] = useState('');
   const [contactName, setContactName] = useState('');
+  const [isSavingWhatsapp, setIsSavingWhatsapp] = useState(false);
 
   const [isSavingUser, setIsSavingUser] = useState<Record<number, boolean>>({});
   const [isSavingSmtp, setIsSavingSmtp] = useState(false);
@@ -88,6 +89,14 @@ export default function AdminPage() {
   const [smtpPass, setSmtpPass] = useState('');
   const [smtpRecipients, setSmtpRecipients] = useState('');
   const [smtpSecure, setSmtpSecure] = useState(false);
+  
+  const [defaultPastillaImageFile, setDefaultPastillaImageFile] = useState<File | null>(null);
+  const [defaultPastillaImagePreview, setDefaultPastillaImagePreview] = useState<string | null>(null);
+  const [isSavingPastillaImage, setIsSavingPastillaImage] = useState(false);
+
+  const [defaultDiscoImageFile, setDefaultDiscoImageFile] = useState<File | null>(null);
+  const [defaultDiscoImagePreview, setDefaultDiscoImagePreview] = useState<string | null>(null);
+  const [isSavingDiscoImage, setIsSavingDiscoImage] = useState(false);
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -98,10 +107,6 @@ export default function AdminPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [productsPerPage] = useState(10);
   
-  // Hardcoded URLs for default image previews in the admin panel
-  const DEFAULT_PASTILLA_IMAGE_URL = 'https://res.cloudinary.com/repufrenos/image/upload/v1716335805/repufrenos/defaults/default_pastilla.png';
-  const DEFAULT_DISCO_IMAGE_URL = 'https://res.cloudinary.com/repufrenos/image/upload/v1716335805/repufrenos/defaults/default_disco.png';
-
   useEffect(() => {
     async function fetchProducts() {
       const dbProducts = await getProducts();
@@ -113,22 +118,6 @@ export default function AdminPage() {
     if (authStatus === 'true') {
         setIsAuthenticated(true);
     }
-    
-    const savedInfo = localStorage.getItem('whatsappInfo');
-    if (savedInfo) {
-        try {
-            const { name, number } = JSON.parse(savedInfo);
-            setContactName(name || 'Ventas');
-            setWhatsappNumber(number || '56912345678');
-        } catch (e) {
-            setContactName('Ventas');
-            setWhatsappNumber('56912345678');
-        }
-    } else {
-        setContactName('Ventas');
-        setWhatsappNumber('56912345678');
-    }
-
   }, []);
 
   useEffect(() => {
@@ -160,6 +149,13 @@ export default function AdminPage() {
                     setSmtpUser(settings.smtp.user || '');
                     setSmtpRecipients(settings.smtp.recipients || '');
                     setSmtpSecure(settings.smtp.secure || false);
+
+                    setContactName(settings.whatsapp.contactName || 'Ventas');
+                    setWhatsappNumber(settings.whatsapp.number || '56912345678');
+                    
+                    setDefaultPastillaImagePreview(settings.defaultImages.pastillaUrl || null);
+                    setDefaultDiscoImagePreview(settings.defaultImages.discoUrl || null);
+
 
                     setInitialSettingsLoaded(true);
                 } catch (error) {
@@ -207,15 +203,26 @@ export default function AdminPage() {
     setError('');
   };
 
-  const handleSaveWhatsapp = (e: React.FormEvent) => {
+  const handleSaveWhatsapp = async (e: React.FormEvent) => {
     e.preventDefault();
-    const whatsappInfo = {
-        name: contactName,
-        number: whatsappNumber,
-    };
-    localStorage.setItem('whatsappInfo', JSON.stringify(whatsappInfo));
-    window.dispatchEvent(new Event('storage')); // Notificar a otros componentes
-    alert('Configuración de contacto actualizada.');
+    setIsSavingWhatsapp(true);
+    const result = await saveEnvSettings({
+        WHATSAPP_CONTACT_NAME: contactName,
+        WHATSAPP_NUMBER: whatsappNumber,
+    });
+    setIsSavingWhatsapp(false);
+    if (result.success) {
+        toast({
+            title: "¡Contacto Guardado!",
+            description: "La información de WhatsApp se ha actualizado.",
+        });
+    } else {
+        toast({
+            variant: "destructive",
+            title: "Error al Guardar",
+            description: result.error || "No se pudo guardar la configuración de contacto.",
+        });
+    }
   };
 
   const handleUserChange = (index: number, field: 'username' | 'password' | 'repeatPassword', value: string) => {
@@ -382,6 +389,84 @@ export default function AdminPage() {
     };
     handleAddOrUpdateProduct(updatedProduct);
   };
+  
+  const handleDefaultImageChange = (
+    e: React.ChangeEvent<HTMLInputElement>, 
+    setter: React.Dispatch<React.SetStateAction<File | null>>, 
+    previewSetter: React.Dispatch<React.SetStateAction<string | null>>
+  ) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setter(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        previewSetter(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSaveDefaultImage = async (
+    e: React.FormEvent,
+    file: File | null,
+    type: 'pastilla' | 'disco',
+    savingSetter: React.Dispatch<React.SetStateAction<boolean>>
+  ) => {
+    e.preventDefault();
+    if (!file) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Por favor, selecciona un archivo para subir.',
+      });
+      return;
+    }
+
+    savingSetter(true);
+    
+    try {
+        const fileAsDataUrl = await fileToDataUrl(file);
+        const result = await uploadImage({
+            fileAsDataUrl,
+            fileName: `default_${type}`,
+            uploadDir: 'repufrenos/defaults',
+        });
+
+        if (result.success) {
+          const key = type === 'pastilla' ? 'DEFAULT_PASTILLA_IMAGE_URL' : 'DEFAULT_DISCO_IMAGE_URL';
+          const saveUrlResult = await saveEnvSettings({ [key]: result.filePath });
+          
+          if(saveUrlResult.success) {
+              if (type === 'pastilla') setDefaultPastillaImagePreview(result.filePath);
+              if (type === 'disco') setDefaultDiscoImagePreview(result.filePath);
+              toast({
+                title: '¡Imagen Guardada!',
+                description: `La imagen por defecto para ${type}s se ha actualizado.`,
+              });
+          } else {
+              toast({
+                variant: 'destructive',
+                title: 'Error al Guardar URL',
+                description: saveUrlResult.error,
+              });
+          }
+        } else {
+          toast({
+            variant: 'destructive',
+            title: 'Error al Subir',
+            description: result.error,
+          });
+        }
+    } catch (error) {
+        toast({
+            variant: 'destructive',
+            title: 'Error de Archivo',
+            description: 'No se pudo procesar el archivo para la subida.',
+        });
+    } finally {
+        savingSetter(false);
+    }
+  };
 
   const filteredProducts = useMemo(() => {
     return products.filter(p => {
@@ -536,7 +621,10 @@ export default function AdminPage() {
                     </div>
                   </CardContent>
                   <CardFooter>
-                    <Button type="submit">Guardar Contacto</Button>
+                    <Button type="submit" disabled={isSavingWhatsapp}>
+                        {isSavingWhatsapp ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                        Guardar Contacto
+                    </Button>
                   </CardFooter>
                 </form>
               </Card>
@@ -696,37 +784,79 @@ export default function AdminPage() {
             <TabsContent value="images">
               <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Card>
+                  <form onSubmit={(e) => handleSaveDefaultImage(e, defaultPastillaImageFile, 'pastilla', setIsSavingPastillaImage)}>
                     <CardHeader>
                       <CardTitle>Imagen por Defecto para Pastillas</CardTitle>
                       <CardDescription>
-                        Esta imagen se usa si un producto de la categoría "Pastillas" no tiene su propia imagen. Se gestiona desde el código.
+                        Esta imagen se usará si un producto de la categoría "Pastillas" no tiene su propia imagen.
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="space-y-2">
+                        <Label htmlFor="default-pastilla-image">Subir nueva imagen</Label>
+                        <Input
+                          id="default-pastilla-image"
+                          type="file"
+                          accept="image/png, image/jpeg, image/webp"
+                          onChange={(e) => handleDefaultImageChange(e, setDefaultPastillaImageFile, setDefaultPastillaImagePreview)}
+                        />
+                      </div>
+                      <div className="space-y-2">
                         <Label>Vista previa actual</Label>
                         <div className="h-32 w-full bg-muted rounded-md flex items-center justify-center border">
-                            <Image src={DEFAULT_PASTILLA_IMAGE_URL} alt="Vista previa de imagen para pastillas" width={128} height={128} className="object-contain h-32 w-32" />
+                          {defaultPastillaImagePreview ? (
+                            <Image src={defaultPastillaImagePreview} alt="Vista previa de imagen para pastillas" width={128} height={128} className="object-contain h-32 w-32" />
+                          ) : (
+                            <span className="text-sm text-muted-foreground">No hay imagen guardada</span>
+                          )}
                         </div>
                       </div>
                     </CardContent>
+                    <CardFooter>
+                      <Button type="submit" disabled={isSavingPastillaImage}>
+                        {isSavingPastillaImage ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                        Guardar Imagen
+                      </Button>
+                    </CardFooter>
+                  </form>
                 </Card>
 
                 <Card>
+                  <form onSubmit={(e) => handleSaveDefaultImage(e, defaultDiscoImageFile, 'disco', setIsSavingDiscoImage)}>
                     <CardHeader>
                       <CardTitle>Imagen por Defecto para Discos</CardTitle>
                        <CardDescription>
-                        Esta imagen se usa si un producto de la categoría "Discos" no tiene su propia imagen. Se gestiona desde el código.
+                        Esta imagen se usará si un producto de la categoría "Discos" no tiene su propia imagen.
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="space-y-2">
+                        <Label htmlFor="default-disco-image">Subir nueva imagen</Label>
+                        <Input
+                          id="default-disco-image"
+                          type="file"
+                          accept="image/png, image/jpeg, image/webp"
+                          onChange={(e) => handleDefaultImageChange(e, setDefaultDiscoImageFile, setDefaultDiscoImagePreview)}
+                        />
+                      </div>
+                      <div className="space-y-2">
                         <Label>Vista previa actual</Label>
                         <div className="h-32 w-full bg-muted rounded-md flex items-center justify-center border">
-                           <Image src={DEFAULT_DISCO_IMAGE_URL} alt="Vista previa de imagen para discos" width={128} height={128} className="object-contain h-32 w-32" />
+                          {defaultDiscoImagePreview ? (
+                             <Image src={defaultDiscoImagePreview} alt="Vista previa de imagen para discos" width={128} height={128} className="object-contain h-32 w-32" />
+                          ) : (
+                            <span className="text-sm text-muted-foreground">No hay imagen guardada</span>
+                          )}
                         </div>
                       </div>
                     </CardContent>
+                    <CardFooter>
+                      <Button type="submit" disabled={isSavingDiscoImage}>
+                         {isSavingDiscoImage ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                        Guardar Imagen
+                      </Button>
+                    </CardFooter>
+                  </form>
                 </Card>
               </div>
             </TabsContent>

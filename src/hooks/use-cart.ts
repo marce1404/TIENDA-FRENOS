@@ -13,6 +13,7 @@ interface CartContextType {
   clearCart: () => void;
   cartCount: number;
   cartTotal: number;
+  whatsappNumber: string;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -28,8 +29,11 @@ export function useCart() {
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const { toast } = useToast();
+  const [whatsappNumber, setWhatsappNumber] = useState('56912345678');
+
 
   useEffect(() => {
+    // Load cart from localStorage
     const savedCart = localStorage.getItem('cart');
     if (savedCart) {
       try {
@@ -39,6 +43,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         setCartItems([]);
       }
     }
+    
+    // Load whatsapp number from localStorage as a fallback
+    const savedInfo = localStorage.getItem('whatsappInfo');
+    if (savedInfo) {
+        try {
+            const { number } = JSON.parse(savedInfo);
+            if (number) setWhatsappNumber(number);
+        } catch(e) {
+             // ignore
+        }
+    }
+
   }, []);
 
   useEffect(() => {
@@ -95,7 +111,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     updateQuantity,
     clearCart,
     cartCount,
-    cartTotal
+    cartTotal,
+    whatsappNumber
   };
 
   return React.createElement(CartContext.Provider, { value }, children);

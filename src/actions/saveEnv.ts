@@ -3,7 +3,6 @@
 
 import { db } from '@/lib/db/drizzle';
 import { settings as settingsTable } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 
@@ -24,6 +23,10 @@ const settingsSchema = z.object({
   'CLOUDINARY_CLOUD_NAME': z.string().optional(),
   'CLOUDINARY_API_KEY': z.string().optional(),
   'CLOUDINARY_API_SECRET': z.string().optional(),
+  'WHATSAPP_NUMBER': z.string().optional(),
+  'WHATSAPP_CONTACT_NAME': z.string().optional(),
+  'DEFAULT_PASTILLA_IMAGE_URL': z.string().optional(),
+  'DEFAULT_DISCO_IMAGE_URL': z.string().optional(),
 }).partial();
 
 type Settings = z.infer<typeof settingsSchema>;
@@ -68,8 +71,8 @@ export async function saveEnvSettings(settingsToSave: Settings): Promise<{ succe
       }
     });
 
-    // Revalidate the admin path to ensure new settings are loaded
-    revalidatePath('/admin');
+    // Revalidate paths to ensure new settings are loaded across the app
+    revalidatePath('/', 'layout');
     
     return { success: true };
   } catch (error) {

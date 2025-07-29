@@ -20,6 +20,16 @@ export type CloudinaryConfig = {
     CLOUDINARY_API_SECRET?: string;
 };
 
+export type WhatsAppConfig = {
+    WHATSAPP_NUMBER?: string;
+    WHATSAPP_CONTACT_NAME?: string;
+}
+
+export type DefaultImagesConfig = {
+    DEFAULT_PASTILLA_IMAGE_URL?: string;
+    DEFAULT_DISCO_IMAGE_URL?: string;
+}
+
 export type AdminUser = {
     username?: string;
     password?: string;
@@ -29,7 +39,7 @@ export type AdminConfig = {
     users: AdminUser[];
 };
 
-type AllConfig = AdminConfig & SmtpConfig & CloudinaryConfig;
+type AllConfig = AdminConfig & SmtpConfig & CloudinaryConfig & WhatsAppConfig & DefaultImagesConfig;
 
 /**
  * Reads all settings from the 'settings' table in the database.
@@ -84,5 +94,9 @@ export async function getEnvSettings(): Promise<AllConfig> {
         CLOUDINARY_CLOUD_NAME: combinedConfig.CLOUDINARY_CLOUD_NAME,
         CLOUDINARY_API_KEY: combinedConfig.CLOUDINARY_API_KEY,
         CLOUDINARY_API_SECRET: combinedConfig.CLOUDINARY_API_SECRET,
+        WHATSAPP_NUMBER: combinedConfig.WHATSAPP_NUMBER,
+        WHATSAPP_CONTACT_NAME: combinedConfig.WHATSAPP_CONTACT_NAME,
+        DEFAULT_PASTILLA_IMAGE_URL: combinedConfig.DEFAULT_PASTILLA_IMAGE_URL,
+        DEFAULT_DISCO_IMAGE_URL: combinedConfig.DEFAULT_DISCO_IMAGE_URL,
     };
 }
