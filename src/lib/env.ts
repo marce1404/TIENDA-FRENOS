@@ -13,7 +13,7 @@ export interface AppSettings {
     SMTP_USER?: string;
     SMTP_PASS?: string;
     SMTP_RECIPIENTS?: string;
-    SMTP_SECURE?: string;
+    SMTP_SECURE: boolean; // Guarantee this is always a boolean
     CLOUDINARY_CLOUD_NAME?: string;
     CLOUDINARY_API_KEY?: string;
     CLOUDINARY_API_SECRET?: string;
@@ -58,7 +58,8 @@ export async function getEnvSettings(): Promise<AppSettings> {
                 SMTP_USER: settings.SMTP_USER,
                 SMTP_PASS: settings.SMTP_PASS,
                 SMTP_RECIPIENTS: settings.SMTP_RECIPIENTS,
-                SMTP_SECURE: settings.SMTP_SECURE,
+                // Ensure SMTP_SECURE is always a boolean
+                SMTP_SECURE: settings.SMTP_SECURE === 'true',
                 CLOUDINARY_CLOUD_NAME: settings.CLOUDINARY_CLOUD_NAME,
                 CLOUDINARY_API_KEY: settings.CLOUDINARY_API_KEY,
                 CLOUDINARY_API_SECRET: settings.CLOUDINARY_API_SECRET,
@@ -91,7 +92,8 @@ export async function getEnvSettings(): Promise<AppSettings> {
         SMTP_USER: process.env.SMTP_USER,
         SMTP_PASS: process.env.SMTP_PASS,
         SMTP_RECIPIENTS: process.env.SMTP_RECIPIENTS,
-        SMTP_SECURE: process.env.SMTP_SECURE,
+        // Ensure SMTP_SECURE is always a boolean
+        SMTP_SECURE: process.env.SMTP_SECURE === 'true',
         CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME,
         CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY,
         CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET,
