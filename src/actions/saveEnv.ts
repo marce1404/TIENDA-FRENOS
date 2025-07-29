@@ -20,7 +20,6 @@ export async function saveEnvSettings(settingsToSave: Record<string, any>): Prom
 
   return { 
     success: false, 
-    error: `No se pudieron guardar las configuraciones (${keysAttempted}). En Vercel, las variables de entorno son de solo lectura y deben actualizarse en el panel de control del proyecto.` 
+    error: `No se pudieron guardar las configuraciones (${keysAttempted}). En Vercel, las variables de entorno son de solo lectura y deben actualizarse en el panel de control del proyecto para que los cambios persistan.` 
   };
 }
-
