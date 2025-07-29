@@ -20,3 +20,9 @@ export const products = pgTable('products', {
   isOnSale: boolean('is_on_sale').default(false),
   salePrice: integer('sale_price'),
 });
+
+// Defines the settings table as a key-value store.
+export const settings = pgTable('settings', {
+  key: text('key').primaryKey(),
+  value: text('value'),
+});
