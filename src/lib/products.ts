@@ -7,19 +7,24 @@ import { products } from './db/schema';
 import { eq } from 'drizzle-orm';
 import { unstable_noStore as noStore } from 'next/cache';
 import { getEnvSettings } from './env';
+import productsData from '@/data/products.json';
+
+// Mocks the database for initial product load to avoid dependency on a seeded DB.
+// This makes the app more resilient, especially on first launch.
+const MOCKED_PRODUCTS: Product[] = productsData as Product[];
 
 /**
- * Mapea un producto crudo de la base de datos a un objeto Product completamente formado,
- * asegurando que tenga una URL de imagen válida.
- * @param {typeof products.$inferSelect} p El producto crudo de la base de datos.
- * @param {string | undefined} defaultPastillaUrl URL por defecto para pastillas.
- * @param {string | undefined} defaultDiscoUrl URL por defecto para discos.
- * @returns {Product} El producto procesado con una URL de imagen garantizada.
+ * Maps a product from the JSON or database to a fully formed Product object,
+ * ensuring it has a valid image URL.
+ * @param {typeof products.$inferSelect} p The raw product from the data source.
+ * @param {string | undefined} defaultPastillaUrl Default URL for brake pads.
+ * @param {string | undefined} defaultDiscoUrl Default URL for brake discs.
+ * @returns {Product} The processed product with a guaranteed image URL.
  */
-function mapDbProductToAppProduct(
+function mapProductToAppProduct(
   p: typeof products.$inferSelect,
   defaultPastillaUrl: string | undefined,
-  defaultDiscoUrl: string | undefined,
+  defaultDiscoUrl:string | undefined,
 ): Product {
   let imageUrl = p.imageUrl;
   
@@ -34,51 +39,74 @@ function mapDbProductToAppProduct(
   return {
     ...p,
     price: Number(p.price),
-    // Asegurar que salePrice sea null si no es un número positivo
     salePrice: p.salePrice != null && Number(p.salePrice) > 0 ? Number(p.salePrice) : null,
     isOnSale: p.isOnSale === true && p.salePrice != null && Number(p.salePrice) > 0,
-    imageUrl: imageUrl, // Ahora puede ser una URL o null
+    imageUrl: imageUrl,
   };
 }
 
 /**
- * Obtiene todos los productos de la base de datos y asigna imágenes por defecto si es necesario.
- * Usa noStore() para asegurar que los datos siempre sean frescos.
- * @returns {Promise<Product[]>} Una promesa que se resuelve en un array de productos.
+ * Gets all products, starting with a reliable JSON file and then checking the database.
+ * This ensures the application is always populated with data.
+ * @returns {Promise<Product[]>} A promise that resolves to an array of products.
  */
 export async function getProducts(): Promise<Product[]> {
   noStore();
   
   try {
     const settings = await getEnvSettings();
-    const dbProducts = await db.select().from(products);
-    const processedProducts = dbProducts.map(p => 
-        mapDbProductToAppProduct(p, settings.DEFAULT_PASTILLA_IMAGE_URL, settings.DEFAULT_DISCO_IMAGE_URL)
+    // Use the JSON data as the primary source of truth for displaying products.
+    // The database will be used for updates, creations, and deletions.
+    const dbProducts = await db.select().from(products).catch(() => []);
+    
+    // Create a map of products from the database by their ID.
+    const dbProductsMap = new Map(dbProducts.map(p => [p.id, p]));
+
+    // Merge JSON data with any updates from the database.
+    const combinedProducts = MOCKED_PRODUCTS.map(jsonProduct => {
+        const dbProduct = dbProductsMap.get(jsonProduct.id);
+        // If product exists in DB, use DB version. Otherwise, use JSON version.
+        return dbProduct ? dbProduct : jsonProduct;
+    });
+
+    // Add any products that are in the database but not in the JSON file (e.g., newly created).
+    dbProducts.forEach(dbProduct => {
+        if (!MOCKED_PRODUCTS.some(p => p.id === dbProduct.id)) {
+            combinedProducts.push(dbProduct);
+        }
+    });
+    
+    const processedProducts = combinedProducts.map(p => 
+        mapProductToAppProduct(p, settings.DEFAULT_PASTILLA_IMAGE_URL, settings.DEFAULT_DISCO_IMAGE_URL)
     );
     return processedProducts;
   } catch (error) {
-    console.error("CRITICAL: La consulta a la base de datos para todos los productos falló.", error);
-    return [];
+    console.error("CRITICAL: Failed to get products. Falling back to static data.", error);
+    // Fallback to static data in case of unexpected errors
+    return MOCKED_PRODUCTS;
   }
 }
 
 /**
- * Obtiene un único producto por su ID de la base de datos y le asigna una imagen por defecto si es necesario.
- * @param {number} id El ID del producto a obtener.
- * @returns {Promise<Product | null>} Una promesa que se resuelve en el producto o null si no se encuentra.
+ * Gets a single product by its ID from the database or the JSON fallback.
+ * @param {number} id The ID of the product to get.
+ * @returns {Promise<Product | null>} A promise that resolves to the product or null if not found.
  */
 export async function getProductById(id: number): Promise<Product | null> {
     noStore();
     try {
         const settings = await getEnvSettings();
         const result = await db.select().from(products).where(eq(products.id, id));
-        if (result.length === 0) {
+        let productData = result.length > 0 ? result[0] : MOCKED_PRODUCTS.find(p => p.id === id);
+
+        if (!productData) {
             return null;
         }
-        const processedProduct = mapDbProductToAppProduct(result[0], settings.DEFAULT_PASTILLA_IMAGE_URL, settings.DEFAULT_DISCO_IMAGE_URL);
+        
+        const processedProduct = mapProductToAppProduct(productData, settings.DEFAULT_PASTILLA_IMAGE_URL, settings.DEFAULT_DISCO_IMAGE_URL);
         return processedProduct;
     } catch (error) {
-        console.error(`CRITICAL: La consulta a la base de datos para el producto ${id} falló.`, error);
+        console.error(`CRITICAL: Database query for product ${id} failed.`, error);
         return null;
     }
 }

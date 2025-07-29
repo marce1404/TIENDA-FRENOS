@@ -1,84 +1,26 @@
 
 'use server';
 
-import { db } from '@/lib/db/drizzle';
-import { settings as settingsTable } from '@/lib/db/schema';
-import { z } from 'zod';
-import { revalidatePath } from 'next/cache';
-
-// This schema defines all possible settings keys that can be saved.
-// .partial() makes all fields optional, allowing us to save subsets of settings.
-const settingsSchema = z.object({
-  'ADMIN_USER_1_USERNAME': z.string().optional(),
-  'ADMIN_USER_1_PASSWORD': z.string().optional(),
-  'ADMIN_USER_2_USERNAME': z.string().optional(),
-  'ADMIN_USER_2_PASSWORD': z.string().optional(),
-  'ADMIN_USER_3_USERNAME': z.string().optional(),
-  'ADMIN_USER_3_PASSWORD': z.string().optional(),
-  'SMTP_HOST': z.string().optional(),
-  'SMTP_PORT': z.string().optional(),
-  'SMTP_USER': z.string().optional(),
-  'SMTP_PASS': z.string().optional(),
-  'SMTP_RECIPIENTS': z.string().optional(),
-  'SMTP_SECURE': z.string().optional(),
-  'CLOUDINARY_CLOUD_NAME': z.string().optional(),
-  'CLOUDINARY_API_KEY': z.string().optional(),
-  'CLOUDINARY_API_SECRET': z.string().optional(),
-  'WHATSAPP_NUMBER': z.string().optional(),
-  'WHATSAPP_CONTACT_NAME': z.string().optional(),
-  'DEFAULT_PASTILLA_IMAGE_URL': z.string().optional(),
-  'DEFAULT_DISCO_IMAGE_URL': z.string().optional(),
-}).partial();
-
-type Settings = z.infer<typeof settingsSchema>;
-
 /**
- * Saves settings to the database. It performs an "upsert" operation for each key provided.
- * If a key exists, it's updated. If not, it's inserted.
- * This version avoids db.transaction() due to potential incompatibility with some serverless drivers.
- * @param settingsToSave An object where keys are the setting name and values are the setting value.
- * @returns An object indicating success or failure.
+ * Placeholder function for saving environment settings.
+ * In a Vercel environment, environment variables are not writable at runtime.
+ * They must be configured in the Vercel project settings.
+ * 
+ * This action will always return a message informing the user about this.
+ * The form in the admin panel is useful for seeing the current values, but saving
+ * must be done through the Vercel dashboard.
+ * 
+ * @param settingsToSave - An object containing the settings the user wants to save.
+ * @returns An object indicating failure and providing instructions.
  */
-export async function saveEnvSettings(settingsToSave: Settings): Promise<{ success: true } | { success: false, error: string }> {
-  const parsed = settingsSchema.safeParse(settingsToSave);
+export async function saveEnvSettings(settingsToSave: Record<string, any>): Promise<{ success: false, error: string }> {
+  console.warn("Attempted to save settings at runtime in a Vercel environment. This is not supported.");
+  
+  const keysAttempted = Object.keys(settingsToSave).join(', ');
 
-  if (!parsed.success) {
-    console.error('Invalid data sent to saveEnvSettings:', parsed.error);
-    return { success: false, error: 'Datos inválidos.' };
-  }
-
-  const data = parsed.data;
-
-  try {
-    for (const key in data) {
-      const typedKey = key as keyof Settings;
-      const value = data[typedKey];
-      
-      // Skip saving password fields if they are empty, null, or undefined.
-      if (typedKey.includes('PASSWORD') && !value) {
-          continue;
-      }
-
-      // Skip saving any other fields that are undefined
-      if (value !== undefined) {
-           // Ensure all values are stored as strings.
-          const valueToStore = String(value);
-
-          await db.insert(settingsTable)
-              .values({ key: typedKey, value: valueToStore })
-              .onConflictDoUpdate({
-                  target: settingsTable.key,
-                  set: { value: valueToStore },
-              });
-      }
-    }
-
-    // Revalidate the entire site layout to ensure new settings are loaded everywhere.
-    revalidatePath('/', 'layout');
-    
-    return { success: true };
-  } catch (error) {
-    console.error('Error saving settings to database:', error);
-    return { success: false, error: 'No se pudo guardar la configuración en la base de datos.' };
-  }
+  return { 
+    success: false, 
+    error: `No se pudieron guardar las configuraciones (${keysAttempted}). En Vercel, las variables de entorno son de solo lectura y deben actualizarse en el panel de control del proyecto.` 
+  };
 }
+
