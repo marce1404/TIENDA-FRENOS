@@ -18,7 +18,7 @@ const envSchema = z.object({
   SMTP_PASS: z.string().optional(),
   SMTP_RECIPIENTS: z.string().optional(),
   SMTP_SECURE: z.string().optional(),
-}).partial(); // Allow partial updates
+}).partial();
 
 type EnvSettings = z.infer<typeof envSchema>;
 
@@ -38,9 +38,9 @@ async function readEnvFile(envPath: string): Promise<Record<string, string>> {
     return envVars;
   } catch (error: any) {
     if (error.code === 'ENOENT') {
-      return {}; // File doesn't exist, return empty object
+      return {}; 
     }
-    throw error; // Other errors
+    throw error;
   }
 }
 
@@ -58,23 +58,33 @@ export async function saveEnvSettings(settings: EnvSettings) {
     const currentEnv = await readEnvFile(envPath);
     const newSettings = parsed.data;
 
+    // Check if we are setting a multi-user config for the first time
+    // and if a legacy single-user config exists.
     const isMigratingToMultiUser = 
-        newSettings.ADMIN_USER_1_USERNAME !== undefined &&
-        !currentEnv.ADMIN_USER_1_USERNAME &&
-        currentEnv.ADMIN_USERNAME;
+        (newSettings.ADMIN_USER_1_USERNAME !== undefined ||
+         newSettings.ADMIN_USER_2_USERNAME !== undefined ||
+         newSettings.ADMIN_USER_3_USERNAME !== undefined) &&
+        (currentEnv.ADMIN_USERNAME || currentEnv.ADMIN_PASSWORD);
 
     if (isMigratingToMultiUser) {
         delete currentEnv.ADMIN_USERNAME;
         delete currentEnv.ADMIN_PASSWORD;
     }
-
+    
+    // Update currentEnv with new settings
     for (const key in newSettings) {
         const typedKey = key as keyof EnvSettings;
         const value = newSettings[typedKey];
 
-        if (value === '') { 
+        // Only update password fields if a new value is provided.
+        // This prevents overwriting existing passwords with empty strings.
+        if (typedKey.includes('PASSWORD') && (value === undefined || value === '')) {
+            continue; 
+        }
+
+        if (value === undefined || value === '') { 
             delete currentEnv[typedKey];
-        } else if (value !== undefined) {
+        } else {
             currentEnv[typedKey] = value;
         }
     }
