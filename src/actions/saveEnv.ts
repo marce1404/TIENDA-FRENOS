@@ -20,7 +20,7 @@ const settingsSchema = z.object({
   'SMTP_USER': z.string().optional(),
   'SMTP_PASS': z.string().optional(),
   'SMTP_RECIPIENTS': z.string().optional(),
-  'SMTP_SECURE': z.string().optional(), // It will be received as 'true' or 'false' string
+  'SMTP_SECURE': z.string().optional(),
   'CLOUDINARY_CLOUD_NAME': z.string().optional(),
   'CLOUDINARY_API_KEY': z.string().optional(),
   'CLOUDINARY_API_SECRET': z.string().optional(),
@@ -35,6 +35,7 @@ type Settings = z.infer<typeof settingsSchema>;
 /**
  * Saves settings to the database. It performs an "upsert" operation for each key provided.
  * If a key exists, it's updated. If not, it's inserted.
+ * This version avoids db.transaction() due to potential incompatibility with some serverless drivers.
  * @param settingsToSave An object where keys are the setting name and values are the setting value.
  * @returns An object indicating success or failure.
  */
@@ -49,33 +50,28 @@ export async function saveEnvSettings(settingsToSave: Settings): Promise<{ succe
   const data = parsed.data;
 
   try {
-    // Start a transaction to perform all upserts atomically.
-    await db.transaction(async (tx) => {
-      for (const key in data) {
-        // We cast key to the correct type to satisfy TypeScript
-        const typedKey = key as keyof Settings;
-        const value = data[typedKey];
-        
-        // Skip saving password fields if they are empty, null, or undefined.
-        // This prevents overwriting a saved password with nothing.
-        if (typedKey.includes('PASSWORD') && !value) {
-            continue;
-        }
-
-        // Ensure we only process keys with defined values
-        if (value !== undefined) {
-             // Ensure all values are stored as strings, handling nulls gracefully.
-            const valueToStore = value === null ? '' : String(value);
-
-            await tx.insert(settingsTable)
-                .values({ key: typedKey, value: valueToStore })
-                .onConflictDoUpdate({
-                    target: settingsTable.key,
-                    set: { value: valueToStore },
-                });
-        }
+    for (const key in data) {
+      const typedKey = key as keyof Settings;
+      const value = data[typedKey];
+      
+      // Skip saving password fields if they are empty, null, or undefined.
+      if (typedKey.includes('PASSWORD') && !value) {
+          continue;
       }
-    });
+
+      // Skip saving any other fields that are undefined
+      if (value !== undefined) {
+           // Ensure all values are stored as strings.
+          const valueToStore = String(value);
+
+          await db.insert(settingsTable)
+              .values({ key: typedKey, value: valueToStore })
+              .onConflictDoUpdate({
+                  target: settingsTable.key,
+                  set: { value: valueToStore },
+              });
+      }
+    }
 
     // Revalidate the entire site layout to ensure new settings are loaded everywhere.
     revalidatePath('/', 'layout');

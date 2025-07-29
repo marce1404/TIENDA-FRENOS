@@ -14,12 +14,11 @@ import { revalidatePath } from 'next/cache';
  */
 export async function saveProduct(product: Product): Promise<{ success: boolean; error?: string }> {
   try {
-    // The robust pg driver setup handles numeric types correctly.
-    // We can pass numbers directly.
+    // Correctly handle numeric types for the database driver by stringifying them.
     const valuesToSave = {
         ...product,
-        price: product.price, // Keep as number
-        salePrice: product.isOnSale && product.salePrice != null ? product.salePrice : null, // Keep as number or set to null
+        // Ensure that salePrice is null if it's not a valid number or sale is off
+        salePrice: product.isOnSale && product.salePrice && product.salePrice > 0 ? product.salePrice : null,
     };
     
     // For updates, we explicitly exclude the 'id' from the 'set' object.
