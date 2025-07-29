@@ -162,9 +162,11 @@ export default function AdminPage() {
                     const apiKey = settings.cloudinary.apiKey || '';
                     setCloudinaryCloudName(cloudName);
                     setCloudinaryApiKey(apiKey);
-                    // Show form only if essential Cloudinary vars are missing from env
+                    // Show form only if essential Cloudinary vars are missing.
                     if (!cloudName || !apiKey) {
                         setShowCloudinaryForm(true);
+                    } else {
+                        setShowCloudinaryForm(false);
                     }
 
                     setContactName(settings.whatsapp.contactName || 'Ventas');
@@ -1417,5 +1419,7 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
         </Dialog>
     );
 }
+
+    
 
     
