@@ -5,6 +5,7 @@ import { db } from '@/lib/db/drizzle';
 import { settings as settingsTable } from '@/lib/db/schema';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
+import { eq } from 'drizzle-orm';
 
 // Define a flexible schema that accepts any key-value pairs where values are strings.
 const settingsSchema = z.record(z.string(), z.string().optional());
@@ -13,6 +14,8 @@ const settingsSchema = z.record(z.string(), z.string().optional());
  * Saves a batch of settings to the 'settings' table in the database.
  * This function uses an "upsert" logic: it updates the value if the key exists,
  * or inserts a new row if the key does not exist.
+ *
+ * NOTE: This function does NOT use a transaction, as it's not supported by the neon-http driver.
  *
  * @param {Record<string, any>} settingsToSave - An object containing the settings to save.
  * @returns {Promise<{ success: boolean; error?: string }>} An object indicating success or failure.
@@ -38,19 +41,16 @@ export async function saveEnvSettings(
   }
 
   try {
-    // Drizzle's db.transaction is used to ensure all settings are saved in a single atomic operation.
-    // This means either all settings are saved successfully, or none are.
-    await db.transaction(async (tx) => {
-      for (const [key, value] of entries) {
-        await tx
-          .insert(settingsTable)
-          .values({ key, value: value as string })
-          .onConflictDoUpdate({
-            target: settingsTable.key,
-            set: { value: value as string },
-          });
-      }
-    });
+    for (const [key, value] of entries) {
+      await db
+        .insert(settingsTable)
+        .values({ key, value: value as string })
+        .onConflictDoUpdate({
+          target: settingsTable.key,
+          set: { value: value as string },
+          where: eq(settingsTable.key, key), // Use Drizzle's eq operator
+        });
+    }
 
     // Revalidate the admin path to ensure the UI shows the new values.
     revalidatePath('/admin');
