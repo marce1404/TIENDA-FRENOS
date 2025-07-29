@@ -1,3 +1,4 @@
+
 // This is a development-only script to seed the database with initial data.
 // To use it, you'll need to run it with a tool like `tsx` or `ts-node`
 // that can handle TypeScript and environment variables.
@@ -6,7 +7,8 @@
 import { config } from 'dotenv';
 import path from 'path';
 import fs from 'fs';
-import { sql } from 'drizzle-orm';
+import { neon } from '@neondatabase/serverless'; 
+import { eq } from 'drizzle-orm';
 
 // --- Robust .env file loading ---
 const rootPath = process.cwd();
@@ -21,6 +23,9 @@ if (fs.existsSync(envLocalPath)) {
   config({ path: envPath });
 }
 // --- End of robust loading ---
+
+// Inicializamos la conexión de Neon aquí también para ejecutar SQL crudo
+const sql = neon(process.env.POSTGRES_URL as string);
 
 import { db } from './db/drizzle';
 import { products as productsTable, settings as settingsTable } from './db/schema';
@@ -42,7 +47,8 @@ async function seed() {
   // Step 1: Create tables if they don't exist
   console.log('📝 Creating tables if they do not exist...');
   
-  await (db as any).client.query(`
+  // Usamos la instancia `sql` de Neon para ejecutar SQL crudo
+  await sql(`
     CREATE TABLE IF NOT EXISTS products (
       id SERIAL PRIMARY KEY,
       code TEXT NOT NULL,
@@ -60,7 +66,8 @@ async function seed() {
   `);
   console.log('✅ Table "products" checked/created.');
 
-  await (db as any).client.query(`
+  // Usamos la instancia `sql` de Neon para ejecutar SQL crudo
+  await sql(`
     CREATE TABLE IF NOT EXISTS settings (
       "key" TEXT PRIMARY KEY,
       "value" TEXT
@@ -109,7 +116,7 @@ async function seed() {
         .onConflictDoUpdate({ 
             target: settingsTable.key, 
             set: { value: setting.value },
-            where: sql`${settingsTable.key} = ${setting.key}` 
+            where: eq(settingsTable.key, setting.key)
         });
       console.log(`- Upserted setting: ${setting.key}`);
    }
