@@ -24,89 +24,66 @@ export interface AppSettings {
 }
 
 /**
- * Reads all settings from the database 'settings' table.
- * Falls back to environment variables if the database is unavailable or the table is empty.
+ * Reads all settings from the database 'settings' table and merges them
+ * with environment variables. Settings from the database take precedence.
  * This is the single source of truth for dynamic application configuration.
  */
 export async function getEnvSettings(): Promise<AppSettings> {
     noStore(); // Ensure settings are always fresh and not cached
 
+    let dbSettings: Record<string, any> = {};
+
     try {
-        const dbSettings = await db.select().from(settingsTable);
+        const dbResult = await db.select().from(settingsTable);
         
-        if (dbSettings.length > 0) {
+        if (dbResult.length > 0) {
             // If we have settings in the DB, parse them into an object
-            const settings: Record<string, any> = dbSettings.reduce((acc, { key, value }) => {
+            dbSettings = dbResult.reduce((acc, { key, value }) => {
                 if (value !== null && value !== undefined) {
                     acc[key] = value;
                 }
                 return acc;
             }, {} as Record<string, any>);
-            
-            const users = [];
-            for (let i = 1; i <= 3; i++) {
-                users.push({
-                    username: settings[`ADMIN_USER_${i}_USERNAME`],
-                    password: settings[`ADMIN_USER_${i}_PASSWORD`],
-                });
-            }
-
-            // --- Start of Correction ---
-            // Gmail requires secure to be true for port 465, but false for port 587 (which uses STARTTLS).
-            // This logic ensures the correct secure setting based on the specified port.
-            const isSecure = settings.SMTP_PORT === '465';
-            // --- End of Correction ---
-
-            return {
-                users,
-                SMTP_HOST: settings.SMTP_HOST,
-                SMTP_PORT: settings.SMTP_PORT,
-                SMTP_USER: settings.SMTP_USER,
-                SMTP_PASS: settings.SMTP_PASS,
-                SMTP_RECIPIENTS: settings.SMTP_RECIPIENTS,
-                SMTP_SECURE: isSecure, // Use the corrected value
-                CLOUDINARY_CLOUD_NAME: settings.CLOUDINARY_CLOUD_NAME,
-                CLOUDINARY_API_KEY: settings.CLOUDINARY_API_KEY,
-                CLOUDINARY_API_SECRET: settings.CLOUDINARY_API_SECRET,
-                WHATSAPP_NUMBER: settings.WHATSAPP_NUMBER,
-                WHATSAPP_CONTACT_NAME: settings.WHATSAPP_CONTACT_NAME,
-                DEFAULT_PASTILLA_IMAGE_URL: settings.DEFAULT_PASTILLA_IMAGE_URL,
-                DEFAULT_DISCO_IMAGE_URL: settings.DEFAULT_DISCO_IMAGE_URL,
-            };
         }
-
     } catch (error) {
-        // This is not a critical error, as we can fall back to env vars.
+        // This is not a critical error, as we can still use env vars.
         // It likely means the settings table doesn't exist yet.
         console.warn(`Could not read from settings table, falling back to environment variables. Error: ${error}`);
     }
 
-    // Fallback logic: read from process.env if DB fails or is empty
+    // Combine database settings with process.env, giving DB precedence
+    const combinedSettings = {
+        // Start with Vercel/system environment variables
+        ...process.env,
+        // Override with settings from the database
+        ...dbSettings,
+    };
+    
     const users = [];
     for (let i = 1; i <= 3; i++) {
         users.push({
-            username: process.env[`ADMIN_USER_${i}_USERNAME`],
-            password: process.env[`ADMIN_USER_${i}_PASSWORD`],
+            username: combinedSettings[`ADMIN_USER_${i}_USERNAME`],
+            password: combinedSettings[`ADMIN_USER_${i}_PASSWORD`],
         });
     }
 
-    // Apply the same port logic to environment variables for consistency
-    const isSecureFromEnv = process.env.SMTP_PORT === '465';
+    // Logic to determine `secure` based on the port, prioritizing 465.
+    const isSecure = combinedSettings.SMTP_PORT === '465';
 
     return { 
         users,
-        SMTP_HOST: process.env.SMTP_HOST,
-        SMTP_PORT: process.env.SMTP_PORT,
-        SMTP_USER: process.env.SMTP_USER,
-        SMTP_PASS: process.env.SMTP_PASS,
-        SMTP_RECIPIENTS: process.env.SMTP_RECIPIENTS,
-        SMTP_SECURE: isSecureFromEnv,
-        CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME,
-        CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY,
-        CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET,
-        WHATSAPP_NUMBER: process.env.WHATSAPP_NUMBER,
-        WHATSAPP_CONTACT_NAME: process.env.WHATSAPP_CONTACT_NAME,
-        DEFAULT_PASTILLA_IMAGE_URL: process.env.DEFAULT_PASTILLA_IMAGE_URL,
-        DEFAULT_DISCO_IMAGE_URL: process.env.DEFAULT_DISCO_IMAGE_URL,
+        SMTP_HOST: combinedSettings.SMTP_HOST,
+        SMTP_PORT: combinedSettings.SMTP_PORT,
+        SMTP_USER: combinedSettings.SMTP_USER,
+        SMTP_PASS: combinedSettings.SMTP_PASS,
+        SMTP_RECIPIENTS: combinedSettings.SMTP_RECIPIENTS,
+        SMTP_SECURE: isSecure,
+        CLOUDINARY_CLOUD_NAME: combinedSettings.CLOUDINARY_CLOUD_NAME,
+        CLOUDINARY_API_KEY: combinedSettings.CLOUDINARY_API_KEY,
+        CLOUDINARY_API_SECRET: combinedSettings.CLOUDINARY_API_SECRET,
+        WHATSAPP_NUMBER: combinedSettings.WHATSAPP_NUMBER,
+        WHATSAPP_CONTACT_NAME: combinedSettings.WHATSAPP_CONTACT_NAME,
+        DEFAULT_PASTILLA_IMAGE_URL: combinedSettings.DEFAULT_PASTILLA_IMAGE_URL,
+        DEFAULT_DISCO_IMAGE_URL: combinedSettings.DEFAULT_DISCO_IMAGE_URL,
     };
 }
