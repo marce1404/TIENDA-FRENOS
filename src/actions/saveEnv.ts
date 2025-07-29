@@ -20,7 +20,7 @@ const settingsSchema = z.object({
   'SMTP_USER': z.string().optional(),
   'SMTP_PASS': z.string().optional(),
   'SMTP_RECIPIENTS': z.string().optional(),
-  'SMTP_SECURE': z.string().optional(),
+  'SMTP_SECURE': z.string().optional(), // It will be received as 'true' or 'false' string
   'CLOUDINARY_CLOUD_NAME': z.string().optional(),
   'CLOUDINARY_API_KEY': z.string().optional(),
   'CLOUDINARY_API_SECRET': z.string().optional(),
@@ -62,13 +62,16 @@ export async function saveEnvSettings(settingsToSave: Settings): Promise<{ succe
             continue;
         }
 
-        // Only process keys where the value is not undefined.
+        // Ensure we only process keys with defined values
         if (value !== undefined) {
+             // Ensure all values are stored as strings, handling nulls gracefully.
+            const valueToStore = value === null ? '' : String(value);
+
             await tx.insert(settingsTable)
-                .values({ key: typedKey, value: value === null ? '' : value }) // Handle null values gracefully
+                .values({ key: typedKey, value: valueToStore })
                 .onConflictDoUpdate({
                     target: settingsTable.key,
-                    set: { value: value === null ? '' : value },
+                    set: { value: valueToStore },
                 });
         }
       }
