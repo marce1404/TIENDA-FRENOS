@@ -25,9 +25,8 @@ function mapProductToAppProduct(
   defaultPastillaUrl: string | undefined,
   defaultDiscoUrl:string | undefined,
 ): Product {
-    const hasImage = p.imageUrl && p.imageUrl.trim() !== '';
+    let finalImageUrl = p.imageUrl || null;
 
-    let finalImageUrl = hasImage ? p.imageUrl : null;
     if (!finalImageUrl) {
         if (p.category === 'Pastillas') {
             finalImageUrl = defaultPastillaUrl || null;
