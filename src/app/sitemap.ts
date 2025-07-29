@@ -1,11 +1,22 @@
 
 import { MetadataRoute } from 'next';
+import { getProducts } from '@/lib/products';
+import type { Product } from '@/lib/types';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://www.repufrenos.cl';
 
-  // Se simplifica el sitemap para evitar la dependencia de la base de datos durante la construcción.
-  // Google descubrirá las páginas de productos a través del rastreo de la página de productos.
+  // Obtener todos los productos para generar las URLs dinámicas
+  const products: Product[] = await getProducts();
+
+  const productUrls = products.map((product) => ({
+    url: `${baseUrl}/productos/${product.id}`,
+    lastModified: new Date(),
+    changeFrequency: 'weekly' as const,
+    priority: 0.8,
+  }));
+
+  // Páginas estáticas
   const staticPages: MetadataRoute.Sitemap = [
     {
       url: baseUrl,
@@ -27,5 +38,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  return staticPages;
+  return [...staticPages, ...productUrls];
 }
