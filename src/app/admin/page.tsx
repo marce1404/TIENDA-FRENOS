@@ -295,7 +295,6 @@ export default function AdminPage() {
     };
     
     // Only include the password if the user has entered a new one.
-    // An empty string will be ignored by the server action.
     if (smtpPass) {
         settings.SMTP_PASS = smtpPass;
     }
@@ -1172,7 +1171,3 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
         </Dialog>
     );
 }
-
-    
-
-    

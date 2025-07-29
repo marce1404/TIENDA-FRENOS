@@ -4,6 +4,7 @@ import {
   text,
   integer,
   boolean,
+  primaryKey,
 } from 'drizzle-orm/pg-core';
 
 export const products = pgTable('products', {
@@ -19,4 +20,13 @@ export const products = pgTable('products', {
   imageUrl: text('image_url'),
   isOnSale: boolean('is_on_sale').default(false),
   salePrice: integer('sale_price'),
+});
+
+export const settings = pgTable('settings', {
+    key: text('key').notNull(),
+    value: text('value'),
+  }, (table) => {
+    return {
+      pk: primaryKey({ columns: [table.key] }),
+    }
 });

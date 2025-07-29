@@ -1,8 +1,9 @@
 
 'use server';
 
-import fs from 'fs/promises';
-import path from 'path';
+import { db } from './db/drizzle';
+import { settings as settingsTable } from './db/schema';
+import { unstable_noStore as noStore } from 'next/cache';
 
 export type SmtpConfig = {
     SMTP_HOST?: string;
@@ -28,62 +29,42 @@ export type AdminConfig = {
     users: AdminUser[];
 };
 
-type EnvConfig = SmtpConfig & AdminConfig & CloudinaryConfig;
-
-async function readEnvFile(): Promise<Record<string, string>> {
-  const envPath = path.resolve(process.cwd(), '.env');
-  try {
-    const content = await fs.readFile(envPath, 'utf-8');
-    const envVars: Record<string, string> = {};
-    content.split('\n').forEach(line => {
-      const trimmedLine = line.trim();
-      if (trimmedLine && !trimmedLine.startsWith('#')) {
-        const [key, ...valueParts] = trimmedLine.split('=');
-        if (key) {
-          let value = valueParts.join('=').trim();
-          // remove quotes if they exist
-          if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
-             value = value.slice(1, -1);
-          }
-          envVars[key.trim()] = value;
-        }
-      }
-    });
-    return envVars;
-  } catch (error: any) {
-    if (error.code === 'ENOENT') {
-      return {}; // File doesn't exist, return empty object
-    }
-    console.error('Error reading .env file:', error);
-    return {};
-  }
-}
+type AllConfig = AdminConfig & SmtpConfig & CloudinaryConfig;
 
 /**
- * Reads settings from the .env file dynamically.
- * This should be used in server actions to get the most up-to-date values
- * without requiring a server restart.
- * It merges values from the .env file with those in process.env,
- * with the .env file taking precedence.
+ * Reads all settings from the 'settings' table in the database.
+ * This is now the single source of truth for dynamic application configuration.
+ * It also falls back to process.env for values that might be set there,
+ * with database values taking precedence.
  */
-export async function getEnvSettings(): Promise<AdminConfig & SmtpConfig & CloudinaryConfig> {
-    const envFromFile = await readEnvFile();
-    
-    // Values from .env file override any existing process.env values.
-    const combinedEnv = { ...process.env, ...envFromFile };
+export async function getEnvSettings(): Promise<AllConfig> {
+    noStore(); // Ensure settings are always fresh
 
+    let dbSettings: Record<string, string> = {};
+    try {
+        const settingsResult = await db.select().from(settingsTable);
+        settingsResult.forEach(row => {
+            if (row.value !== null) {
+                dbSettings[row.key] = row.value;
+            }
+        });
+    } catch (error) {
+        // This might happen if the table doesn't exist yet (e.g., first run before migration)
+        console.warn('Could not read from settings table. Falling back to environment variables.', error);
+    }
+    
+    // Combine environment variables and database settings.
+    // Database values override environment variables.
+    const combinedConfig = { ...process.env, ...dbSettings };
+    
     const users: AdminUser[] = [];
     const maxUsers = 3;
 
-    // Load multi-user settings
     for (let i = 1; i <= maxUsers; i++) {
-        const usernameKey = `ADMIN_USER_${i}_USERNAME`;
-        const passwordKey = `ADMIN_USER_${i}_PASSWORD`;
+        const username = combinedConfig[`ADMIN_USER_${i}_USERNAME`];
+        const password = combinedConfig[`ADMIN_USER_${i}_PASSWORD`];
         
-        const username = combinedEnv[usernameKey];
-        const password = combinedEnv[passwordKey];
-
-        // Add user only if username is present.
+        // Only add user if username is present.
         if (username) {
             users.push({ username, password });
         } else {
@@ -91,26 +72,17 @@ export async function getEnvSettings(): Promise<AdminConfig & SmtpConfig & Cloud
             users.push({});
         }
     }
-    
-    // Check for legacy single user ONLY if no multi-user config was found.
-    const multiUserConfigFound = users.some(u => u.username);
-    if (!multiUserConfigFound && combinedEnv.ADMIN_USERNAME) {
-        users[0] = {
-            username: combinedEnv.ADMIN_USERNAME,
-            password: combinedEnv.ADMIN_PASSWORD,
-        };
-    }
-    
+
     return { 
         users,
-        SMTP_HOST: combinedEnv.SMTP_HOST,
-        SMTP_PORT: combinedEnv.SMTP_PORT,
-        SMTP_USER: combinedEnv.SMTP_USER,
-        SMTP_PASS: combinedEnv.SMTP_PASS,
-        SMTP_RECIPIENTS: combinedEnv.SMTP_RECIPIENTS,
-        SMTP_SECURE: combinedEnv.SMTP_SECURE,
-        CLOUDINARY_CLOUD_NAME: combinedEnv.CLOUDINARY_CLOUD_NAME,
-        CLOUDINARY_API_KEY: combinedEnv.CLOUDINARY_API_KEY,
-        CLOUDINARY_API_SECRET: combinedEnv.CLOUDINARY_API_SECRET,
+        SMTP_HOST: combinedConfig.SMTP_HOST,
+        SMTP_PORT: combinedConfig.SMTP_PORT,
+        SMTP_USER: combinedConfig.SMTP_USER,
+        SMTP_PASS: combinedConfig.SMTP_PASS,
+        SMTP_RECIPIENTS: combinedConfig.SMTP_RECIPIENTS,
+        SMTP_SECURE: combinedConfig.SMTP_SECURE,
+        CLOUDINARY_CLOUD_NAME: combinedConfig.CLOUDINARY_CLOUD_NAME,
+        CLOUDINARY_API_KEY: combinedConfig.CLOUDINARY_API_KEY,
+        CLOUDINARY_API_SECRET: combinedConfig.CLOUDINARY_API_SECRET,
     };
 }

@@ -1,103 +1,79 @@
 
 'use server';
 
-import fs from 'fs/promises';
-import path from 'path';
+import { db } from '@/lib/db/drizzle';
+import { settings as settingsTable } from '@/lib/db/schema';
+import { eq } from 'drizzle-orm';
 import { z } from 'zod';
+import { revalidatePath } from 'next/cache';
 
-const envSchema = z.object({
-  ADMIN_USER_1_USERNAME: z.string().optional(),
-  ADMIN_USER_1_PASSWORD: z.string().optional(),
-  ADMIN_USER_2_USERNAME: z.string().optional(),
-  ADMIN_USER_2_PASSWORD: z.string().optional(),
-  ADMIN_USER_3_USERNAME: z.string().optional(),
-  ADMIN_USER_3_PASSWORD: z.string().optional(),
-  SMTP_HOST: z.string().optional(),
-  SMTP_PORT: z.string().optional(),
-  SMTP_USER: z.string().optional(),
-  SMTP_PASS: z.string().optional(),
-  SMTP_RECIPIENTS: z.string().optional(),
-  SMTP_SECURE: z.string().optional(),
+// This schema defines all possible settings keys that can be saved.
+const settingsSchema = z.object({
+  'ADMIN_USER_1_USERNAME': z.string().optional(),
+  'ADMIN_USER_1_PASSWORD': z.string().optional(),
+  'ADMIN_USER_2_USERNAME': z.string().optional(),
+  'ADMIN_USER_2_PASSWORD': z.string().optional(),
+  'ADMIN_USER_3_USERNAME': z.string().optional(),
+  'ADMIN_USER_3_PASSWORD': z.string().optional(),
+  'SMTP_HOST': z.string().optional(),
+  'SMTP_PORT': z.string().optional(),
+  'SMTP_USER': z.string().optional(),
+  'SMTP_PASS': z.string().optional(),
+  'SMTP_RECIPIENTS': z.string().optional(),
+  'SMTP_SECURE': z.string().optional(),
+  'CLOUDINARY_CLOUD_NAME': z.string().optional(),
+  'CLOUDINARY_API_KEY': z.string().optional(),
+  'CLOUDINARY_API_SECRET': z.string().optional(),
 }).partial();
 
-type EnvSettings = z.infer<typeof envSchema>;
+type Settings = z.infer<typeof settingsSchema>;
 
-async function readEnvFile(envPath: string): Promise<Record<string, string>> {
-  try {
-    const content = await fs.readFile(envPath, 'utf-8');
-    const envVars: Record<string, string> = {};
-    content.split('\n').forEach(line => {
-      const trimmedLine = line.trim();
-      if (trimmedLine && !trimmedLine.startsWith('#')) {
-        const [key, ...valueParts] = trimmedLine.split('=');
-        if (key) {
-          envVars[key.trim()] = valueParts.join('=').trim();
-        }
-      }
-    });
-    return envVars;
-  } catch (error: any) {
-    if (error.code === 'ENOENT') {
-      return {}; 
-    }
-    throw error;
-  }
-}
-
-export async function saveEnvSettings(settings: EnvSettings) {
-  const parsed = envSchema.safeParse(settings);
+/**
+ * Saves settings to the database. It performs an "upsert" operation.
+ * If a key exists, it's updated. If not, it's inserted.
+ * @param settingsToSave An object where keys are the setting name and values are the setting value.
+ * @returns An object indicating success or failure.
+ */
+export async function saveEnvSettings(settingsToSave: Settings): Promise<{ success: true } | { success: false, error: string }> {
+  const parsed = settingsSchema.safeParse(settingsToSave);
 
   if (!parsed.success) {
     console.error('Invalid data sent to saveEnvSettings:', parsed.error);
     return { success: false, error: 'Datos inválidos.' };
   }
 
-  const envPath = path.resolve(process.cwd(), '.env');
+  const data = parsed.data;
 
   try {
-    const currentEnv = await readEnvFile(envPath);
-    const newSettings = parsed.data;
-
-    // Check if we are setting a multi-user config for the first time
-    // and if a legacy single-user config exists.
-    const isMigratingToMultiUser = 
-        (newSettings.ADMIN_USER_1_USERNAME !== undefined ||
-         newSettings.ADMIN_USER_2_USERNAME !== undefined ||
-         newSettings.ADMIN_USER_3_USERNAME !== undefined) &&
-        (currentEnv.ADMIN_USERNAME || currentEnv.ADMIN_PASSWORD);
-
-    if (isMigratingToMultiUser) {
-        delete currentEnv.ADMIN_USERNAME;
-        delete currentEnv.ADMIN_PASSWORD;
-    }
-    
-    // Update currentEnv with new settings
-    for (const key in newSettings) {
-        const typedKey = key as keyof EnvSettings;
-        const value = newSettings[typedKey];
-
-        // Only update password fields if a new value is provided.
-        // This prevents overwriting existing passwords with empty strings.
-        if (typedKey.includes('PASSWORD') && (value === undefined || value === '')) {
-            continue; 
+    // Start a transaction to perform all upserts
+    await db.transaction(async (tx) => {
+      for (const key in data) {
+        const typedKey = key as keyof Settings;
+        const value = data[typedKey];
+        
+        // Skip saving password fields if they are empty or undefined.
+        // This prevents overwriting a saved password with nothing.
+        if (typedKey.includes('PASSWORD') && !value) {
+            continue;
         }
 
-        if (value === undefined || value === '') { 
-            delete currentEnv[typedKey];
-        } else {
-            currentEnv[typedKey] = value;
+        if (value !== undefined && value !== null) {
+            await tx.insert(settingsTable)
+                .values({ key: typedKey, value })
+                .onConflictDoUpdate({
+                    target: settingsTable.key,
+                    set: { value: value },
+                });
         }
-    }
-    
-    const newEnvContent = Object.entries(currentEnv)
-      .map(([key, value]) => `${key}=${value}`)
-      .join('\n');
+      }
+    });
 
-    await fs.writeFile(envPath, newEnvContent + '\n', 'utf-8');
+    // Revalidate the admin path to ensure new settings are loaded
+    revalidatePath('/admin');
     
     return { success: true };
   } catch (error) {
-    console.error('Error al guardar el archivo .env:', error);
-    return { success: false, error: 'No se pudo guardar la configuración en el servidor.' };
+    console.error('Error saving settings to database:', error);
+    return { success: false, error: 'No se pudo guardar la configuración en la base de datos.' };
   }
 }
