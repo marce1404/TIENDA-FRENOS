@@ -9,13 +9,12 @@ import { unstable_noStore as noStore } from 'next/cache';
 import { getEnvSettings } from './env';
 import productsData from '@/data/products.json';
 
-// Mocks the database for initial product load to avoid dependency on a seeded DB.
-// This makes the app more resilient, especially on first launch.
+// This was the original, working list from v5.9, acting as a reliable fallback and base.
 const MOCKED_PRODUCTS: Product[] = productsData as Product[];
 
 /**
  * Maps a product from the JSON or database to a fully formed Product object,
- * ensuring it has a valid image URL.
+ * ensuring it has a valid image URL. This logic is restored from v5.9.
  * @param {typeof products.$inferSelect} p The raw product from the data source.
  * @param {string | undefined} defaultPastillaUrl Default URL for brake pads.
  * @param {string | undefined} defaultDiscoUrl Default URL for brake discs.
@@ -26,24 +25,23 @@ function mapProductToAppProduct(
   defaultPastillaUrl: string | undefined,
   defaultDiscoUrl:string | undefined,
 ): Product {
-  let imageUrl = p.imageUrl;
-  
-  if (!imageUrl || imageUrl.trim() === '') {
-    if (p.category === 'Pastillas') {
-        imageUrl = defaultPastillaUrl || null;
-    } else if (p.category === 'Discos') {
-        imageUrl = defaultDiscoUrl || null;
-    } else {
-        imageUrl = null;
+    const hasImage = p.imageUrl && p.imageUrl.trim() !== '';
+
+    let finalImageUrl = hasImage ? p.imageUrl : null;
+    if (!finalImageUrl) {
+        if (p.category === 'Pastillas') {
+            finalImageUrl = defaultPastillaUrl || null;
+        } else if (p.category === 'Discos') {
+            finalImageUrl = defaultDiscoUrl || null;
+        }
     }
-  }
   
   return {
     ...p,
     price: Number(p.price),
     salePrice: p.salePrice != null && Number(p.salePrice) > 0 ? Number(p.salePrice) : null,
     isOnSale: p.isOnSale === true && p.salePrice != null && Number(p.salePrice) > 0,
-    imageUrl: imageUrl,
+    imageUrl: finalImageUrl,
   };
 }
 
