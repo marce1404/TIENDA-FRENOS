@@ -25,65 +25,59 @@ export interface AppSettings {
 
 /**
  * Reads all settings from the database 'settings' table and merges them
- * with environment variables. Settings from the database take precedence.
+ * with environment variables. Settings from the database take precedence ONLY if they are not null/empty.
  * This is the single source of truth for dynamic application configuration.
  */
 export async function getEnvSettings(): Promise<AppSettings> {
     noStore(); // Ensure settings are always fresh and not cached
 
-    let dbSettings: Record<string, any> = {};
+    // Start with Vercel/system environment variables as the base
+    const finalSettings: Record<string, any> = { ...process.env };
 
     try {
         const dbResult = await db.select().from(settingsTable);
         
         if (dbResult.length > 0) {
-            // If we have settings in the DB, parse them into an object
-            dbSettings = dbResult.reduce((acc, { key, value }) => {
-                if (value !== null && value !== undefined) {
-                    acc[key] = value;
+            // Intelligently merge database settings over environment variables
+            for (const { key, value } of dbResult) {
+                // Only override the environment variable if the database value is valid (not null, undefined, or an empty string)
+                if (value) {
+                    finalSettings[key] = value;
                 }
-                return acc;
-            }, {} as Record<string, any>);
+            }
         }
     } catch (error) {
         // This is not a critical error, as we can still use env vars.
         // It likely means the settings table doesn't exist yet.
         console.warn(`Could not read from settings table, falling back to environment variables. Error: ${error}`);
     }
-
-    // Combine database settings with process.env, giving DB precedence
-    const combinedSettings = {
-        // Start with Vercel/system environment variables
-        ...process.env,
-        // Override with settings from the database
-        ...dbSettings,
-    };
     
     const users = [];
     for (let i = 1; i <= 3; i++) {
         users.push({
-            username: combinedSettings[`ADMIN_USER_${i}_USERNAME`],
-            password: combinedSettings[`ADMIN_USER_${i}_PASSWORD`],
+            username: finalSettings[`ADMIN_USER_${i}_USERNAME`],
+            password: finalSettings[`ADMIN_USER_${i}_PASSWORD`],
         });
     }
 
     // Logic to determine `secure` based on the port, prioritizing 465.
-    const isSecure = combinedSettings.SMTP_PORT === '465';
+    // This makes the configuration robust regardless of the checkbox in the UI.
+    const isSecure = finalSettings.SMTP_PORT === '465';
 
     return { 
         users,
-        SMTP_HOST: combinedSettings.SMTP_HOST,
-        SMTP_PORT: combinedSettings.SMTP_PORT,
-        SMTP_USER: combinedSettings.SMTP_USER,
-        SMTP_PASS: combinedSettings.SMTP_PASS,
-        SMTP_RECIPIENTS: combinedSettings.SMTP_RECIPIENTS,
+        SMTP_HOST: finalSettings.SMTP_HOST,
+        SMTP_PORT: finalSettings.SMTP_PORT,
+        SMTP_USER: finalSettings.SMTP_USER,
+        SMTP_PASS: finalSettings.SMTP_PASS,
+        SMTP_RECIPIENTS: finalSettings.SMTP_RECIPIENTS,
         SMTP_SECURE: isSecure,
-        CLOUDINARY_CLOUD_NAME: combinedSettings.CLOUDINARY_CLOUD_NAME,
-        CLOUDINARY_API_KEY: combinedSettings.CLOUDINARY_API_KEY,
-        CLOUDINARY_API_SECRET: combinedSettings.CLOUDINARY_API_SECRET,
-        WHATSAPP_NUMBER: combinedSettings.WHATSAPP_NUMBER,
-        WHATSAPP_CONTACT_NAME: combinedSettings.WHATSAPP_CONTACT_NAME,
-        DEFAULT_PASTILLA_IMAGE_URL: combinedSettings.DEFAULT_PASTILLA_IMAGE_URL,
-        DEFAULT_DISCO_IMAGE_URL: combinedSettings.DEFAULT_DISCO_IMAGE_URL,
+        CLOUDINARY_CLOUD_NAME: finalSettings.CLOUDINARY_CLOUD_NAME,
+        CLOUDINARY_API_KEY: finalSettings.CLOUDINARY_API_KEY,
+        CLOUDINARY_API_SECRET: finalSettings.CLOUDINARY_API_SECRET,
+        WHATSAPP_NUMBER: finalSettings.WHATSAPP_NUMBER,
+        WHATSAPP_CONTACT_NAME: finalSettings.WHATSAPP_CONTACT_NAME,
+        DEFAULT_PASTILLA_IMAGE_URL: finalSettings.DEFAULT_PASTILLA_IMAGE_URL,
+        DEFAULT_DISCO_IMAGE_URL: finalSettings.DEFAULT_DISCO_IMAGE_URL,
     };
 }
