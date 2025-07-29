@@ -20,7 +20,11 @@ export interface AdminSettingsForForm {
     defaultImages: {
         pastillaUrl: string | undefined;
         discoUrl: string | undefined;
-    }
+    };
+    cloudinary: {
+        cloudName: string | undefined;
+        apiKey: string | undefined;
+    };
 }
 
 
@@ -38,7 +42,7 @@ export async function getAdminSettingsForForm(): Promise<AdminSettingsForForm> {
             port: settings.SMTP_PORT,
             user: settings.SMTP_USER,
             recipients: settings.SMTP_RECIPIENTS,
-            secure: settings.SMTP_SECURE === 'true',
+            secure: settings.SMTP_SECURE,
         },
         whatsapp: {
             number: settings.WHATSAPP_NUMBER,
@@ -47,6 +51,10 @@ export async function getAdminSettingsForForm(): Promise<AdminSettingsForForm> {
         defaultImages: {
             pastillaUrl: settings.DEFAULT_PASTILLA_IMAGE_URL,
             discoUrl: settings.DEFAULT_DISCO_IMAGE_URL,
+        },
+        cloudinary: {
+            cloudName: settings.CLOUDINARY_CLOUD_NAME,
+            apiKey: settings.CLOUDINARY_API_KEY,
         }
     };
 }

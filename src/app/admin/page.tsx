@@ -90,6 +90,12 @@ export default function AdminPage() {
   const [smtpRecipients, setSmtpRecipients] = useState('');
   const [smtpSecure, setSmtpSecure] = useState(false);
   const [showSmtpPassword, setShowSmtpPassword] = useState(false);
+
+  const [cloudinaryCloudName, setCloudinaryCloudName] = useState('');
+  const [cloudinaryApiKey, setCloudinaryApiKey] = useState('');
+  const [cloudinaryApiSecret, setCloudinaryApiSecret] = useState('');
+  const [showCloudinarySecret, setShowCloudinarySecret] = useState(false);
+  const [isSavingCloudinary, setIsSavingCloudinary] = useState(false);
   
   const [defaultPastillaImageFile, setDefaultPastillaImageFile] = useState<File | null>(null);
   const [defaultPastillaImagePreview, setDefaultPastillaImagePreview] = useState<string | null>(null);
@@ -150,6 +156,9 @@ export default function AdminPage() {
                     setSmtpUser(settings.smtp.user || '');
                     setSmtpRecipients(settings.smtp.recipients || '');
                     setSmtpSecure(settings.smtp.secure || false);
+                    
+                    setCloudinaryCloudName(settings.cloudinary.cloudName || '');
+                    setCloudinaryApiKey(settings.cloudinary.apiKey || '');
 
                     setContactName(settings.whatsapp.contactName || 'Ventas');
                     setWhatsappNumber(settings.whatsapp.number || '56912345678');
@@ -322,6 +331,39 @@ export default function AdminPage() {
             variant: "destructive",
             title: "Error al Guardar",
             description: result.error || "Ocurrió un problema al guardar la configuración.",
+        });
+    }
+  };
+  
+  const handleSaveCloudinary = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSavingCloudinary(true);
+    
+    const settings: any = {
+        CLOUDINARY_CLOUD_NAME: cloudinaryCloudName,
+        CLOUDINARY_API_KEY: cloudinaryApiKey,
+    };
+    
+    // Only include the secret if the user has entered a new one.
+    if (cloudinaryApiSecret) {
+        settings.CLOUDINARY_API_SECRET = cloudinaryApiSecret;
+    }
+
+    const result = await saveEnvSettings(settings);
+    setIsSavingCloudinary(false);
+
+    if (result.success) {
+        toast({
+            title: "¡Credenciales de Cloudinary Guardadas!",
+            description: "La configuración se ha actualizado correctamente.",
+        });
+        // Clear the secret field for security
+        setCloudinaryApiSecret('');
+    } else {
+        toast({
+            variant: "destructive",
+            title: "Error al Guardar",
+            description: result.error || "Ocurrió un problema al guardar las credenciales.",
         });
     }
   };
@@ -579,8 +621,8 @@ export default function AdminPage() {
             <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="contact"><Phone className="mr-2 h-4 w-4" />Contacto</TabsTrigger>
               <TabsTrigger value="users"><Users className="mr-2 h-4 w-4" />Usuarios</TabsTrigger>
-              <TabsTrigger value="services"><Mail className="mr-2 h-4 w-4" />Correo</TabsTrigger>
-              <TabsTrigger value="images"><ImageIcon className="mr-2 h-4 w-4" />Imágenes por Defecto</TabsTrigger>
+              <TabsTrigger value="services"><Cloud className="mr-2 h-4 w-4" />Servicios</TabsTrigger>
+              <TabsTrigger value="images"><ImageIcon className="mr-2 h-4 w-4" />Imágenes</TabsTrigger>
             </TabsList>
             <TabsContent value="contact">
               <Card className="mt-6">
@@ -727,79 +769,122 @@ export default function AdminPage() {
                 </div>
             </TabsContent>
             <TabsContent value="services">
-                <Card className="mt-6">
-                  <form onSubmit={handleSaveSmtp}>
-                    <CardHeader>
-                      <CardTitle>Configuración de Correo (SMTP)</CardTitle>
-                        <CardDescription>
-                          Credenciales para el envío de correos desde los formularios de contacto. Compatible con Gmail (usando Contraseñas de Aplicación).
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="smtp-host">Host del Servidor (SMTP_HOST)</Label>
-                            <Input id="smtp-host" placeholder="smtp.example.com" value={smtpHost} onChange={(e) => setSmtpHost(e.target.value)}/>
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="smtp-port">Puerto (SMTP_PORT)</Label>
-                            <Input id="smtp-port" placeholder="587" value={smtpPort} onChange={(e) => setSmtpPort(e.target.value)}/>
-                        </div>
-                        <div className="flex items-center space-x-2 mt-2">
-                            <Switch id="smtp-secure" checked={smtpSecure} onCheckedChange={setSmtpSecure} />
-                            <Label htmlFor="smtp-secure">Usar cifrado SSL/TLS (SMTP_SECURE)</Label>
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="smtp-user">Usuario (SMTP_USER)</Label>
-                            <Input id="smtp-user" placeholder="user@example.com" value={smtpUser} onChange={(e) => setSmtpUser(e.target.value)}/>
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="smtp-pass">Contraseña (SMTP_PASS)</Label>
-                          <div className="relative">
-                            <Input
-                              id="smtp-pass"
-                              type={showSmtpPassword ? 'text' : 'password'}
-                              placeholder="Dejar en blanco para no cambiar"
-                              value={smtpPass}
-                              onChange={(e) => setSmtpPass(e.target.value)}
-                              className="pr-10"
-                            />
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
-                              className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 text-muted-foreground hover:bg-transparent"
-                              onClick={() => setShowSmtpPassword((prev) => !prev)}
-                            >
-                              {showSmtpPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                              <span className="sr-only">Toggle password visibility</span>
-                            </Button>
+                <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <Card>
+                      <form onSubmit={handleSaveSmtp}>
+                        <CardHeader>
+                          <CardTitle>Configuración de Correo (SMTP)</CardTitle>
+                            <CardDescription>
+                              Credenciales para el envío de correos desde los formularios.
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="smtp-host">Host del Servidor (SMTP_HOST)</Label>
+                                <Input id="smtp-host" placeholder="smtp.example.com" value={smtpHost} onChange={(e) => setSmtpHost(e.target.value)}/>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="smtp-port">Puerto (SMTP_PORT)</Label>
+                                <Input id="smtp-port" placeholder="587" value={smtpPort} onChange={(e) => setSmtpPort(e.target.value)}/>
+                            </div>
+                            <div className="flex items-center space-x-2 mt-2">
+                                <Switch id="smtp-secure" checked={smtpSecure} onCheckedChange={setSmtpSecure} />
+                                <Label htmlFor="smtp-secure">Usar cifrado SSL/TLS (SMTP_SECURE)</Label>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="smtp-user">Usuario (SMTP_USER)</Label>
+                                <Input id="smtp-user" placeholder="user@example.com" value={smtpUser} onChange={(e) => setSmtpUser(e.target.value)}/>
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="smtp-pass">Contraseña (SMTP_PASS)</Label>
+                              <div className="relative">
+                                <Input
+                                  id="smtp-pass"
+                                  type={showSmtpPassword ? 'text' : 'password'}
+                                  placeholder="Dejar en blanco para no cambiar"
+                                  value={smtpPass}
+                                  onChange={(e) => setSmtpPass(e.target.value)}
+                                  className="pr-10"
+                                />
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 text-muted-foreground hover:bg-transparent"
+                                  onClick={() => setShowSmtpPassword((prev) => !prev)}
+                                >
+                                  {showSmtpPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                  <span className="sr-only">Toggle password visibility</span>
+                                </Button>
+                              </div>
+                               <p className="text-xs text-muted-foreground mt-1">Si usas Gmail, debes usar una "Contraseña de Aplicación".</p>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="smtp-recipients">Correos de Destino (SMTP_RECIPIENTS)</Label>
+                                <Input id="smtp-recipients" placeholder="correo1@example.com, correo2@example.com" value={smtpRecipients} onChange={(e) => setSmtpRecipients(e.target.value)}/>
+                                <p className="text-xs text-muted-foreground">
+                                    Separa los correos por comas.
+                                </p>
+                            </div>
+                        </CardContent>
+                        <CardFooter>
+                          <Button type="submit" disabled={isSavingSmtp || !initialSettingsLoaded}>
+                            {isSavingSmtp ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                            Guardar Conf. de Correo
+                          </Button>
+                        </CardFooter>
+                      </form>
+                    </Card>
+                     <Card>
+                      <form onSubmit={handleSaveCloudinary}>
+                        <CardHeader>
+                          <CardTitle>Configuración de Cloudinary</CardTitle>
+                          <CardDescription>
+                            Credenciales para el almacenamiento de imágenes de productos.
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="cloudinary-cloud-name">Cloud Name</Label>
+                            <Input id="cloudinary-cloud-name" placeholder="tu-cloud-name" value={cloudinaryCloudName} onChange={(e) => setCloudinaryCloudName(e.target.value)} />
                           </div>
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="smtp-recipients">Correos de Destino (SMTP_RECIPIENTS)</Label>
-                            <Input id="smtp-recipients" placeholder="correo1@example.com, correo2@example.com" value={smtpRecipients} onChange={(e) => setSmtpRecipients(e.target.value)}/>
-                            <p className="text-xs text-muted-foreground">
-                                Importante: Esta es la lista de correos que recibirán los mensajes. Sepáralos por comas.
-                            </p>
-                        </div>
-                    </CardContent>
-                    <CardFooter>
-                      <Button type="submit" disabled={isSavingSmtp || !initialSettingsLoaded}>
-                        {isSavingSmtp ? (
-                            <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Guardando...
-                            </>
-                        ) : (
-                            <>
-                                <Save className="mr-2 h-4 w-4" />
-                                Guardar Configuración SMTP
-                            </>
-                        )}
-                      </Button>
-                    </CardFooter>
-                  </form>
-                </Card>
+                          <div className="space-y-2">
+                            <Label htmlFor="cloudinary-api-key">API Key</Label>
+                            <Input id="cloudinary-api-key" placeholder="tu-api-key" value={cloudinaryApiKey} onChange={(e) => setCloudinaryApiKey(e.target.value)} />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="cloudinary-api-secret">API Secret</Label>
+                            <div className="relative">
+                                <Input
+                                    id="cloudinary-api-secret"
+                                    type={showCloudinarySecret ? 'text' : 'password'}
+                                    placeholder="Dejar en blanco para no cambiar"
+                                    value={cloudinaryApiSecret}
+                                    onChange={(e) => setCloudinaryApiSecret(e.target.value)}
+                                    className="pr-10"
+                                />
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 text-muted-foreground hover:bg-transparent"
+                                    onClick={() => setShowCloudinarySecret((prev) => !prev)}
+                                >
+                                    {showCloudinarySecret ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                    <span className="sr-only">Toggle secret visibility</span>
+                                </Button>
+                            </div>
+                          </div>
+                        </CardContent>
+                        <CardFooter>
+                          <Button type="submit" disabled={isSavingCloudinary || !initialSettingsLoaded}>
+                            {isSavingCloudinary ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                            Guardar Conf. de Cloudinary
+                          </Button>
+                        </CardFooter>
+                      </form>
+                    </Card>
+                </div>
             </TabsContent>
             <TabsContent value="images">
               <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -808,7 +893,7 @@ export default function AdminPage() {
                     <CardHeader>
                       <CardTitle>Imagen por Defecto para Pastillas</CardTitle>
                       <CardDescription>
-                        Esta imagen se usará si un producto de la categoría "Pastillas" no tiene su propia imagen.
+                        Esta imagen se usará si un producto "Pastillas" no tiene imagen.
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
@@ -846,7 +931,7 @@ export default function AdminPage() {
                     <CardHeader>
                       <CardTitle>Imagen por Defecto para Discos</CardTitle>
                        <CardDescription>
-                        Esta imagen se usará si un producto de la categoría "Discos" no tiene su propia imagen.
+                         Esta imagen se usará si un producto "Discos" no tiene imagen.
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
