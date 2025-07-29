@@ -36,7 +36,7 @@ export async function sendEmail(formData: {
   const transporter = nodemailer.createTransport({
     host: SMTP_HOST,
     port: parseInt(SMTP_PORT, 10),
-    secure: SMTP_SECURE === 'true',
+    secure: !!SMTP_SECURE, // Correctly handle boolean or string from settings
     auth: {
       user: SMTP_USER,
       pass: SMTP_PASS,
