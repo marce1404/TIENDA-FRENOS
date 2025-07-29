@@ -1,14 +1,13 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { WhatsAppIcon } from './icons/WhatsAppIcon';
-import { getEnvSettings } from '@/lib/env';
 
 
 export function WhatsAppButton({ initialNumber }: { initialNumber?: string | null }) {
-  const [whatsappNumber, setWhatsappNumber] = useState(initialNumber || '56912345678');
+  const [whatsappNumber] = useState(initialNumber || '56912345678');
   
   const openWhatsApp = () => {
     const whatsappUrl = `https://wa.me/${whatsappNumber}`;
