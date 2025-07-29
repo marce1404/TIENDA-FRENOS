@@ -18,7 +18,7 @@ const envSchema = z.object({
   SMTP_PASS: z.string().optional(),
   SMTP_RECIPIENTS: z.string().optional(),
   SMTP_SECURE: z.string().optional(),
-});
+}).partial(); // Allow partial updates
 
 type EnvSettings = z.infer<typeof envSchema>;
 
@@ -48,6 +48,7 @@ export async function saveEnvSettings(settings: EnvSettings) {
   const parsed = envSchema.safeParse(settings);
 
   if (!parsed.success) {
+    console.error('Invalid data sent to saveEnvSettings:', parsed.error);
     return { success: false, error: 'Datos inválidos.' };
   }
 
@@ -55,33 +56,27 @@ export async function saveEnvSettings(settings: EnvSettings) {
 
   try {
     const currentEnv = await readEnvFile(envPath);
-    
     const newSettings = parsed.data;
 
-    // Check if this is the first time setting a multi-user config
-    // to migrate away from the old single-user variables.
     const isMigratingToMultiUser = 
         newSettings.ADMIN_USER_1_USERNAME !== undefined &&
-        !currentEnv.ADMIN_USER_1_USERNAME;
+        !currentEnv.ADMIN_USER_1_USERNAME &&
+        currentEnv.ADMIN_USERNAME;
 
     if (isMigratingToMultiUser) {
         delete currentEnv.ADMIN_USERNAME;
         delete currentEnv.ADMIN_PASSWORD;
     }
 
-    // Merge new settings. 
     for (const key in newSettings) {
         const typedKey = key as keyof EnvSettings;
         const value = newSettings[typedKey];
 
-        if (value !== undefined) { // A value was submitted in the form
-            if (value === '') { // An empty string means "delete this setting"
-                delete currentEnv[typedKey];
-            } else { // A non-empty string means "update this setting"
-                currentEnv[typedKey] = value;
-            }
+        if (value === '') { 
+            delete currentEnv[typedKey];
+        } else if (value !== undefined) {
+            currentEnv[typedKey] = value;
         }
-        // If value is undefined, it wasn't in the form, so we don't touch it.
     }
     
     const newEnvContent = Object.entries(currentEnv)
