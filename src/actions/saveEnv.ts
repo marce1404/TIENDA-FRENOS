@@ -61,7 +61,7 @@ export async function saveEnvSettings(
     console.error('Error saving settings to database:', error);
     // Provide a more specific error message if available
     const errorMessage = error.message.includes('relation "settings" does not exist')
-        ? 'La tabla "settings" no existe en la base de datos. Por favor, créala para continuar.'
+        ? 'La tabla "settings" no existe. Ejecuta `npm run db:seed` para crearla.'
         : 'No se pudo guardar la configuración en la base de datos.';
         
     return {

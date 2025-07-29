@@ -6,12 +6,10 @@
 import { config } from 'dotenv';
 import path from 'path';
 import fs from 'fs';
+import { sql } from 'drizzle-orm';
 
 // --- Robust .env file loading ---
-// The path to the project root.
 const rootPath = process.cwd();
-
-// Prioritize .env.local for local development secrets, then fall back to .env
 const envLocalPath = path.resolve(rootPath, '.env.local');
 const envPath = path.resolve(rootPath, '.env');
 
@@ -25,7 +23,7 @@ if (fs.existsSync(envLocalPath)) {
 // --- End of robust loading ---
 
 import { db } from './db/drizzle';
-import { products as productsTable } from './db/schema';
+import { products as productsTable, settings as settingsTable } from './db/schema';
 import productsData from '../data/products.json';
 
 
@@ -33,7 +31,6 @@ async function seed() {
   console.log('🌱 Seeding database...');
   console.log('-------------------------------');
 
-  // Explicitly check if the environment variable is loaded.
   const connectionString = process.env.POSTGRES_URL;
   if (!connectionString) {
     throw new Error(
@@ -42,14 +39,41 @@ async function seed() {
   }
   console.log('✅ POSTGRES_URL encontrada. Conectando a la base de datos...');
 
+  // Step 1: Create tables if they don't exist
+  console.log('📝 Creating tables if they do not exist...');
+  
+  await (db as any).client.query(`
+    CREATE TABLE IF NOT EXISTS products (
+      id SERIAL PRIMARY KEY,
+      code TEXT NOT NULL,
+      name TEXT NOT NULL,
+      brand TEXT NOT NULL,
+      model TEXT NOT NULL,
+      compatibility TEXT NOT NULL,
+      price INTEGER NOT NULL,
+      category TEXT NOT NULL,
+      is_featured BOOLEAN DEFAULT false NOT NULL,
+      image_url TEXT,
+      is_on_sale BOOLEAN DEFAULT false,
+      sale_price INTEGER
+    );
+  `);
+  console.log('✅ Table "products" checked/created.');
 
-  // Clear existing data
+  await (db as any).client.query(`
+    CREATE TABLE IF NOT EXISTS settings (
+      "key" TEXT PRIMARY KEY,
+      "value" TEXT
+    );
+  `);
+  console.log('✅ Table "settings" checked/created.');
+
+
+  // Step 2: Seed products table
   console.log('🗑️  Clearing existing products table...');
   await db.delete(productsTable);
-  console.log('🗑️  Table cleared.');
+  console.log('🗑️  Table "products" cleared.');
 
-
-  // Insert new data
   console.log(' Inserting new products data...');
   for (const product of productsData) {
     await db.insert(productsTable).values({
@@ -66,8 +90,31 @@ async function seed() {
       isOnSale: product.isOnSale || false,
       salePrice: product.salePrice ? product.salePrice : null,
     });
-    console.log(`- Inserted: ${product.name}`);
+    console.log(`- Inserted product: ${product.name}`);
   }
+  console.log(`✅ Inserted ${productsData.length} products.`);
+
+  // Step 3: Seed settings table with default values (optional, but good practice)
+   console.log('⚙️  Seeding settings table with default values...');
+   const defaultSettings = [
+     { key: 'WHATSAPP_NUMBER', value: '56912345678' },
+     { key: 'WHATSAPP_CONTACT_NAME', value: 'Ventas' },
+     { key: 'ADMIN_USER_1_USERNAME', value: 'admin' },
+     { key: 'ADMIN_USER_1_PASSWORD', value: 'admin123' },
+   ];
+
+   for (const setting of defaultSettings) {
+      await db.insert(settingsTable)
+        .values(setting)
+        .onConflictDoUpdate({ 
+            target: settingsTable.key, 
+            set: { value: setting.value },
+            where: sql`${settingsTable.key} = ${setting.key}` 
+        });
+      console.log(`- Upserted setting: ${setting.key}`);
+   }
+   console.log(`✅ Upserted ${defaultSettings.length} default settings.`);
+
 
   console.log('-------------------------------');
   console.log('✅ Seeding complete.');

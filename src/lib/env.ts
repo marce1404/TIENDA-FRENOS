@@ -4,7 +4,6 @@
 import { unstable_noStore as noStore } from 'next/cache';
 import { db } from './db/drizzle';
 import { settings as settingsTable } from './db/schema';
-import { eq } from 'drizzle-orm';
 
 // Define the shape of the settings object
 export interface AppSettings {
@@ -71,7 +70,9 @@ export async function getEnvSettings(): Promise<AppSettings> {
         }
 
     } catch (error) {
-        console.warn(`Could not read from settings table, falling back to environment variables. Error: ${error}`);
+        // This is not a critical error, as we can fall back to env vars.
+        // It likely means the settings table doesn't exist yet.
+        console.warn(`Could not read from settings table, falling back to environment variables. This is expected if the DB hasn't been seeded. Error: ${error}`);
     }
 
     // Fallback logic: read from process.env if DB fails or is empty

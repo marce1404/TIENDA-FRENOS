@@ -4,6 +4,8 @@ import {
   text,
   integer,
   boolean,
+  pgEnum,
+  primaryKey,
 } from 'drizzle-orm/pg-core';
 
 export const products = pgTable('products', {
