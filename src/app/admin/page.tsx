@@ -89,6 +89,7 @@ export default function AdminPage() {
   const [smtpPass, setSmtpPass] = useState('');
   const [smtpRecipients, setSmtpRecipients] = useState('');
   const [smtpSecure, setSmtpSecure] = useState(false);
+  const [showSmtpPassword, setShowSmtpPassword] = useState(false);
   
   const [defaultPastillaImageFile, setDefaultPastillaImageFile] = useState<File | null>(null);
   const [defaultPastillaImagePreview, setDefaultPastillaImagePreview] = useState<string | null>(null);
@@ -752,8 +753,27 @@ export default function AdminPage() {
                             <Input id="smtp-user" placeholder="user@example.com" value={smtpUser} onChange={(e) => setSmtpUser(e.target.value)}/>
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="smtp-pass">Contraseña (SMTP_PASS)</Label>
-                            <Input id="smtp-pass" type="password" placeholder="Dejar en blanco para no cambiar" value={smtpPass} onChange={(e) => setSmtpPass(e.target.value)}/>
+                          <Label htmlFor="smtp-pass">Contraseña (SMTP_PASS)</Label>
+                          <div className="relative">
+                            <Input
+                              id="smtp-pass"
+                              type={showSmtpPassword ? 'text' : 'password'}
+                              placeholder="Dejar en blanco para no cambiar"
+                              value={smtpPass}
+                              onChange={(e) => setSmtpPass(e.target.value)}
+                              className="pr-10"
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 text-muted-foreground hover:bg-transparent"
+                              onClick={() => setShowSmtpPassword((prev) => !prev)}
+                            >
+                              {showSmtpPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                              <span className="sr-only">Toggle password visibility</span>
+                            </Button>
+                          </div>
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="smtp-recipients">Correos de Destino (SMTP_RECIPIENTS)</Label>
@@ -1301,3 +1321,5 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
         </Dialog>
     );
 }
+
+    
