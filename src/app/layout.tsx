@@ -5,6 +5,7 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { CartProvider } from '@/hooks/use-cart';
 import { AppLayout } from '@/components/layout/app-layout';
+import { getEnvSettings } from '@/lib/env';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -17,15 +18,17 @@ export const metadata: Metadata = {
   keywords: ['repuestos de frenos chile', 'pastillas de freno', 'discos de freno', 'venta de frenos online', 'despacho a regiones', 'frenos para auto', 'Brembo', 'Bosch', 'TRW', 'repuestos para autos chile'],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const settings = await getEnvSettings();
+  
   return (
     <html lang="es" className="dark">
       <body className={`${inter.className} antialiased`}>
-        <CartProvider>
+        <CartProvider settings={settings}>
           <AppLayout>
             {children}
           </AppLayout>

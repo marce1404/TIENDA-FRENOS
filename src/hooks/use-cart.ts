@@ -4,7 +4,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import type { Product, CartItem } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
-import { getEnvSettings } from '@/lib/env';
+import type { AppSettings } from '@/lib/env';
 
 interface CartContextType {
   cartItems: CartItem[];
@@ -27,14 +27,23 @@ export function useCart() {
   return context;
 }
 
-export function CartProvider({ children }: { children: React.ReactNode }) {
+// El provider ahora acepta la configuración como props para asegurar consistencia
+export function CartProvider({ children, settings }: { children: React.ReactNode, settings: AppSettings }) {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const { toast } = useToast();
-  const [whatsappNumber, setWhatsappNumber] = useState('56912345678');
+  // El número de WhatsApp se inicializa desde las props pasadas por el layout del servidor
+  const [whatsappNumber, setWhatsappNumber] = useState(settings.WHATSAPP_NUMBER || '56912345678');
+  
+  useEffect(() => {
+      // Actualiza el número si las settings cambian (por ejemplo, en navegación del lado del cliente)
+      if (settings.WHATSAPP_NUMBER) {
+          setWhatsappNumber(settings.WHATSAPP_NUMBER);
+      }
+  }, [settings.WHATSAPP_NUMBER]);
 
 
   useEffect(() => {
-    // Load cart from localStorage - this is session-specific and okay
+    // Cargar el carrito desde localStorage es seguro, ya que es específico de la sesión del usuario.
     const savedCart = localStorage.getItem('cart');
     if (savedCart) {
       try {
@@ -44,20 +53,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         setCartItems([]);
       }
     }
-    
-    // Load global settings from the server
-    async function loadSettings() {
-        try {
-            const settings = await getEnvSettings();
-            if (settings.WHATSAPP_NUMBER) {
-                setWhatsappNumber(settings.WHATSAPP_NUMBER);
-            }
-        } catch (e) {
-            console.error("Could not load settings for cart provider", e);
-        }
-    }
-    loadSettings();
-
   }, []);
 
   useEffect(() => {

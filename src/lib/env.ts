@@ -29,7 +29,7 @@ export interface AppSettings {
  * This is the single source of truth for dynamic application configuration.
  */
 export async function getEnvSettings(): Promise<AppSettings> {
-    noStore(); // Ensure settings are always fresh
+    noStore(); // Ensure settings are always fresh and not cached
 
     try {
         const dbSettings = await db.select().from(settingsTable);
@@ -72,7 +72,7 @@ export async function getEnvSettings(): Promise<AppSettings> {
     } catch (error) {
         // This is not a critical error, as we can fall back to env vars.
         // It likely means the settings table doesn't exist yet.
-        console.warn(`Could not read from settings table, falling back to environment variables. This is expected if the DB hasn't been seeded. Error: ${error}`);
+        console.warn(`Could not read from settings table, falling back to environment variables. Error: ${error}`);
     }
 
     // Fallback logic: read from process.env if DB fails or is empty
