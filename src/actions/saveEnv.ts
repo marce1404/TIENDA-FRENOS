@@ -48,7 +48,7 @@ export async function saveEnvSettings(
         .onConflictDoUpdate({
           target: settingsTable.key,
           set: { value: value as string },
-          where: eq(settingsTable.key, key), // Use Drizzle's eq operator
+          where: eq(settingsTable.key, key),
         });
     }
 
@@ -69,4 +69,40 @@ export async function saveEnvSettings(
       error: errorMessage,
     };
   }
+}
+
+
+/**
+ * Retrieves the current contact counter, increments it by 1, and saves it back to the database.
+ * @returns {Promise<number>} The new, incremented counter value.
+ */
+export async function getAndIncrementContactCounter(): Promise<number> {
+    const counterKey = 'CONTACT_COUNTER';
+    
+    try {
+        const result = await db.select({ value: settingsTable.value }).from(settingsTable).where(eq(settingsTable.key, counterKey));
+        
+        let currentCounter = 0;
+        if (result.length > 0 && result[0].value) {
+            currentCounter = parseInt(result[0].value, 10);
+        }
+        
+        const newCounter = currentCounter + 1;
+        
+        await db
+            .insert(settingsTable)
+            .values({ key: counterKey, value: newCounter.toString() })
+            .onConflictDoUpdate({
+                target: settingsTable.key,
+                set: { value: newCounter.toString() },
+                where: eq(settingsTable.key, counterKey),
+            });
+            
+        return newCounter;
+
+    } catch (error) {
+        console.error("Failed to get and increment contact counter:", error);
+        // Fallback to a random number if DB operation fails, so email can still be sent.
+        return Math.floor(Math.random() * 1000);
+    }
 }
