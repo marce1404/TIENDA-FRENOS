@@ -103,10 +103,6 @@ export default function ContactoPage() {
           <h2 className="text-2xl font-bold">Información de Contacto</h2>
           <div className="space-y-4 text-lg">
              <div className="flex items-center gap-4">
-                <Mail className="h-6 w-6 text-primary" />
-                <span>contacto@repufrenos.cl</span>
-             </div>
-             <div className="flex items-center gap-4">
                 <MapPin className="h-6 w-6 text-primary" />
                 <span>Av. La Palmilla #4780, Conchalí, Santiago</span>
              </div>
