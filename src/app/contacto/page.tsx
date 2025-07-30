@@ -9,10 +9,13 @@ import { Button } from '@/components/ui/button';
 import { Mail, MapPin, Loader2 } from 'lucide-react';
 import { sendEmail } from '@/actions/sendEmail';
 import { useToast } from "@/hooks/use-toast";
+import { useCart } from '@/hooks/use-cart';
+import { WhatsAppIcon } from '@/components/icons/WhatsAppIcon';
 
 export default function ContactoPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const { whatsappNumber } = useCart();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -106,6 +109,19 @@ export default function ContactoPage() {
                 <MapPin className="h-6 w-6 text-primary" />
                 <span>Av. La Palmilla #4780, Conchalí, Santiago</span>
              </div>
+              {whatsappNumber && (
+                <div className="flex items-center gap-4">
+                  <WhatsAppIcon className="h-6 w-6 text-primary" />
+                  <a
+                    href={`https://wa.me/${whatsappNumber}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:underline"
+                  >
+                    +{whatsappNumber}
+                  </a>
+                </div>
+              )}
           </div>
         </div>
       </div>
