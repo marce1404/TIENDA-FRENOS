@@ -27,11 +27,13 @@ function mapProductToAppProduct(
 ): Product {
     let finalImageUrl = p.imageUrl || null;
 
-    if (!finalImageUrl) {
+    if (!finalImageUrl || finalImageUrl.trim() === '') {
         if (p.category === 'Pastillas') {
             finalImageUrl = defaultPastillaUrl || null;
         } else if (p.category === 'Discos') {
             finalImageUrl = defaultDiscoUrl || null;
+        } else {
+            finalImageUrl = null;
         }
     }
   

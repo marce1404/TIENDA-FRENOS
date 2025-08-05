@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 import Image from 'next/image';
 import { BrakePadIcon } from './icons/BrakePadIcon';
 import { BrakeDiscIcon } from './icons/BrakeDiscIcon';
+import { GenericProductIcon } from './icons/GenericProductIcon';
 import { Badge } from '@/components/ui/badge';
 
 interface FeaturedProductCardProps {
@@ -60,12 +61,12 @@ export function FeaturedProductCard({ product, onProductClick }: FeaturedProduct
                         className="object-contain"
                         data-ai-hint={product.category === 'Pastillas' ? 'brake pad' : 'brake disc'}
                     />
-                ) : ( // Fallback to icons if imageUrl is somehow still null/undefined
-                    product.category === 'Pastillas' ? (
-                        <BrakePadIcon className="w-16 h-16 text-muted-foreground mx-auto" />
-                    ) : (
-                        <BrakeDiscIcon className="w-16 h-16 text-muted-foreground mx-auto" />
-                    )
+                ) : (
+                    <>
+                        {product.category === 'Pastillas' && <BrakePadIcon className="w-16 h-16 text-muted-foreground mx-auto" />}
+                        {product.category === 'Discos' && <BrakeDiscIcon className="w-16 h-16 text-muted-foreground mx-auto" />}
+                        {product.category === 'Otros' && <GenericProductIcon className="w-16 h-16 text-muted-foreground mx-auto" />}
+                    </>
                 )}
             </div>
             <div className="text-sm text-muted-foreground space-y-1 text-left w-full">

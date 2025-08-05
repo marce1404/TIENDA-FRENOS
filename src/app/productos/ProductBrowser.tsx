@@ -30,6 +30,7 @@ import { WhatsAppIcon } from '@/components/icons/WhatsAppIcon';
 import { Badge } from '@/components/ui/badge';
 import { BrakePadIcon } from '@/components/icons/BrakePadIcon';
 import { BrakeDiscIcon } from '@/components/icons/BrakeDiscIcon';
+import { GenericProductIcon } from '@/components/icons/GenericProductIcon';
 
 // Este es el nuevo componente del navegador que recibe los datos iniciales.
 export function ProductBrowser({ initialProducts }: { initialProducts: Product[] }) {
@@ -169,7 +170,9 @@ export function ProductBrowser({ initialProducts }: { initialProducts: Product[]
                             />
                           ) : (
                             <div className="w-10 h-10 bg-muted rounded-md flex items-center justify-center text-xs text-muted-foreground">
-                              {product.category === 'Pastillas' ? <BrakePadIcon className="h-6 w-6" /> : <BrakeDiscIcon className="h-6 w-6" />}
+                              {product.category === 'Pastillas' && <BrakePadIcon className="h-6 w-6" />}
+                              {product.category === 'Discos' && <BrakeDiscIcon className="h-6 w-6" />}
+                              {product.category === 'Otros' && <GenericProductIcon className="h-6 w-6" />}
                             </div>
                           )}
                         </TableCell>
@@ -254,11 +257,11 @@ export function ProductBrowser({ initialProducts }: { initialProducts: Product[]
                             data-ai-hint={selectedProduct.category === 'Pastillas' ? 'brake pad' : 'brake disc'}
                         />
                     ) : (
-                         selectedProduct.category === 'Pastillas' ? (
-                            <BrakePadIcon className="w-48 h-48 text-muted-foreground m-auto" />
-                        ) : (
-                            <BrakeDiscIcon className="w-48 h-48 text-muted-foreground m-auto" />
-                        )
+                        <>
+                            {selectedProduct.category === 'Pastillas' && <BrakePadIcon className="w-48 h-48 text-muted-foreground m-auto" />}
+                            {selectedProduct.category === 'Discos' && <BrakeDiscIcon className="w-48 h-48 text-muted-foreground m-auto" />}
+                            {selectedProduct.category === 'Otros' && <GenericProductIcon className="w-48 h-48 text-muted-foreground m-auto" />}
+                        </>
                     )}
                 </div>
                 <div className="flex flex-col space-y-4">

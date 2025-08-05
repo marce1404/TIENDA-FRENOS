@@ -24,6 +24,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { BrakePadIcon } from '@/components/icons/BrakePadIcon';
 import { BrakeDiscIcon } from '@/components/icons/BrakeDiscIcon';
+import { GenericProductIcon } from '@/components/icons/GenericProductIcon';
 
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat('es-CL', {
@@ -179,11 +180,11 @@ export default function HomePage() {
                             data-ai-hint={selectedProduct.category === 'Pastillas' ? 'brake pad' : 'brake disc'}
                         />
                     ) : (
-                         selectedProduct.category === 'Pastillas' ? (
-                            <BrakePadIcon className="w-48 h-48 text-muted-foreground m-auto" />
-                        ) : (
-                            <BrakeDiscIcon className="w-48 h-48 text-muted-foreground m-auto" />
-                        )
+                        <>
+                            {selectedProduct.category === 'Pastillas' && <BrakePadIcon className="w-48 h-48 text-muted-foreground m-auto" />}
+                            {selectedProduct.category === 'Discos' && <BrakeDiscIcon className="w-48 h-48 text-muted-foreground m-auto" />}
+                            {selectedProduct.category === 'Otros' && <GenericProductIcon className="w-48 h-48 text-muted-foreground m-auto" />}
+                        </>
                     )}
                 </div>
                 <div className="flex flex-col space-y-4">

@@ -17,6 +17,7 @@ import { ScrollArea } from './ui/scroll-area';
 import { Separator } from './ui/separator';
 import { BrakePadIcon } from './icons/BrakePadIcon';
 import { BrakeDiscIcon } from './icons/BrakeDiscIcon';
+import { GenericProductIcon } from './icons/GenericProductIcon';
 import Image from 'next/image';
 
 const formatPrice = (price: number) => {
@@ -69,11 +70,11 @@ export function CartSheet() {
                         {item.imageUrl ? (
                            <Image src={item.imageUrl} alt={`Imagen de ${item.name}`} fill className="object-contain" />
                         ) : (
-                          item.category === 'Pastillas' ? (
-                            <BrakePadIcon className="w-8 h-8 text-muted-foreground" />
-                          ) : (
-                            <BrakeDiscIcon className="w-8 h-8 text-muted-foreground" />
-                          )
+                           <>
+                            {item.category === 'Pastillas' && <BrakePadIcon className="w-8 h-8 text-muted-foreground" />}
+                            {item.category === 'Discos' && <BrakeDiscIcon className="w-8 h-8 text-muted-foreground" />}
+                            {item.category === 'Otros' && <GenericProductIcon className="w-8 h-8 text-muted-foreground" />}
+                           </>
                         )}
                       </div>
                       <div className="flex-1 space-y-1">

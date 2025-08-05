@@ -50,6 +50,7 @@ import { uploadImage } from '@/actions/uploadImage';
 import { Badge } from '@/components/ui/badge';
 import { BrakePadIcon } from '@/components/icons/BrakePadIcon';
 import { BrakeDiscIcon } from '@/components/icons/BrakeDiscIcon';
+import { GenericProductIcon } from '@/components/icons/GenericProductIcon';
 
 // Helper function to convert a File to a Base64 Data URL
 const fileToDataUrl = (file: File): Promise<string> => {
@@ -1029,7 +1030,9 @@ export default function AdminPage() {
                             />
                           ) : (
                             <div className="w-10 h-10 bg-muted rounded-md flex items-center justify-center text-xs text-muted-foreground">
-                              {product.category === 'Pastillas' ? <BrakePadIcon className="h-6 w-6" /> : <BrakeDiscIcon className="h-6 w-6" />}
+                              {product.category === 'Pastillas' && <BrakePadIcon className="h-6 w-6" />}
+                              {product.category === 'Discos' && <BrakeDiscIcon className="h-6 w-6" />}
+                              {product.category === 'Otros' && <GenericProductIcon className="h-6 w-6" />}
                             </div>
                           )}
                         </TableCell>
@@ -1346,6 +1349,7 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
                                 <SelectContent>
                                     <SelectItem value="Pastillas">Pastillas</SelectItem>
                                     <SelectItem value="Discos">Discos</SelectItem>
+                                    <SelectItem value="Otros">Otros</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>

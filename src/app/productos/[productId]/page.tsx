@@ -11,6 +11,7 @@ import { ShoppingCart, ArrowLeft } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { BrakePadIcon } from '@/components/icons/BrakePadIcon';
 import { BrakeDiscIcon } from '@/components/icons/BrakeDiscIcon';
+import { GenericProductIcon } from '@/components/icons/GenericProductIcon';
 import { useCart } from '@/hooks/use-cart';
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -92,11 +93,11 @@ export default function ProductDetailPage({ params }: { params: { productId: str
                                  data-ai-hint={product.category === 'Pastillas' ? 'brake pad' : 'brake disc'}
                              />
                          ) : (
-                             product.category === 'Pastillas' ? (
-                                <BrakePadIcon className="w-48 h-48 text-muted-foreground m-auto" />
-                            ) : (
-                                <BrakeDiscIcon className="w-48 h-48 text-muted-foreground m-auto" />
-                            )
+                            <>
+                                {product.category === 'Pastillas' && <BrakePadIcon className="w-48 h-48 text-muted-foreground m-auto" />}
+                                {product.category === 'Discos' && <BrakeDiscIcon className="w-48 h-48 text-muted-foreground m-auto" />}
+                                {product.category === 'Otros' && <GenericProductIcon className="w-48 h-48 text-muted-foreground m-auto" />}
+                            </>
                          )}
                     </div>
                     <div className="flex flex-col space-y-6">
