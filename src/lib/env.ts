@@ -21,6 +21,7 @@ export interface AppSettings {
     WHATSAPP_CONTACT_NAME?: string;
     DEFAULT_PASTILLA_IMAGE_URL?: string;
     DEFAULT_DISCO_IMAGE_URL?: string;
+    DEFAULT_OTRO_IMAGE_URL?: string;
 }
 
 /**
@@ -77,5 +78,8 @@ export async function getEnvSettings(): Promise<AppSettings> {
         WHATSAPP_CONTACT_NAME: finalSettings.WHATSAPP_CONTACT_NAME,
         DEFAULT_PASTILLA_IMAGE_URL: finalSettings.DEFAULT_PASTILLA_IMAGE_URL,
         DEFAULT_DISCO_IMAGE_URL: finalSettings.DEFAULT_DISCO_IMAGE_URL,
+        DEFAULT_OTRO_IMAGE_URL: finalSettings.DEFAULT_OTRO_IMAGE_URL,
     };
 }
+
+    

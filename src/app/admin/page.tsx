@@ -106,6 +106,10 @@ export default function AdminPage() {
   const [defaultDiscoImageFile, setDefaultDiscoImageFile] = useState<File | null>(null);
   const [defaultDiscoImagePreview, setDefaultDiscoImagePreview] = useState<string | null>(null);
   const [isSavingDiscoImage, setIsSavingDiscoImage] = useState(false);
+  
+  const [defaultOtroImageFile, setDefaultOtroImageFile] = useState<File | null>(null);
+  const [defaultOtroImagePreview, setDefaultOtroImagePreview] = useState<string | null>(null);
+  const [isSavingOtroImage, setIsSavingOtroImage] = useState(false);
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -172,6 +176,7 @@ export default function AdminPage() {
                     
                     setDefaultPastillaImagePreview(settings.defaultImages.pastillaUrl || null);
                     setDefaultDiscoImagePreview(settings.defaultImages.discoUrl || null);
+                    setDefaultOtroImagePreview(settings.defaultImages.otroUrl || null);
 
 
                     setInitialSettingsLoaded(true);
@@ -461,7 +466,7 @@ export default function AdminPage() {
   const handleSaveDefaultImage = async (
     e: React.FormEvent,
     file: File | null,
-    type: 'pastilla' | 'disco',
+    type: 'pastilla' | 'disco' | 'otro',
     savingSetter: React.Dispatch<React.SetStateAction<boolean>>
   ) => {
     e.preventDefault();
@@ -485,12 +490,17 @@ export default function AdminPage() {
         });
 
         if (result.success) {
-          const key = type === 'pastilla' ? 'DEFAULT_PASTILLA_IMAGE_URL' : 'DEFAULT_DISCO_IMAGE_URL';
+          let key = '';
+          if (type === 'pastilla') key = 'DEFAULT_PASTILLA_IMAGE_URL';
+          else if (type === 'disco') key = 'DEFAULT_DISCO_IMAGE_URL';
+          else if (type === 'otro') key = 'DEFAULT_OTRO_IMAGE_URL';
+
           const saveUrlResult = await saveEnvSettings({ [key]: result.filePath });
           
           if(saveUrlResult.success) {
               if (type === 'pastilla') setDefaultPastillaImagePreview(result.filePath);
               if (type === 'disco') setDefaultDiscoImagePreview(result.filePath);
+              if (type === 'otro') setDefaultOtroImagePreview(result.filePath);
               toast({
                 title: '¡Imagen Guardada!',
                 description: `La imagen por defecto para ${type}s se ha actualizado.`,
@@ -898,7 +908,7 @@ export default function AdminPage() {
                 </div>
             </TabsContent>
             <TabsContent value="images">
-              <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
                 <Card>
                   <form onSubmit={(e) => handleSaveDefaultImage(e, defaultPastillaImageFile, 'pastilla', setIsSavingPastillaImage)}>
                     <CardHeader>
@@ -969,6 +979,44 @@ export default function AdminPage() {
                     <CardFooter>
                       <Button type="submit" disabled={isSavingDiscoImage}>
                          {isSavingDiscoImage ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                        Guardar Imagen
+                      </Button>
+                    </CardFooter>
+                  </form>
+                </Card>
+                
+                <Card>
+                  <form onSubmit={(e) => handleSaveDefaultImage(e, defaultOtroImageFile, 'otro', setIsSavingOtroImage)}>
+                    <CardHeader>
+                      <CardTitle>Imagen por Defecto para "Otros"</CardTitle>
+                       <CardDescription>
+                         Esta imagen se usará si un producto "Otros" no tiene imagen.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="default-otro-image">Subir nueva imagen</Label>
+                        <Input
+                          id="default-otro-image"
+                          type="file"
+                          accept="image/png, image/jpeg, image/webp"
+                          onChange={(e) => handleDefaultImageChange(e, setDefaultOtroImageFile, setDefaultOtroImagePreview)}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Vista previa actual</Label>
+                        <div className="h-32 w-full bg-muted rounded-md flex items-center justify-center border">
+                          {defaultOtroImagePreview ? (
+                             <Image src={defaultOtroImagePreview} alt="Vista previa de imagen para otros" width={128} height={128} className="object-contain h-32 w-32" />
+                          ) : (
+                            <span className="text-sm text-muted-foreground">No hay imagen guardada</span>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                    <CardFooter>
+                      <Button type="submit" disabled={isSavingOtroImage}>
+                         {isSavingOtroImage ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                         Guardar Imagen
                       </Button>
                     </CardFooter>
@@ -1420,3 +1468,5 @@ function ProductFormDialog({ isOpen, onOpenChange, onSave, product, title, nextP
         </Dialog>
     );
 }
+
+    

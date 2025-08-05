@@ -20,6 +20,7 @@ export interface AdminSettingsForForm {
     defaultImages: {
         pastillaUrl: string | undefined;
         discoUrl: string | undefined;
+        otroUrl: string | undefined;
     };
     cloudinary: {
         cloudName: string | undefined;
@@ -51,6 +52,7 @@ export async function getAdminSettingsForForm(): Promise<AdminSettingsForForm> {
         defaultImages: {
             pastillaUrl: settings.DEFAULT_PASTILLA_IMAGE_URL,
             discoUrl: settings.DEFAULT_DISCO_IMAGE_URL,
+            otroUrl: settings.DEFAULT_OTRO_IMAGE_URL,
         },
         cloudinary: {
             cloudName: settings.CLOUDINARY_CLOUD_NAME,
@@ -58,3 +60,5 @@ export async function getAdminSettingsForForm(): Promise<AdminSettingsForForm> {
         }
     };
 }
+
+    

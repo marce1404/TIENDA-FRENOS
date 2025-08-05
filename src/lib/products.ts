@@ -18,12 +18,14 @@ const MOCKED_PRODUCTS: Product[] = productsData as Product[];
  * @param {typeof products.$inferSelect} p The raw product from the data source.
  * @param {string | undefined} defaultPastillaUrl Default URL for brake pads.
  * @param {string | undefined} defaultDiscoUrl Default URL for brake discs.
+ * @param {string | undefined} defaultOtroUrl Default URL for other products.
  * @returns {Product} The processed product with a guaranteed image URL.
  */
 function mapProductToAppProduct(
   p: typeof products.$inferSelect,
   defaultPastillaUrl: string | undefined,
   defaultDiscoUrl:string | undefined,
+  defaultOtroUrl: string | undefined
 ): Product {
     let finalImageUrl = p.imageUrl || null;
 
@@ -32,6 +34,8 @@ function mapProductToAppProduct(
             finalImageUrl = defaultPastillaUrl || null;
         } else if (p.category === 'Discos') {
             finalImageUrl = defaultDiscoUrl || null;
+        } else if (p.category === 'Otros') {
+            finalImageUrl = defaultOtroUrl || null;
         } else {
             finalImageUrl = null;
         }
@@ -78,7 +82,7 @@ export async function getProducts(): Promise<Product[]> {
     });
     
     const processedProducts = combinedProducts.map(p => 
-        mapProductToAppProduct(p, settings.DEFAULT_PASTILLA_IMAGE_URL, settings.DEFAULT_DISCO_IMAGE_URL)
+        mapProductToAppProduct(p, settings.DEFAULT_PASTILLA_IMAGE_URL, settings.DEFAULT_DISCO_IMAGE_URL, settings.DEFAULT_OTRO_IMAGE_URL)
     );
     return processedProducts;
   } catch (error) {
@@ -104,10 +108,17 @@ export async function getProductById(id: number): Promise<Product | null> {
             return null;
         }
         
-        const processedProduct = mapProductToAppProduct(productData, settings.DEFAULT_PASTILLA_IMAGE_URL, settings.DEFAULT_DISCO_IMAGE_URL);
+        const processedProduct = mapProductToAppProduct(
+            productData, 
+            settings.DEFAULT_PASTILLA_IMAGE_URL, 
+            settings.DEFAULT_DISCO_IMAGE_URL, 
+            settings.DEFAULT_OTRO_IMAGE_URL
+        );
         return processedProduct;
     } catch (error) {
         console.error(`CRITICAL: Database query for product ${id} failed.`, error);
         return null;
     }
 }
+
+    
