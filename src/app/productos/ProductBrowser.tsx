@@ -44,8 +44,16 @@ export function ProductBrowser({ initialProducts }: { initialProducts: Product[]
   const { addToCart, whatsappNumber } = useCart();
   
   const categories = useMemo(() => {
-    const uniqueCategories = [...new Set(allProducts.map(p => p.category))];
-    return uniqueCategories.sort();
+    const existingCategories = [...new Set(allProducts.map(p => p.category))];
+    // Ensure "Otros" is always in the list for filtering, and sort them.
+    if (!existingCategories.includes('Otros')) {
+        existingCategories.push('Otros');
+    }
+    return existingCategories.sort((a,b) => {
+        if (a === 'Otros') return 1; // "Otros" always at the end
+        if (b === 'Otros') return -1;
+        return a.localeCompare(b);
+    });
   }, [allProducts]);
 
   const filteredProducts = useMemo(() => {
@@ -159,22 +167,24 @@ export function ProductBrowser({ initialProducts }: { initialProducts: Product[]
                         className="cursor-pointer"
                       >
                         <TableCell>
-                          {product.imageUrl ? (
-                            <Image
-                              src={product.imageUrl}
-                              alt={`Imagen de ${product.name}`}
-                              width={40}
-                              height={40}
-                              className="rounded-md object-contain"
-                              data-ai-hint={product.category === 'Pastillas' ? 'brake pad' : 'brake disc'}
-                            />
-                          ) : (
-                            <div className="w-10 h-10 bg-muted rounded-md flex items-center justify-center text-xs text-muted-foreground">
-                              {product.category === 'Pastillas' && <BrakePadIcon className="h-6 w-6" />}
-                              {product.category === 'Discos' && <BrakeDiscIcon className="h-6 w-6" />}
-                              {product.category === 'Otros' && <GenericProductIcon className="h-6 w-6" />}
-                            </div>
-                          )}
+                          <div className="relative w-10 h-10 bg-muted/50 rounded-md flex items-center justify-center border overflow-hidden">
+                            {product.imageUrl ? (
+                              <Image
+                                src={product.imageUrl}
+                                alt={`Imagen de ${product.name}`}
+                                width={40}
+                                height={40}
+                                className="object-contain"
+                                data-ai-hint={product.category === 'Pastillas' ? 'brake pad' : product.category === 'Discos' ? 'brake disc' : 'tool'}
+                              />
+                            ) : (
+                              <>
+                                {product.category === 'Pastillas' && <BrakePadIcon className="h-6 w-6" />}
+                                {product.category === 'Discos' && <BrakeDiscIcon className="h-6 w-6" />}
+                                {product.category === 'Otros' && <GenericProductIcon className="h-6 w-6" />}
+                              </>
+                            )}
+                          </div>
                         </TableCell>
                         <TableCell className="font-medium">{product.name}</TableCell>
                         <TableCell>{product.code}</TableCell>
